@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
-import { SiteContentPage } from "@/components/site/site-content-page";
-import { sitePages } from "@/lib/content/site-pages";
+import { MinistryDetail, ministryMetadata } from "../[slug]/page";
 
-const path = "/ministries/children";
-export const metadata: Metadata = { title: "A place for little ones to grow.", description: sitePages[path].description, alternates: { canonical: path } };
-export default function ChildrenMinistryPage() { return <SiteContentPage page={sitePages[path]} path={path} />; }
+export function generateMetadata() {
+  return ministryMetadata("children");
+}
+
+export default function ChildrenMinistryPage() {
+  return <MinistryDetail slug="children" />;
+}

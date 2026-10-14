@@ -9,7 +9,7 @@ type AdminProfile = { fullName?: string; email?: string };
 export function AdminShellView({ children, profile }: { children: ReactNode; profile: AdminProfile }) {
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
 
-  return <div className="flex min-h-screen bg-slate-50 text-slate-900">
+  return <div className="flex min-h-screen bg-background text-text">
     <SidebarView isOpen={mobileNavigationOpen} onClose={() => setMobileNavigationOpen(false)} />
     <div className="flex min-w-0 flex-1 flex-col">
       <HeaderView profile={profile} isMenuOpen={mobileNavigationOpen} onMenuClick={() => setMobileNavigationOpen((open) => !open)} />

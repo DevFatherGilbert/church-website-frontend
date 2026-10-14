@@ -156,7 +156,7 @@ export function DashboardView() {
 
     async function loadDashboard() {
       const [sermonsResult, eventsResult, announcementsResult, prayersResult] = await Promise.allSettled([
-        authGet<DatedRecord[]>("/sermons"),
+        authGet<DatedRecord[]>("/admin/sermons").catch(() => authGet<DatedRecord[]>("/sermons")),
         authGet<DatedRecord[]>("/events"),
         authGet<DashboardAnnouncementList>("/admin/announcements"),
         authGet<DatedRecord[]>("/inquiries/prayer"),
@@ -227,8 +227,8 @@ export function DashboardView() {
   return <div>
     <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
-        <p className="text-sm font-medium text-indigo-700">Church website management</p>
-        <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">Dashboard overview</h1>
+        <p className="text-xs font-bold uppercase tracking-wider text-primary">Church website management</p>
+        <h1 className="mt-1.5 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Dashboard overview</h1>
         <p className="mt-2 text-sm text-slate-500">A snapshot of content and activity across your church website.</p>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:justify-end">

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { SiteContentPage } from "@/components/site/site-content-page";
-import { sitePages } from "@/lib/content/site-pages";
-
+import { PageHero } from "@/components/site/page-hero";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 const path = "/about/our-story";
-export const metadata: Metadata = { title: "A story still being written.", description: sitePages[path].description, alternates: { canonical: path } };
-export default function OurStoryPage() { return <SiteContentPage page={sitePages[path]} path={path} />; }
+export const metadata: Metadata = { title: "Our story", description: "The church's approved background and history.", alternates: { canonical: path } };
+export default async function OurStoryPage() { const { church, churchRecord } = await getPublicWebsiteSettings(); return <main><PageHero eyebrow="OUR STORY" title={churchRecord?.title || "Our story"} emphasis="" description={churchRecord?.description || "The church's background and history."} breadcrumbs={[{ label: "Home", href: "/" }, { label: "About", href: "/about" }]} /><section className="page-container section-space"><h2 className="text-3xl font-medium">Church history</h2>{church.profile.history ? <p className="mt-5 max-w-4xl whitespace-pre-line text-base leading-8 text-muted">{church.profile.history}</p> : <p className="mt-5 text-sm text-muted">Church history has not been published yet.</p>}{church.profile.imageUrl && <img alt={church.profile.imageAlt || "Church history"} className="mt-8 max-h-[34rem] w-full object-cover" src={church.profile.imageUrl} />}</section></main>; }

@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { AdminAuthPage } from "@/components/admin/admin-auth-page";
 
 export const metadata: Metadata = {
-  title: "Create an admin account",
+  title: "Register",
   robots: { index: false, follow: false },
 };
 
 export default function AdminSignupPage() {
   return <AdminAuthPage
     step="register"
-    title="Create your account"
-    description="Enter your details to begin account setup."
+    title="Register"
+    description="Create your account to join the church community."
   />;
 }

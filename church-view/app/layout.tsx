@@ -1,14 +1,43 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
+import { Inter, Manrope } from "next/font/google";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: { default: "A Place to Belong | Church", template: "%s | Church" },
-  description: "A community of faith, hope and open doors in Kigali. Join us for worship, find your people, and grow in faith together.",
-  openGraph: { type: "website", siteName: "Church", locale: "en_RW" },
-  icons: { icon: "/logo-c.png", shortcut: "/logo-c.png", apple: "/logo-c.png" },
-};
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  await connection();
+  const { churchName, churchDescription } = await getPublicWebsiteSettings();
+  const name = churchName || "Church";
+
+  return {
+    title: { default: name, template: `%s | ${name}` },
+    description: churchDescription || "Find church information, services, ministries, events and ways to connect.",
+    openGraph: { type: "website", siteName: name, locale: "en_RW" },
+    icons: { icon: "/logo-c.png", shortcut: "/logo-c.png", apple: "/logo-c.png" },
+  };
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return <html lang="en"><body className="antialiased">{children}</body></html>;
+  return (
+    <html data-scroll-behavior="smooth" lang="en">
+      <body className={`${manrope.variable} ${inter.variable} antialiased font-sans`}>
+        {children}
+      </body>
+    </html>
+  );
 }

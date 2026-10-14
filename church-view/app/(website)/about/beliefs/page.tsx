@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { SiteContentPage } from "@/components/site/site-content-page";
-import { sitePages } from "@/lib/content/site-pages";
-
+import { PageHero } from "@/components/site/page-hero";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 const path = "/about/beliefs";
-export const metadata: Metadata = { title: "Faith at the center.", description: sitePages[path].description, alternates: { canonical: path } };
-export default function BeliefsPage() { return <SiteContentPage page={sitePages[path]} path={path} />; }
+export const metadata: Metadata = { title: "Beliefs", description: "The approved statement of faith and beliefs of the church.", alternates: { canonical: path } };
+export default async function BeliefsPage() { const { church } = await getPublicWebsiteSettings(); const beliefs = church.beliefs.filter((item) => item.visible).sort((a, b) => a.order - b.order); return <main><PageHero eyebrow="STATEMENT OF FAITH" title="What we believe" emphasis="" description="Church-approved beliefs and statement of faith." breadcrumbs={[{ label: "Home", href: "/" }, { label: "About", href: "/about" }]} /><section className="page-container section-space">{beliefs.length ? <div className="divide-y divide-border border-y border-border">{beliefs.map((item) => <article className="py-6" key={`${item.order}-${item.title}`}><h2 className="text-xl font-semibold">{item.title}</h2><p className="mt-3 whitespace-pre-line text-sm leading-7 text-muted">{item.description}</p></article>)}</div> : <p className="text-sm text-muted">The approved statement of faith has not been published yet.</p>}</section></main>; }

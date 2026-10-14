@@ -1,13 +1,133 @@
 import Link from "next/link";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type PublicContent } from "@/lib/api/church-api";
-import { mockServices } from "@/lib/content/church-defaults";
+import { formatServiceDate, formatServiceTime, sortServices, toChurchService, type ChurchService } from "@/lib/content/services";
 
 export default async function ServicesPage() {
   const response = await getPublicData<{ items: PublicContent[] }>("/content/services?limit=50");
-  const services = response?.items ?? [];
-  const detail = (record: PublicContent, key: string) => typeof record.details[key] === "string" ? record.details[key] as string : "To be confirmed";
-  return <main><PageHero eyebrow="GATHER WITH US" title="There’s a place" emphasis="for you." description="Find worship gatherings, Bible studies, prayer meetings and special services. The schedule and venue details below will be updated with church-approved information." />
-    <section className="page-container section-space"><div className="grid gap-10 lg:grid-cols-[1fr_.8fr]"><div><p className="eyebrow text-muted">REGULAR GATHERINGS</p><h2 className="mt-4 text-4xl font-medium">Service <em className="font-display text-clay">schedule.</em></h2>{services.length ? <div className="mt-7 divide-y divide-border border-y border-border">{services.map((service) => <article className="py-6" key={service.id}><div className="flex flex-wrap items-start justify-between gap-4"><div><h3 className="text-xl font-semibold">{service.title}</h3>{service.description && <p className="mt-2 text-sm text-muted">{service.description}</p>}</div><span className="bg-surface-strong px-3 py-2 text-xs font-semibold">{detail(service, "type")}</span></div><dl className="mt-5 grid gap-4 text-sm sm:grid-cols-3"><div><dt className="text-xs text-muted">DAY & TIME</dt><dd className="mt-1">{detail(service, "day")} · {detail(service, "time")}</dd></div><div><dt className="text-xs text-muted">LOCATION</dt><dd className="mt-1">{detail(service, "location")}</dd></div><div><dt className="text-xs text-muted">SPECIAL INFORMATION</dt><dd className="mt-1">{detail(service, "specialInformation")}</dd></div></dl></article>)}</div> : <article className="mt-7 border-y border-border py-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><h3 className="text-xl font-semibold">Service schedule being confirmed</h3><p className="mt-2 text-sm text-muted">Approved service times, types and locations will be listed here.</p></div></div><dl className="mt-6 grid gap-4 text-sm sm:grid-cols-3"><div><dt className="text-xs text-muted">DAY & TIME</dt><dd className="mt-1">To be confirmed</dd></div><div><dt className="text-xs text-muted">LOCATION</dt><dd className="mt-1">To be confirmed</dd></div><div><dt className="text-xs text-muted">SERVICE TYPE</dt><dd className="mt-1">To be confirmed</dd></div></dl></article>}<p className="mt-5 text-sm leading-6 text-muted">For the latest schedule or special service information, please contact the church.</p><Link className="button button-primary mt-5" href="/contact?topic=services">Ask about a service ↗</Link></div><div className="surface-card p-6 sm:p-8"><p className="eyebrow text-muted">SERVICE TYPES</p><ul className="mt-5 divide-y divide-border">{mockServices.map((type, i) => <li className="flex items-center justify-between py-3 text-sm" key={type}><span>{type}</span><span className="font-display text-clay">0{i + 1}</span></li>)}</ul></div></div></section>
-  </main>;
+  const services = sortServices((response?.items ?? []).map(toChurchService));
+  const regular = services.filter((service) => service.scheduleType === "weekly");
+  const special = services.filter((service) => service.scheduleType === "special");
+
+  return (
+    <main>
+      <PageHero
+        breadcrumbs={[{ label: "Home", href: "/" }]}
+        eyebrow="GATHER WITH US"
+        title="There’s a place"
+        emphasis="for you."
+        description="Find current worship gatherings, Bible studies, prayer meetings and special services."
+      />
+      <section className="page-container section-space">
+        <div className="flex items-center gap-2">
+          <span className="size-2 rounded-full bg-secondary" />
+          <p className="eyebrow text-primary">REGULAR GATHERINGS</p>
+        </div>
+        <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight text-text sm:text-4xl">
+          Weekly worship & fellowship
+        </h2>
+
+        {regular.length ? (
+          <ServiceList services={regular} />
+        ) : (
+          <p className="mt-7 rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted">
+            Approved regular service times will be listed here when available.
+          </p>
+        )}
+
+        {special.length > 0 && (
+          <div className="mt-16">
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-secondary" />
+              <p className="eyebrow text-primary">SPECIAL SERVICES</p>
+            </div>
+            <h2 className="mt-3 font-display text-3xl font-extrabold tracking-tight text-text sm:text-4xl">
+              Upcoming gatherings
+            </h2>
+            <ServiceList services={special} />
+          </div>
+        )}
+
+        <div className="mt-14 rounded-2xl border border-border/80 bg-gradient-to-r from-primary/5 via-primary/10 to-transparent p-8 sm:p-10">
+          <h3 className="font-display text-xl font-bold text-text">
+            Planning to join us for the first time?
+          </h3>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted">
+            We&apos;d love to welcome you! Let us know you&apos;re coming and we&apos;ll save you a seat, show you around, and help you get connected.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-4">
+            <Link className="button button-primary" href="/plan-your-visit">
+              Plan your visit <span aria-hidden="true">→</span>
+            </Link>
+            <Link className="button button-outline" href="/contact">
+              Ask a question
+            </Link>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function ServiceList({ services }: { services: ChurchService[] }) {
+  return (
+    <div className="mt-8 grid gap-6 md:grid-cols-2">
+      {services.map((service) => (
+        <article
+          className="surface-card flex flex-col justify-between p-6 sm:p-8"
+          key={service.id}
+        >
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                {service.serviceType}
+              </span>
+              <span className="text-xs font-semibold text-muted">
+                {service.scheduleType === "special" ? "Special Event" : "Weekly"}
+              </span>
+            </div>
+
+            <h3 className="mt-4 font-display text-2xl font-bold text-text">
+              {service.title}
+            </h3>
+
+            {service.description && (
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                {service.description}
+              </p>
+            )}
+
+            <div className="mt-6 space-y-3 rounded-xl border border-border/60 bg-surface-strong/50 p-4 text-xs">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-muted uppercase tracking-wider">
+                  {service.scheduleType === "special" ? "Date & Time" : "Day & Time"}
+                </span>
+                <span className="font-semibold text-text">
+                  {formatServiceDate(service)} · {formatServiceTime(service)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-muted uppercase tracking-wider">Location</span>
+                <span className="font-semibold text-text">
+                  {service.location || "Main Sanctuary"}
+                </span>
+              </div>
+              {service.targetAudience && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-muted uppercase tracking-wider">Audience</span>
+                  <span className="font-semibold text-text">{service.targetAudience}</span>
+                </div>
+              )}
+            </div>
+
+            {service.instructions && (
+              <p className="mt-3 text-xs italic text-muted">
+                Note: {service.instructions}
+              </p>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  );
 }

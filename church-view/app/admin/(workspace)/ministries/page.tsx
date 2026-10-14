@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { AdminContentPage } from "@/components/admin/admin-content-page";
+import { MinistriesManager } from "@/components/admin/management/ministries-manager";
 
 export const metadata: Metadata = { title: "Ministries", robots: { index: false, follow: false } };
 
 export default function AdminMinistriesPage() {
-  return <AdminContentPage section="ministries" />;
+  return <MinistriesManager />;
 }

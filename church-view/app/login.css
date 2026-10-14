@@ -1,0 +1,871 @@
+/* ==========================================================================
+   Login & Auth Split-Panel Styles
+   Theme colors aligned strictly with site tokens:
+   - Primary: var(--color-primary) / hsl(var(--brand-primary)) [Navy #142852]
+   - Secondary / Glow: var(--color-secondary) / hsl(var(--brand-secondary)) [Gold/Amber #f59e0b]
+   - Background: var(--color-background) [Ivory #fbfaf8]
+   - Surface: var(--color-surface) [#ffffff]
+   - Text: var(--color-text) [#0f172a]
+   - Muted: var(--color-muted) [#64748b]
+   - Border: var(--color-border) [#cbd5e1]
+   - Error: var(--color-error) [#b91c1c]
+   ========================================================================== */
+
+/* Outer Auth Wrapper */
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Two-Panel Split Container */
+.auth-wrapper .container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 980px;
+  min-height: 580px;
+  background: var(--color-surface);
+  border-radius: 1.5rem;
+  border: 1px solid hsl(var(--border) / 0.85);
+  box-shadow:
+    0 24px 50px -12px hsl(var(--brand-primary) / 0.18),
+    0 4px 16px -2px hsl(var(--brand-primary) / 0.06),
+    0 0 0 1px hsl(var(--border) / 0.35);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .auth-wrapper .container {
+    flex-direction: row;
+  }
+}
+
+/* ==========================================================================
+   SIDE A: Form Section
+   ========================================================================== */
+.auth-wrapper .form-section.side-a {
+  flex: 1.05;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  background: var(--color-surface);
+  position: relative;
+  z-index: 1;
+}
+
+.auth-wrapper .form-box {
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-wrapper .form-box h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 3.5vw, 2.25rem);
+  font-weight: 800;
+  color: var(--color-text);
+  margin-top: 0;
+  margin-bottom: 2rem;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+/* Input Group with Icon & Floating Label */
+.auth-wrapper .input-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.auth-wrapper .input-group .icon {
+  position: absolute;
+  left: 1.05rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: hsl(var(--muted-foreground));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  z-index: 2;
+}
+
+.auth-wrapper .input-group:focus-within .icon {
+  color: var(--color-primary);
+  transform: translateY(-50%) scale(1.08);
+}
+
+.auth-wrapper .input-group input {
+  width: 100%;
+  height: 3.25rem;
+  padding: 0.75rem 2.75rem 0.75rem 2.85rem;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: hsl(var(--background) / 0.45);
+  border: 1.5px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
+}
+
+.auth-wrapper .input-group input:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 4px hsl(var(--brand-primary) / 0.12);
+}
+
+.auth-wrapper .input-group label {
+  position: absolute;
+  left: 2.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.9375rem;
+  pointer-events: none;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  background: transparent;
+  padding: 0 0.35rem;
+  border-radius: 4px;
+}
+
+/* Floating trigger when input has focus, placeholder is not shown, or has value */
+.auth-wrapper .input-group input:focus ~ label,
+.auth-wrapper .input-group input:not(:placeholder-shown) ~ label,
+.auth-wrapper .input-group input.has-value ~ label {
+  top: 0;
+  left: 0.85rem;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+/* Password Toggle Icon Button */
+.auth-wrapper .password-toggle {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0.35rem;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+  z-index: 2;
+}
+
+.auth-wrapper .password-toggle:hover {
+  color: var(--color-primary);
+  background-color: hsl(var(--brand-primary) / 0.08);
+}
+
+/* Error and Notice Banners */
+.auth-wrapper .error {
+  color: var(--color-error);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  margin-top: -0.75rem;
+  margin-bottom: 1.25rem;
+  padding: 0.6rem 0.85rem;
+  background: hsl(var(--error) / 0.08);
+  border: 1px solid hsl(var(--error) / 0.22);
+  border-radius: 0.5rem;
+  animation: authFadeIn 0.2s ease-in-out;
+}
+
+.auth-wrapper .notice {
+  color: var(--color-success);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  margin-bottom: 1.25rem;
+  padding: 0.65rem 0.85rem;
+  background: hsl(var(--success) / 0.09);
+  border: 1px solid hsl(var(--success) / 0.25);
+  border-radius: 0.5rem;
+  animation: authFadeIn 0.2s ease-in-out;
+}
+
+/* Glow Button */
+.auth-wrapper .glow-button {
+  width: 100%;
+  height: 3.25rem;
+  margin-top: 0.75rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, hsl(var(--brand-primary)) 0%, hsl(var(--brand-primary-hover)) 100%);
+  color: hsl(var(--surface));
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 4px 18px hsl(var(--brand-primary) / 0.35),
+    0 0 22px hsl(var(--brand-secondary) / 0.25);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.auth-wrapper .glow-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, hsl(var(--brand-primary-hover)) 0%, hsl(220 60% 32%) 100%);
+  box-shadow:
+    0 8px 26px hsl(var(--brand-primary) / 0.48),
+    0 0 35px hsl(var(--brand-secondary) / 0.38);
+}
+
+.auth-wrapper .glow-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px hsl(var(--brand-primary) / 0.3);
+}
+
+.auth-wrapper .glow-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px hsl(var(--brand-primary) / 0.15);
+}
+
+/* Signup Link */
+.auth-wrapper .signup-link {
+  margin-top: 1.75rem;
+  margin-bottom: 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.auth-wrapper .signup-link a {
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-left: 0.35rem;
+  text-decoration: none;
+  transition: color 0.15s ease, text-decoration 0.15s ease;
+}
+
+.auth-wrapper .signup-link a:hover {
+  color: var(--color-secondary);
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   SIDE B: Slide Panel
+   ========================================================================== */
+.auth-wrapper .slide-panel.side-b {
+  flex: 0.95;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: clamp(2.5rem, 5vw, 4rem);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--brand-primary-dark)) 0%,
+    hsl(var(--brand-primary)) 60%,
+    hsl(220 58% 28%) 100%
+  );
+  color: hsl(var(--surface));
+  overflow: hidden;
+  min-height: 240px;
+}
+
+/* Background atmospheric glows using amber/secondary color */
+.auth-wrapper .slide-panel.side-b::before {
+  content: "";
+  position: absolute;
+  top: -25%;
+  right: -25%;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--brand-secondary) / 0.28) 0%, transparent 70%);
+  pointer-events: none;
+  animation: panelGlowPulse 6s ease-in-out infinite alternate;
+}
+
+.auth-wrapper .slide-panel.side-b::after {
+  content: "";
+  position: absolute;
+  bottom: -25%;
+  left: -25%;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, hsl(var(--brand-secondary) / 0.18) 0%, transparent 70%);
+  pointer-events: none;
+  animation: panelGlowPulse 8s ease-in-out infinite alternate-reverse;
+}
+
+.auth-wrapper .slide-panel-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 340px;
+}
+
+.auth-wrapper .church-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.95rem;
+  background: hsl(0 0% 100% / 0.08);
+  border: 1px solid hsl(var(--brand-secondary) / 0.35);
+  border-radius: 9999px;
+  margin-bottom: 1.75rem;
+  backdrop-filter: blur(8px);
+}
+
+.auth-wrapper .church-tag span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--brand-secondary));
+}
+
+.auth-wrapper .welcome-text {
+  margin: 0;
+  color: #ffffff;
+}
+
+.auth-wrapper .welcome-text pre {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 4.5vw, 3.25rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+  white-space: pre;
+  text-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 35px hsl(var(--brand-secondary) / 0.45);
+}
+
+.auth-wrapper .slide-divider {
+  width: 3.5rem;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, hsl(var(--brand-secondary)), transparent);
+  border-radius: 9999px;
+  margin: 1.5rem 0 1rem;
+}
+
+.auth-wrapper .welcome-subtext {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: hsl(var(--surface) / 0.85);
+  margin: 0;
+  font-weight: 400;
+}
+
+@keyframes panelGlowPulse {
+  from {
+    transform: scale(0.92);
+    opacity: 0.75;
+  }
+  to {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes authFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Login flow: form on the left, welcome panel on the right. */
+.auth-wrapper .login-layout {
+  --login-split-start: 50%;
+  --login-split-mid: 60%;
+  --login-split-end: 70%;
+  position: relative;
+  min-height: 580px;
+  isolation: isolate;
+  background: hsl(var(--brand-primary-dark));
+  border-color: hsl(var(--brand-secondary) / 0.5);
+  box-shadow:
+    0 24px 50px -12px hsl(var(--brand-primary) / 0.3),
+    0 0 28px hsl(var(--brand-secondary) / 0.14);
+}
+
+.auth-wrapper .login-layout > .login-section,
+.auth-wrapper .login-layout > .login-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-wrapper .login-layout > .login-section {
+  z-index: 2;
+  justify-content: flex-start;
+  padding-left: clamp(2rem, 5vw, 3.5rem);
+  color: hsl(var(--surface));
+  background: linear-gradient(135deg, hsl(220 58% 10%), hsl(var(--brand-primary-dark)) 70%);
+  clip-path: polygon(
+    0 0,
+    var(--login-split-start) 0,
+    var(--login-split-mid) 50%,
+    var(--login-split-end) 100%,
+    0 100%
+  );
+}
+
+.auth-wrapper .login-layout .form-box h2 {
+  margin-bottom: 1.65rem;
+  color: hsl(var(--surface));
+  text-shadow: 0 0 18px hsl(var(--brand-secondary) / 0.16);
+}
+
+.auth-wrapper .login-layout .input-group .icon {
+  color: hsl(42 96% 68%);
+  text-shadow: 0 0 8px hsl(var(--brand-secondary) / 0.32);
+}
+
+.auth-wrapper .login-layout .input-group input {
+  color: hsl(var(--surface));
+  background: hsl(var(--surface) / 0.06);
+  border-color: hsl(var(--surface) / 0.24);
+}
+
+.auth-wrapper .login-layout .input-group input:focus {
+  border-color: hsl(var(--brand-secondary));
+  background: hsl(var(--surface) / 0.1);
+  box-shadow: 0 0 0 4px hsl(var(--brand-secondary) / 0.16), 0 0 18px hsl(var(--brand-secondary) / 0.15);
+}
+
+.auth-wrapper .login-layout .input-group label {
+  color: hsl(var(--surface) / 0.64);
+}
+
+.auth-wrapper .login-layout .input-group input:focus ~ label,
+.auth-wrapper .login-layout .input-group input:not(:placeholder-shown) ~ label,
+.auth-wrapper .login-layout .input-group input.has-value ~ label {
+  color: hsl(42 96% 68%);
+  background: hsl(220 58% 11%);
+}
+
+.auth-wrapper .login-layout .password-toggle {
+  color: hsl(var(--surface) / 0.72);
+}
+
+.auth-wrapper .login-layout .password-toggle:hover {
+  color: hsl(42 96% 68%);
+  background: hsl(var(--brand-secondary) / 0.12);
+}
+
+.auth-wrapper .login-layout .glow-button {
+  color: hsl(var(--brand-primary-dark));
+  background: linear-gradient(110deg, hsl(42 96% 68%), hsl(var(--brand-secondary)));
+  box-shadow: 0 6px 20px hsl(var(--brand-secondary) / 0.35), 0 0 24px hsl(var(--brand-secondary) / 0.2);
+}
+
+.auth-wrapper .login-layout .glow-button:hover:not(:disabled) {
+  background: linear-gradient(110deg, hsl(42 96% 74%), hsl(38 92% 56%));
+  box-shadow: 0 10px 26px hsl(var(--brand-secondary) / 0.42), 0 0 32px hsl(var(--brand-secondary) / 0.28);
+}
+
+.auth-wrapper .login-layout .signup-link {
+  color: hsl(var(--surface) / 0.72);
+}
+
+.auth-wrapper .login-layout .signup-link a {
+  color: hsl(42 96% 68%);
+}
+
+.auth-wrapper .login-layout .signup-link a:hover {
+  color: hsl(42 96% 78%);
+}
+
+.auth-wrapper .login-layout > .login-panel {
+  z-index: 1;
+  align-items: flex-end;
+  text-align: right;
+  color: hsl(var(--surface));
+  background: linear-gradient(145deg, hsl(220 60% 13%), hsl(var(--brand-primary)) 70%, hsl(220 58% 25%));
+  clip-path: polygon(
+    var(--login-split-start) 0,
+    100% 0,
+    100% 100%,
+    var(--login-split-end) 100%,
+    var(--login-split-mid) 50%
+  );
+}
+
+.auth-wrapper .login-layout > .login-panel::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 2px solid hsl(var(--brand-secondary) / 0.9);
+  box-shadow: inset 0 0 24px hsl(var(--brand-secondary) / 0.14), 0 0 24px hsl(var(--brand-secondary) / 0.2);
+  clip-path: polygon(
+    var(--login-split-start) 0,
+    100% 0,
+    100% 100%,
+    var(--login-split-end) 100%,
+    var(--login-split-mid) 50%
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.auth-wrapper .login-layout .slide-panel-inner {
+  width: 34%;
+  max-width: 340px;
+  margin-right: clamp(1.25rem, 3vw, 2rem);
+  align-items: flex-end;
+  padding-inline: 0;
+  text-align: right;
+}
+
+.auth-wrapper .login-layout .church-tag {
+  border-color: hsl(var(--brand-secondary) / 0.65);
+  background: hsl(var(--surface) / 0.1);
+}
+
+.auth-wrapper .login-layout .church-tag span {
+  color: hsl(42 96% 68%);
+}
+
+.auth-wrapper .login-layout .welcome-text pre {
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  color: hsl(var(--surface));
+  text-shadow: 0 2px 2px hsl(220 60% 8% / 0.8), 0 0 22px hsl(var(--brand-secondary) / 0.48);
+}
+
+.auth-wrapper .login-layout .slide-divider {
+  background: linear-gradient(90deg, transparent, hsl(var(--brand-secondary)), transparent);
+}
+
+.auth-wrapper .login-layout .welcome-subtext {
+  max-width: 24rem;
+  color: hsl(var(--surface) / 0.9);
+}
+
+/* Registration flow: angular split panel, recolored with the church palette. */
+.auth-wrapper .registration-layout {
+  --reg-split-start: 54%;
+  --reg-split-mid: 49%;
+  --reg-split-end: 44%;
+  position: relative;
+  min-height: 580px;
+  isolation: isolate;
+  background: hsl(var(--brand-primary-dark));
+  border-color: hsl(var(--brand-secondary) / 0.5);
+  box-shadow:
+    0 24px 50px -12px hsl(var(--brand-primary) / 0.3),
+    0 0 28px hsl(var(--brand-secondary) / 0.14);
+}
+
+.auth-wrapper .registration-layout > .register-panel,
+.auth-wrapper .registration-layout > .register-section {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-wrapper .registration-layout > .register-panel {
+  z-index: 2;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  color: hsl(var(--surface));
+  background: linear-gradient(145deg, hsl(220 60% 13%), hsl(var(--brand-primary)) 70%, hsl(220 58% 25%));
+  clip-path: polygon(
+    0 0,
+    var(--reg-split-start) 0,
+    var(--reg-split-mid) 50%,
+    var(--reg-split-end) 100%,
+    0 100%
+  );
+}
+
+.auth-wrapper .registration-layout > .register-panel::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: 2px solid hsl(var(--brand-secondary) / 0.9);
+  box-shadow: inset 0 0 24px hsl(var(--brand-secondary) / 0.14), 0 0 24px hsl(var(--brand-secondary) / 0.2);
+  clip-path: polygon(
+    0 0,
+    var(--reg-split-start) 0,
+    var(--reg-split-mid) 50%,
+    var(--reg-split-end) 100%,
+    0 100%
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.auth-wrapper .registration-layout .slide-panel-inner {
+  width: 38%;
+  max-width: 390px;
+  margin-left: clamp(1.25rem, 3vw, 2rem);
+  align-items: flex-start;
+  padding-inline: 0;
+  text-align: left;
+}
+
+.auth-wrapper .registration-layout .church-tag {
+  border-color: hsl(var(--brand-secondary) / 0.65);
+  background: hsl(var(--surface) / 0.1);
+}
+
+.auth-wrapper .registration-layout .church-tag span {
+  color: hsl(42 96% 68%);
+}
+
+.auth-wrapper .registration-layout .welcome-text pre {
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  color: hsl(var(--surface));
+  text-shadow: 0 2px 2px hsl(220 60% 8% / 0.8), 0 0 22px hsl(var(--brand-secondary) / 0.48);
+}
+
+.auth-wrapper .registration-layout .slide-divider {
+  background: linear-gradient(90deg, transparent, hsl(var(--brand-primary) / 0.65), transparent);
+}
+
+.auth-wrapper .registration-layout .welcome-subtext {
+  max-width: 24rem;
+  color: hsl(var(--surface) / 0.9);
+}
+
+.auth-wrapper .registration-layout > .register-section {
+  z-index: 1;
+  justify-content: flex-end;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 4vw, 3.25rem) clamp(1.5rem, 4vw, 3rem) 0;
+  color: hsl(var(--surface));
+  background: linear-gradient(135deg, hsl(220 58% 10%), hsl(var(--brand-primary-dark)) 58%, hsl(220 56% 17%));
+  clip-path: polygon(
+    var(--reg-split-start) 0,
+    100% 0,
+    100% 100%,
+    var(--reg-split-end) 100%,
+    var(--reg-split-mid) 50%
+  );
+}
+
+.auth-wrapper .registration-layout .form-box {
+  width: 42%;
+  max-width: 430px;
+  margin-right: 1%;
+}
+
+.auth-wrapper .registration-layout .form-box h2 {
+  margin-bottom: 1.65rem;
+  color: hsl(var(--surface));
+  text-shadow: 0 0 18px hsl(var(--brand-secondary) / 0.16);
+}
+
+.auth-wrapper .registration-layout .input-group .icon {
+  right: 1rem;
+  left: auto;
+  color: hsl(42 96% 68%);
+  text-shadow: 0 0 8px hsl(var(--brand-secondary) / 0.32);
+}
+
+.auth-wrapper .registration-layout .input-group input {
+  padding-left: 0.9rem;
+  padding-right: 2.8rem;
+  color: hsl(var(--surface));
+  background: hsl(var(--surface) / 0.06);
+  border-color: hsl(var(--surface) / 0.24);
+}
+
+.auth-wrapper .registration-layout .input-group input:focus {
+  border-color: hsl(var(--brand-secondary));
+  background: hsl(var(--surface) / 0.1);
+  box-shadow: 0 0 0 4px hsl(var(--brand-secondary) / 0.16), 0 0 18px hsl(var(--brand-secondary) / 0.15);
+}
+
+.auth-wrapper .registration-layout .input-group label {
+  left: 0.9rem;
+  color: hsl(var(--surface) / 0.64);
+}
+
+.auth-wrapper .registration-layout .input-group input:focus ~ label,
+.auth-wrapper .registration-layout .input-group input:not(:placeholder-shown) ~ label,
+.auth-wrapper .registration-layout .input-group input.has-value ~ label {
+  color: hsl(42 96% 68%);
+  background: hsl(220 58% 11%);
+}
+
+.auth-wrapper .registration-layout .password-toggle {
+  right: 2.5rem;
+  color: hsl(var(--surface) / 0.72);
+}
+
+.auth-wrapper .registration-layout .password-toggle:hover {
+  color: hsl(42 96% 68%);
+  background: hsl(var(--brand-secondary) / 0.12);
+}
+
+.auth-wrapper .registration-layout .glow-button {
+  color: hsl(var(--brand-primary-dark));
+  background: linear-gradient(135deg, hsl(42 96% 70%), hsl(38 95% 60%) 72%, hsl(34 90% 52%));
+  box-shadow: 0 5px 20px hsl(var(--brand-secondary) / 0.28), 0 0 24px hsl(var(--brand-secondary) / 0.18);
+}
+
+.auth-wrapper .registration-layout .glow-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, hsl(46 100% 78%), hsl(38 96% 65%));
+  box-shadow: 0 8px 26px hsl(var(--brand-secondary) / 0.36), 0 0 35px hsl(var(--brand-secondary) / 0.24);
+}
+
+.auth-wrapper .registration-layout .signup-link {
+  color: hsl(var(--surface) / 0.7);
+}
+
+.auth-wrapper .registration-layout .signup-link a {
+  color: hsl(var(--brand-secondary));
+}
+
+.auth-wrapper .registration-layout .signup-link a:hover {
+  color: hsl(46 100% 76%);
+}
+
+.auth-wrapper .registration-layout ol li {
+  color: hsl(var(--surface) / 0.78);
+  border-color: hsl(var(--surface) / 0.3);
+}
+
+.auth-wrapper .registration-layout ol li.border-primary {
+  color: hsl(42 100% 72%);
+  border-color: hsl(42 100% 64%);
+}
+
+.auth-wrapper .registration-layout label.flex {
+  color: hsl(var(--surface) / 0.88);
+}
+
+.auth-wrapper .registration-layout .form-box p.text-muted {
+  color: hsl(var(--surface) / 0.76);
+}
+
+.auth-wrapper .registration-layout .error {
+  color: hsl(0 100% 82%);
+  background: hsl(0 70% 38% / 0.22);
+  border-color: hsl(0 100% 75% / 0.42);
+}
+
+.auth-wrapper .registration-layout .notice {
+  color: hsl(145 70% 80%);
+  background: hsl(145 55% 28% / 0.3);
+  border-color: hsl(145 70% 70% / 0.42);
+}
+
+@media (max-width: 767px) {
+  .auth-wrapper .login-layout {
+    min-height: 0;
+  }
+
+  .auth-wrapper .login-layout > .login-panel,
+  .auth-wrapper .login-layout > .login-section {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    clip-path: none;
+  }
+
+  .auth-wrapper .login-layout > .login-panel {
+    min-height: 220px;
+    padding: 1.5rem 1rem;
+  }
+
+  .auth-wrapper .login-layout > .login-panel::before {
+    clip-path: none;
+  }
+
+  .auth-wrapper .login-layout .slide-panel-inner {
+    width: 100%;
+    max-width: 34rem;
+    margin: 0;
+    align-items: center;
+    padding-inline: 0.75rem;
+    text-align: center;
+  }
+
+  .auth-wrapper .login-layout > .login-section {
+    justify-content: center;
+    padding: 2rem clamp(1.25rem, 6vw, 2.5rem);
+  }
+
+  .auth-wrapper .login-layout .form-box {
+    width: 100%;
+    max-width: 28rem;
+    margin: 0;
+  }
+
+  .auth-wrapper .registration-layout {
+    min-height: 0;
+  }
+
+  .auth-wrapper .registration-layout > .register-panel,
+  .auth-wrapper .registration-layout > .register-section {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    clip-path: none;
+  }
+
+  .auth-wrapper .registration-layout > .register-panel {
+    min-height: 190px;
+    padding: 1.5rem 1rem;
+  }
+
+  .auth-wrapper .registration-layout > .register-panel::before {
+    clip-path: none;
+  }
+
+  .auth-wrapper .registration-layout .slide-panel-inner {
+    width: 100%;
+    max-width: 34rem;
+    align-items: center;
+    padding-inline: 0.75rem;
+    text-align: center;
+  }
+
+  .auth-wrapper .registration-layout > .register-section {
+    justify-content: center;
+    padding: 2rem clamp(1.25rem, 6vw, 2.5rem);
+  }
+
+  .auth-wrapper .registration-layout .form-box {
+    width: 100%;
+    max-width: 28rem;
+    margin: 0;
+  }
+}

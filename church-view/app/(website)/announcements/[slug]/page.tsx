@@ -10,16 +10,16 @@ function titleFromSlug(slug: string) {
 
 export async function generateMetadata({ params }: { params: Promise<AnnouncementParams> }): Promise<Metadata> {
   const { slug } = await params;
-  const item = await getPublicData<PublicContent>(`/content/announcements/${encodeURIComponent(slug)}`);
+  const item = await getPublicData<PublicContent>(`/content/announcements/${encodeURIComponent(slug)}`, { allowNotFound: true });
   const title = item?.title ?? titleFromSlug(slug);
   const image = typeof item?.details.imageUrl === "string" ? item.details.imageUrl : undefined;
   return {
     title,
-    description: item?.description ?? "Church update from our community in Kigali.",
+    description: item?.description ?? "A published update from the church community.",
     alternates: { canonical: `/announcements/${slug}` },
     openGraph: {
       title,
-      description: item?.description ?? "Church update from our community in Kigali.",
+      description: item?.description ?? "A published update from the church community.",
       type: "article",
       url: `/announcements/${slug}`,
       ...(image ? { images: [{ url: image, alt: title }] } : {}),

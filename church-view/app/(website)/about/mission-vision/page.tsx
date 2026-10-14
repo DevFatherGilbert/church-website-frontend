@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { SiteContentPage } from "@/components/site/site-content-page";
-import { sitePages } from "@/lib/content/site-pages";
-
+import { PageHero } from "@/components/site/page-hero";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 const path = "/about/mission-vision";
-export const metadata: Metadata = { title: "A life shaped by faith and hope.", description: sitePages[path].description, alternates: { canonical: path } };
-export default function MissionVisionPage() { return <SiteContentPage page={sitePages[path]} path={path} />; }
+export const metadata: Metadata = { title: "Mission and vision", description: "The approved mission and vision of the church.", alternates: { canonical: path } };
+export default async function MissionVisionPage() { const { church } = await getPublicWebsiteSettings(); const items = [church.mission, church.vision].filter((item) => item.visible); return <main><PageHero eyebrow="PURPOSE & DIRECTION" title="Mission and vision" emphasis="" description="The approved statements that guide the church." breadcrumbs={[{ label: "Home", href: "/" }, { label: "About", href: "/about" }]} /><section className="page-container section-space grid gap-5 md:grid-cols-2">{items.length ? items.map((item) => <article className="surface-card p-7 sm:p-9" key={item.heading}><h2 className="eyebrow text-clay">{item.heading}</h2><p className="mt-4 whitespace-pre-line font-display text-3xl">{item.statement}</p>{item.description && <p className="mt-5 whitespace-pre-line text-sm leading-7 text-muted">{item.description}</p>}</article>) : <p className="text-sm text-muted">Approved mission and vision statements have not been published yet.</p>}</section></main>; }

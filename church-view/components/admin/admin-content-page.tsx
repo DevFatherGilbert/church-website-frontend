@@ -5,14 +5,20 @@ import { InquiryManager } from "@/components/admin/management/inquiry-manager";
 import { MediaLibraryManager } from "@/components/admin/management/media-library-manager";
 import { AnnouncementManager } from "@/components/admin/management/announcement-manager";
 
-type RecordSection = "sermons" | "events" | "ministries" | "resources" | "leadership" | "settings";
+import { SermonManager } from "@/components/admin/management/sermon-manager";
+import { FaqManager } from "@/components/admin/management/faq-manager";
+
+type RecordSection = "events" | "resources" | "leadership" | "settings" | "testimonials";
 
 export function AdminContentPage({ section }: { section: AdminContentSection }) {
+  if (section === "sermons") return <SermonManager />;
+  if (section === "faqs") return <FaqManager />;
   if (section === "media") return <MediaLibraryManager />;
   if (section === "announcements") return <AnnouncementManager />;
   if (section === "inquiries" || section === "prayer-requests") return <InquiryManager section={section} />;
-  if (["sermons", "events", "ministries", "resources", "leadership", "settings"].includes(section)) {
+  if (["events", "resources", "leadership", "settings", "testimonials"].includes(section)) {
     return <AdminRecordManager section={section as RecordSection} />;
   }
   notFound();
 }
+

@@ -34,10 +34,10 @@ function StatusBadge({ status }: { status: ActivityStatus }) {
 }
 
 export function RecentActivityTableView({ items }: { items: ActivityItem[] }) {
-  return <section aria-labelledby="recent-activity-title" className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
+  return <section aria-labelledby="recent-activity-title" className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
     <div className="flex flex-col gap-1 border-b border-slate-200/80 px-5 py-5 sm:px-6">
-      <h2 className="text-lg font-semibold text-slate-900" id="recent-activity-title">Recent activity</h2>
-      <p className="text-sm text-slate-500">A quick look at the latest website content.</p>
+      <h2 className="font-display text-lg font-bold text-slate-900" id="recent-activity-title">Recent activity</h2>
+      <p className="text-sm text-slate-500 font-normal">A quick look at the latest website content.</p>
     </div>
 
     <div className="hidden overflow-x-auto md:block">

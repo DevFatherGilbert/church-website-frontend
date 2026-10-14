@@ -1,14 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import { authGet, authRequest } from "@/lib/api/church-api";
 import { AdminShellView } from "@/components/admin/admin-shell-view";
+import { ConfirmationDialogProvider } from "@/components/admin/confirmation-dialog";
 
-type SessionProfile = { status?: string; fullName?: string; email?: string };
+type SessionProfile = {
+  status?: string;
+  role?: "admin" | "member";
+  fullName?: string;
+  email?: string;
+};
 
 export default function AdminWorkspaceLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -17,12 +22,12 @@ export default function AdminWorkspaceLayout({ children }: { children: ReactNode
   const [profile, setProfile] = useState<SessionProfile>({});
   const checkStarted = useRef(false);
   const currentPath = useRef(pathname);
-  currentPath.current = pathname;
 
   useEffect(() => {
     if (checkStarted.current) return;
     checkStarted.current = true;
     let cancelled = false;
+    currentPath.current = pathname;
 
     async function checkSession() {
       try {
@@ -34,7 +39,9 @@ export default function AdminWorkspaceLayout({ children }: { children: ReactNode
           profile = await authGet<SessionProfile>("/auth/me");
         }
 
-        if (profile?.status !== "active") throw new Error("An active account is required.");
+        if (profile?.status !== "active" || profile.role !== "admin") {
+          throw new Error("An active administrator account is required.");
+        }
         if (!cancelled) {
           setProfile(profile);
           setAuthStatus("authorized");
@@ -53,26 +60,26 @@ export default function AdminWorkspaceLayout({ children }: { children: ReactNode
       cancelled = true;
       checkStarted.current = false;
     };
-  }, [router]);
+  }, [router, pathname]);
 
   if (authStatus !== "authorized") {
-    return <main className="grid min-h-screen place-items-center bg-slate-50 px-5 py-10">
-      <section aria-live="polite" className="w-full max-w-sm rounded-2xl border border-slate-200/80 bg-white p-8 text-center shadow-sm" role="status">
-        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-700">
+    return <main className="grid min-h-screen place-items-center bg-background px-5 py-10">
+      <section aria-live="polite" className="surface-card w-full max-w-sm p-8 text-center" role="status">
+        <span className="mx-auto grid size-14 place-items-center rounded-xl bg-primary/10 text-primary">
           <ChurchLogo className="size-10 rounded-full object-contain" />
         </span>
         <div className="mt-6 flex items-center justify-center gap-2">
-          <LoaderCircle aria-hidden="true" className="size-4 animate-spin text-indigo-600" />
-          <p className="text-sm font-semibold text-slate-900">{authStatus === "redirecting" ? "WELCOME TO ADMIN PAGE" : "FAITHFULNESS AND DEDICATION IS IMPORTANT"}</p>
+          <LoaderCircle aria-hidden="true" className="size-4 animate-spin text-primary" />
+          <p className="text-sm font-semibold text-text">{authStatus === "redirecting" ? "WELCOME TO ADMIN PAGE" : "FAITHFULNESS AND DEDICATION IS IMPORTANT"}</p>
         </div>
-        <p className="mt-2 text-sm leading-6 text-slate-500">{authStatus === "redirecting" ? "Taking you to the secure sign-in page." : "One moment while we get your dashboard ready."}</p>
+        <p className="mt-2 text-sm leading-6 text-muted">{authStatus === "redirecting" ? "Taking you to the secure sign-in page." : "One moment while we get your dashboard ready."}</p>
         <div aria-hidden="true" className="mt-7 space-y-2.5">
-          <div className="mx-auto h-2 w-2/3 animate-pulse rounded-full bg-slate-100" />
-          <div className="mx-auto h-2 w-1/2 animate-pulse rounded-full bg-slate-100 [animation-delay:120ms]" />
+          <div className="mx-auto h-2 w-2/3 animate-pulse rounded-full bg-surface-strong" />
+          <div className="mx-auto h-2 w-1/2 animate-pulse rounded-full bg-surface-strong [animation-delay:120ms]" />
         </div>
       </section>
     </main>;
   }
 
-  return <AdminShellView profile={profile}>{children}</AdminShellView>;
+  return <ConfirmationDialogProvider><AdminShellView profile={profile}>{children}</AdminShellView></ConfirmationDialogProvider>;
 }

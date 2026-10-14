@@ -1,4 +1,5 @@
 import { AdminLoginForm } from "./admin-login-form";
+import { ChurchLogo } from "@/components/brand/church-logo";
 
 type AuthStep = "register" | "verify" | "password" | "login";
 
@@ -11,18 +12,45 @@ export function AdminAuthPage({
   title: string;
   description: string;
 }) {
+  const isLogin = step === "login";
+  const isRegistrationFlow = !isLogin;
+
+  const welcomeText = isLogin
+    ? "WELCOME\n BACK!"
+    : step === "register"
+    ? "WELCOME\n ABOARD!"
+    : step === "verify"
+    ? "CHECK\n INBOX!"
+    : "SECURE\n ACCOUNT!";
+
+  const subtitle = isLogin
+    ? "Sign in to continue to your church administration workspace."
+    : description;
+
   return (
-    <main className="mx-auto w-full max-w-xl">
-      <div className="overflow-hidden border border-stone-200 bg-white shadow-xl shadow-stone-900/10">
-        <div className="h-1.5 bg-amber-700" />
-        <div className="p-6 sm:p-10">
-          <p className="text-xs font-bold tracking-[.18em] text-amber-800 uppercase">Church · Admin workspace</p>
-          <h1 className="mt-4 font-serif text-3xl font-medium tracking-tight text-stone-900 sm:text-4xl">{title}</h1>
-          <p className="mt-3 text-sm leading-6 text-stone-600">{description}</p>
-          <div className="mt-8"><AdminLoginForm initialStep={step} /></div>
-          <p className="mt-7 border-t border-stone-200 pt-4 text-xs leading-5 text-stone-500">
-            Account access is for authorized church administrators. Management permissions are controlled separately.
-          </p>
+    <main className="auth-wrapper">
+      <div className={`container ${isRegistrationFlow ? "registration-layout" : "login-layout"}`}>
+        <div className={`slide-panel side-b ${isRegistrationFlow ? "register-panel" : "login-panel"}`}>
+          <div className="slide-panel-inner">
+            <div className="church-tag">
+              <ChurchLogo className="size-6 object-contain" priority />
+              <span>Church Portal</span>
+            </div>
+
+            <h1 className="welcome-text">
+              <pre>{step === "register" ? "WELCOME!" : welcomeText}</pre>
+            </h1>
+
+            <div className="slide-divider" aria-hidden="true" />
+            <p className="welcome-subtext">{subtitle}</p>
+          </div>
+        </div>
+
+        <div className={`form-section side-a ${isRegistrationFlow ? "register-section" : "login-section"}`}>
+          <div className="form-box">
+            <h2>{isLogin ? "Login" : step === "register" ? "Register" : title}</h2>
+            <AdminLoginForm initialStep={step} />
+          </div>
         </div>
       </div>
     </main>

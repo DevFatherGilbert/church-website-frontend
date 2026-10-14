@@ -1,12 +1,149 @@
 import { PageHero } from "@/components/site/page-hero";
 import { SubmissionForm } from "@/components/forms/submission-form";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export default async function ContactPage({ searchParams }: { searchParams: Promise<{ topic?: string }> }) {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ topic?: string }>;
+}) {
   const { topic } = await searchParams;
-  const initialMessage = topic ? `I’d like to learn more about ${topic.slice(0, 120)}.` : "";
-  return <main><PageHero eyebrow="VISIT · CONNECT · PRAY" title="We’d love to" emphasis="hear from you." description="Planning your first visit, asking about a ministry or carrying something you’d like prayer for? Reach out and our team will follow up." />
-    <section className="mx-auto grid max-w-7xl gap-12 px-6 py-14 lg:grid-cols-[.75fr_1.25fr] lg:px-10 lg:py-20"><aside><p className="text-[10px] font-bold tracking-[.2em] text-muted">GET IN TOUCH</p><h2 className="mt-4 text-4xl font-medium">The door is<br /><em className="font-display text-clay">open.</em></h2><p className="mt-4 text-sm leading-7 text-muted">We’re in Kigali, Rwanda. Our approved street address, phone number, email and WhatsApp details will be added here.</p><div className="mt-7 border-y border-ink/15 py-5"><p className="text-xs font-bold">CONTACT CHANNELS</p><dl className="mt-4 space-y-3 text-sm"><div><dt className="text-xs text-muted">PHONE</dt><dd className="mt-1">Church number to be added</dd></div><div><dt className="text-xs text-muted">EMAIL</dt><dd className="mt-1">Church email to be added</dd></div><div><dt className="text-xs text-muted">WHATSAPP</dt><dd className="mt-1">Link to be added if enabled</dd></div></dl></div><div className="mt-6 border-b border-ink/15 pb-5"><p className="text-xs font-bold">VISIT US</p><p className="mt-2 text-sm text-muted">Kigali, Rwanda</p><p className="mt-1 text-xs text-muted">Exact service location to be confirmed</p><a className="mt-3 inline-block text-sm font-bold" href="https://maps.google.com/?q=Kigali%2C%20Rwanda" target="_blank" rel="noreferrer">Directions to Kigali ↗</a></div><div className="mt-5 min-h-56 overflow-hidden border border-ink/10"><iframe title="Map of Kigali, Rwanda" className="h-56 w-full border-0 grayscale" loading="lazy" src="https://maps.google.com/maps?q=Kigali%2C%20Rwanda&output=embed" /></div></aside>
-      <div className="space-y-12"><div className="surface-card p-6 sm:p-9"><p className="text-[10px] font-bold tracking-[.2em] text-clay">GENERAL CONTACT · MINISTRY QUESTIONS</p><h2 className="mt-3 text-2xl font-semibold">Send us a message</h2><p className="mb-6 mt-2 text-sm text-muted">For general questions, visitor inquiries or ministry information.</p><SubmissionForm initialMessage={initialMessage} type="contact" /></div><div className="grid gap-6 sm:grid-cols-2"><div className="border border-ink/15 p-6"><p className="text-[10px] font-bold tracking-[.2em] text-clay">PLAN A VISIT</p><h2 className="mt-3 text-xl font-semibold">We’ll save you a seat.</h2><p className="mb-5 mt-2 text-sm leading-6 text-muted">Tell us you’re coming and we can help you know what to expect.</p><SubmissionForm type="visitor" compact /></div><div className="border border-ink/15 p-6"><p className="text-[10px] font-bold tracking-[.2em] text-clay">PRAYER REQUEST</p><h2 className="mt-3 text-xl font-semibold">You don’t have to carry it alone.</h2><p className="mb-5 mt-2 text-sm leading-6 text-muted">Share a request with the church prayer team.</p><SubmissionForm type="prayer" compact /></div></div></div>
-    </section>
-  </main>;
+  const { church, churchRecord } = await getPublicWebsiteSettings();
+  const initialMessage = topic
+    ? `I’d like to learn more about ${topic.slice(0, 120)}.`
+    : "";
+
+  return (
+    <main>
+      <PageHero
+        breadcrumbs={[{ label: "Home", href: "/" }]}
+        eyebrow="VISIT · CONNECT · PRAY"
+        title="We’d love to"
+        emphasis="hear from you."
+        description="Planning your first visit, asking about a ministry or carrying something you’d like prayer for? Reach out and our team will follow up."
+      />
+      <section className="page-container section-space grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+        <aside className="space-y-8">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-secondary" />
+              <p className="eyebrow text-primary">GET IN TOUCH</p>
+            </div>
+            <h2 className="mt-3 font-display text-3xl font-extrabold text-text sm:text-4xl">
+              {churchRecord?.title || "The church"}
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              {[church.contact.address, church.contact.city, church.contact.country]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
+          </div>
+
+          <div className="surface-card space-y-4 rounded-2xl p-6 sm:p-7">
+            <h3 className="eyebrow text-primary">CONTACT CHANNELS</h3>
+            <div className="space-y-3 pt-1">
+              {church.contact.phone && (
+                <div className="rounded-xl border border-border/60 bg-surface-strong/40 p-4">
+                  <span className="block text-[11px] font-bold uppercase tracking-wider text-muted">
+                    Phone
+                  </span>
+                  <a
+                    className="mt-1 block font-semibold text-text transition-colors hover:text-primary"
+                    href={`tel:${church.contact.phone}`}
+                  >
+                    {church.contact.phone}
+                  </a>
+                </div>
+              )}
+              {church.contact.email && (
+                <div className="rounded-xl border border-border/60 bg-surface-strong/40 p-4">
+                  <span className="block text-[11px] font-bold uppercase tracking-wider text-muted">
+                    Email
+                  </span>
+                  <a
+                    className="mt-1 block font-semibold text-text transition-colors hover:text-primary"
+                    href={`mailto:${church.contact.email}`}
+                  >
+                    {church.contact.email}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {(church.contact.directionsUrl || church.contact.address) && (
+            <div className="surface-card rounded-2xl p-6 sm:p-7">
+              <h3 className="eyebrow text-primary">VISIT US</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                {[church.contact.address, church.contact.city, church.contact.country]
+                  .filter(Boolean)
+                  .join(", ")}
+              </p>
+              {church.contact.directionsUrl && (
+                <a
+                  className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-hover"
+                  href={church.contact.directionsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Get directions <span>↗</span>
+                </a>
+              )}
+            </div>
+          )}
+
+          {church.contact.mapUrl && (
+            <div className="overflow-hidden rounded-2xl border border-border/80 shadow-sm">
+              <iframe
+                title="Map showing the church location"
+                className="h-64 w-full border-0"
+                loading="lazy"
+                src={church.contact.mapUrl}
+              />
+            </div>
+          )}
+        </aside>
+
+        <div className="space-y-8">
+          <div className="surface-card rounded-2xl p-7 sm:p-10">
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-secondary" />
+              <p className="eyebrow text-primary">SEND US A MESSAGE</p>
+            </div>
+            <h2 className="mt-3 font-display text-2xl font-bold text-text">
+              General Contact & Questions
+            </h2>
+            <p className="mb-6 mt-2 text-sm leading-relaxed text-muted">
+              For general questions, visitor inquiries, or ministry connections.
+            </p>
+            <SubmissionForm initialMessage={initialMessage} type="contact" />
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="surface-card rounded-2xl p-6 sm:p-8">
+              <p className="eyebrow text-primary">PLAN A VISIT</p>
+              <h3 className="mt-2 font-display text-xl font-bold text-text">
+                We’ll save you a seat.
+              </h3>
+              <p className="mb-5 mt-2 text-xs leading-relaxed text-muted">
+                Tell us you’re coming and we can help you know what to expect.
+              </p>
+              <SubmissionForm type="visitor" compact />
+            </div>
+
+            <div className="surface-card rounded-2xl p-6 sm:p-8">
+              <p className="eyebrow text-secondary">PRAYER REQUEST</p>
+              <h3 className="mt-2 font-display text-xl font-bold text-text">
+                You don’t walk alone.
+              </h3>
+              <p className="mb-5 mt-2 text-xs leading-relaxed text-muted">
+                Share a confidential request with the church prayer team.
+              </p>
+              <SubmissionForm type="prayer" compact />
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }
