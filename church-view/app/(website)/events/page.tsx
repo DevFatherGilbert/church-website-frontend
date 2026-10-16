@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/site/page-hero";
@@ -12,6 +13,18 @@ function displayTime(value: string) {
   if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return value;
   return `${hours % 12 || 12}:${String(minutes).padStart(2, "0")} ${hours < 12 ? "AM" : "PM"}`;
 }
+
+export const metadata: Metadata = {
+  title: "Upcoming Events",
+  description: "Discover upcoming worship gatherings, conferences, retreats, youth programmes and community activities at our church.",
+  alternates: { canonical: "/events" },
+  openGraph: {
+    title: "Upcoming Events at Our Church",
+    description: "Keep up with the latest events, meetings, and community gatherings.",
+  },
+};
+
+export const revalidate = 60;
 
 export default async function EventsPage() {
   const events = await getPublicData<ChurchEvent[]>("/events");
@@ -40,7 +53,6 @@ export default async function EventsPage() {
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       src={event.flyerUrl}
-                      unoptimized
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   </div>

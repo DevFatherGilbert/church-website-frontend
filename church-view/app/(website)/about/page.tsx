@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
+export const revalidate = 300;
+
 const aboutLinks = [
   { title: "Our story", description: "Learn about the church’s history and community.", href: "/about/our-story" },
   { title: "Mission and vision", description: "Explore the published statements that guide the church.", href: "/about/mission-vision" },

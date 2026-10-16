@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/announcements" },
 };
 
+export const revalidate = 60;
+
 export default async function AnnouncementsPage() {
   const response = await getPublicData<{ items: PublicContent[] }>("/content/announcements?limit=50");
   return <main>

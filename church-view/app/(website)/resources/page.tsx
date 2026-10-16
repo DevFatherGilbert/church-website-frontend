@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/resources" },
 };
 
+export const revalidate = 60;
+
+
 function detailText(details: Record<string, unknown>, key: string) {
   const value = details[key];
   return typeof value === "string" ? value.trim() : "";

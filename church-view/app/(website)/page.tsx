@@ -41,11 +41,36 @@ import {
   type ChurchService,
 } from "@/lib/content/services";
 
-export const metadata: Metadata = {
-  title: "Welcome to Our Church | Faith, Worship & Community",
-  description: "A welcoming community committed to faith, worship, fellowship, service and sharing the message of Christ.",
-  alternates: { canonical: "/" },
-};
+export const revalidate = 60;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const churchName = settings?.churchName || "Faith Community Church";
+  const title = `${churchName} | Faith, Worship & Community`;
+  const description =
+    settings?.churchDescription ||
+    settings?.church?.profile?.history?.slice(0, 160) ||
+    "A welcoming community committed to faith, worship, fellowship, service and sharing the message of Christ.";
+
+  const heroImage = settings?.homepage?.hero?.imageUrl || settings?.church?.profile?.imageUrl;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: "/" },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: heroImage ? [{ url: heroImage, alt: churchName }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 type Testimonial = PublicContent;
 type Leader = PublicContent;
@@ -439,8 +464,36 @@ export default async function HomeView() {
 
   const hero = homepage.hero;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const churchJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Church",
+    name: churchName,
+    description: churchDescription || church.profile.history || "A welcoming community of faith, worship, and fellowship.",
+    ...(siteUrl ? { url: siteUrl } : {}),
+    ...(church.profile.imageUrl || hero.imageUrl
+      ? { image: church.profile.imageUrl || hero.imageUrl }
+      : {}),
+    ...(church.contact.address || church.contact.city
+      ? {
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: church.contact.address,
+            addressLocality: church.contact.city,
+            addressCountry: church.contact.country,
+          },
+        }
+      : {}),
+    ...(church.contact.phone ? { telephone: church.contact.phone } : {}),
+    ...(church.contact.email ? { email: church.contact.email } : {}),
+  };
+
   return (
     <main className="overflow-hidden bg-background text-text">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(churchJsonLd) }}
+      />
       {/* ── 2. HERO SECTION (SRS Section 9 #2 & Section 11) ───────────────── */}
       {hero.visible && (
         <section className="relative isolate flex min-h-[640px] items-center overflow-hidden bg-primary-dark text-white sm:min-h-[720px] lg:min-h-[780px]">
@@ -451,7 +504,6 @@ export default async function HomeView() {
             priority
             sizes="100vw"
             src={hero.imageUrl || heroFallback}
-            unoptimized
           />
           <div aria-hidden="true" className="home-hero-overlay absolute inset-0" />
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-primary-dark/30 to-primary-dark/40" />

@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/ministries" },
 };
 
+export const revalidate = 60;
+
+
 export default async function MinistriesPage() {
   const items = await getPublicData<Ministry[]>("/ministries");
 
@@ -31,7 +34,6 @@ export default async function MinistriesPage() {
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     src={ministry.imageUrl}
-                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>

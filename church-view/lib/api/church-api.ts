@@ -254,3 +254,17 @@ export type Ministry = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+export type ManagedUser = {
+  id: string;
+  email: string;
+  fullName: string;
+  role: "admin" | "member";
+  status: "active" | "pending" | "disabled";
+  emailVerified: boolean;
+  phone?: string | null;
+  avatar?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+

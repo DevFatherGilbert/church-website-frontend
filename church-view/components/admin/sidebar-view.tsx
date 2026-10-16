@@ -15,6 +15,7 @@ import {
   Megaphone,
   Mic2,
   Settings,
+  ShieldCheck,
   Clock3,
   UsersRound,
   X,
@@ -48,6 +49,7 @@ const navigationGroups: { label: string; items: { label: string; href: string; i
     { label: "Prayer Requests", href: "/admin/prayer-requests", icon: HandHeart },
   ] },
   { label: "System", items: [
+    { label: "Users & Roles", href: "/admin/users", icon: ShieldCheck },
     { label: "Church Information", href: "/admin/settings", icon: Settings },
   ] },
 ];

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -15,21 +16,70 @@ import {
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type ChurchEvent } from "@/lib/api/church-api";
 
+export const revalidate = 60;
+
+type Props = { params: Promise<{ id: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const event = await getPublicData<ChurchEvent>(`/events/${encodeURIComponent(id)}`, { allowNotFound: true });
+  if (!event) return { title: "Event not found" };
+  const description = event.description?.slice(0, 160) ?? `Join us for ${event.name} on ${event.date} at ${event.location}.`;
+  return {
+    title: event.name,
+    description,
+    alternates: { canonical: `/events/${id}` },
+    openGraph: {
+      title: event.name,
+      description,
+      type: "article",
+      images: event.flyerUrl ? [{ url: event.flyerUrl }] : undefined,
+    },
+  };
+}
+
 function displayTime(value: string) {
   const [hours, minutes] = value.split(":").map(Number);
   if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return value;
   return `${hours % 12 || 12}:${String(minutes).padStart(2, "0")} ${hours < 12 ? "AM" : "PM"}`;
 }
 
-export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EventDetailPage({ params }: Props) {
   const { id } = await params;
   const event = await getPublicData<ChurchEvent>(`/events/${encodeURIComponent(id)}`, { allowNotFound: true });
   if (!event) notFound();
 
   const name = event?.name ?? id.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
+  // Build Event JSON-LD structured data
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
+  const eventJsonLd = event ? {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.name,
+    description: event.description ?? undefined,
+    startDate: event.time ? `${event.date}T${event.time}` : event.date,
+    endDate: event.endTime ? `${event.date}T${event.endTime}` : undefined,
+    location: {
+      "@type": "Place",
+      name: event.location,
+    },
+    organizer: event.organizer ? { "@type": "Organization", name: event.organizer } : undefined,
+    image: event.flyerUrl ?? undefined,
+    url: `${siteUrl}/events/${id}`,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  } : null;
+
+
   return (
     <main>
+      {eventJsonLd && (
+        <script
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
+          type="application/ld+json"
+        />
+      )}
       <PageHero
         breadcrumbs={[
           { label: "Home", href: "/" },
@@ -63,7 +113,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                   priority
                   sizes="(max-width: 1024px) 100vw, 65vw"
                   src={event.flyerUrl}
-                  unoptimized
                 />
               </div>
             )}

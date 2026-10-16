@@ -1,7 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type PublicContent } from "@/lib/api/church-api";
 import { formatServiceDate, formatServiceTime, sortServices, toChurchService, type ChurchService } from "@/lib/content/services";
+
+export const metadata: Metadata = {
+  title: "Worship Services & Gathering Times | Church",
+  description: "Find current weekly worship gatherings, prayer meetings, Bible studies, and upcoming special services.",
+  alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Worship Services & Gathering Times",
+    description: "Join us for weekly Sunday worship, prayer meetings, and special church gatherings.",
+  },
+};
+
+export const revalidate = 60;
 
 export default async function ServicesPage() {
   const response = await getPublicData<{ items: PublicContent[] }>("/content/services?limit=50");

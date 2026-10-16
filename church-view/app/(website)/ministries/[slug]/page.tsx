@@ -7,6 +7,8 @@ import { getPublicData, type Ministry } from "@/lib/api/church-api";
 
 type MinistryPageProps = { params: Promise<{ slug: string }> };
 
+export const revalidate = 60;
+
 async function getMinistry(slug: string) {
   return getPublicData<Ministry>(`/ministries/${encodeURIComponent(slug)}`, { allowNotFound: true });
 }
@@ -37,8 +39,22 @@ export async function MinistryDetail({ slug }: { slug: string }) {
   const ministry = await getMinistry(slug);
   if (!ministry) notFound();
 
+  const ministryJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: ministry.name,
+    description: ministry.description,
+    ...(ministry.imageUrl ? { image: ministry.imageUrl } : {}),
+    ...(ministry.contactEmail ? { email: ministry.contactEmail } : {}),
+    ...(ministry.contactPhone ? { telephone: ministry.contactPhone } : {}),
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ministryJsonLd) }}
+      />
       <PageHero
         breadcrumbs={[
           { label: "Home", href: "/" },
@@ -72,7 +88,6 @@ export async function MinistryDetail({ slug }: { slug: string }) {
                   priority
                   sizes="(max-width: 1024px) 100vw, 65vw"
                   src={ministry.imageUrl}
-                  unoptimized
                 />
               </div>
             )}

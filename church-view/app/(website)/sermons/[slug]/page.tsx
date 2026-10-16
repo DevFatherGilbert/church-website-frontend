@@ -21,7 +21,7 @@ import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type Sermon } from "@/lib/api/church-api";
 import { formatSermonDate, parseVideoUrl } from "@/lib/media/video-utils";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -68,8 +68,40 @@ export default async function SermonDetailPage({ params }: Props) {
   const videoInfo = parseVideoUrl(sermon.videoUrl);
   const speaker = sermon.speakerRef;
 
+  const sermonJsonLd = {
+    "@context": "https://schema.org",
+    "@type": sermon.videoUrl ? "VideoObject" : "CreativeWork",
+    name: sermon.title,
+    description: sermon.description || `Sermon preached by ${sermon.speaker} on ${formatSermonDate(sermon.date)}.`,
+    thumbnailUrl: sermon.thumbnailUrl ? [sermon.thumbnailUrl] : undefined,
+    uploadDate: sermon.date,
+    datePublished: sermon.date,
+    author: {
+      "@type": "Person",
+      name: sermon.speaker,
+    },
+    ...(sermon.videoUrl
+      ? {
+          contentUrl: sermon.videoUrl,
+          embedUrl: videoInfo.embedUrl ?? undefined,
+        }
+      : {}),
+    ...(sermon.audioUrl
+      ? {
+          audio: {
+            "@type": "AudioObject",
+            contentUrl: sermon.audioUrl,
+          },
+        }
+      : {}),
+  };
+
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(sermonJsonLd) }}
+      />
       {/* Page Hero Header */}
       <PageHero
         breadcrumbs={[

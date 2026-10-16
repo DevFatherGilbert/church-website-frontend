@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: path },
 };
 
+export const revalidate = 300;
+
 type Leader = PublicContent & {
   details: PublicContent["details"] & {
     role?: string;
@@ -43,7 +45,6 @@ export default async function LeadershipPage() {
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     src={leader.details.imageUrl}
-                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>

@@ -7,9 +7,34 @@ import { submissionSchema, type SubmissionValues } from "@/lib/validation/form-s
 
 type SubmissionType = "contact" | "visitor" | "prayer";
 
-export function SubmissionForm({ type = "contact", compact = false, initialMessage = "" }: { type?: SubmissionType; compact?: boolean; initialMessage?: string }) {
+const TYPES: { value: SubmissionType; label: string; icon: string; description: string }[] = [
+  { value: "contact", label: "General inquiry", icon: "✉️", description: "Questions, ministry info, or anything else." },
+  { value: "visitor", label: "Plan a visit", icon: "🕊️", description: "Tell us you're coming and we'll welcome you." },
+  { value: "prayer", label: "Prayer request", icon: "🙏", description: "Share a private request with our prayer team." },
+];
+
+export function SubmissionForm({
+  type: defaultType = "contact",
+  compact = false,
+  initialMessage = "",
+  showTypeSelector = false,
+}: {
+  type?: SubmissionType;
+  compact?: boolean;
+  initialMessage?: string;
+  showTypeSelector?: boolean;
+}) {
+  const [type, setType] = useState<SubmissionType>(defaultType);
   const [status, setStatus] = useState<{ kind: "error" | "success"; message: string } | null>(null);
-  const { register, handleSubmit, setError, setFocus, clearErrors, reset, formState: { errors, isSubmitting } } = useForm<SubmissionValues>({
+  const {
+    register,
+    handleSubmit,
+    setError,
+    setFocus,
+    clearErrors,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<SubmissionValues>({
     mode: "onBlur",
     defaultValues: { name: "", email: "", phone: "", message: initialMessage },
   });
@@ -30,41 +55,177 @@ export function SubmissionForm({ type = "contact", compact = false, initialMessa
     clearErrors();
     try {
       await submitInquiry(type, result.data);
-      setStatus({ kind: "success", message: "Thank you. Your message has been sent to the church team." });
+      setStatus({
+        kind: "success",
+        message:
+          type === "prayer"
+            ? "Your prayer request has been received. Our team will pray for you."
+            : type === "visitor"
+            ? "Thank you! We look forward to welcoming you. Someone from our team may follow up."
+            : "Thank you. Your message has been sent to the church team.",
+      });
       reset({ name: "", email: "", phone: "", message: "" });
     } catch (cause) {
       setStatus({
         kind: "error",
-        message: cause instanceof Error ? cause.message : "Your message could not be sent. Please try again.",
+        message:
+          cause instanceof Error ? cause.message : "Your message could not be sent. Please try again.",
       });
     }
   };
 
-  const messageLabel = type === "prayer" ? "Prayer request" : type === "visitor" ? "Anything you’d like us to know before you visit?" : "How can we help?";
-  const fieldClass = (field: FieldPath<SubmissionValues>) => `form-field mt-2 ${errors[field] ? "border-error" : ""}`;
-  const fieldDescription = (field: FieldPath<SubmissionValues>) => errors[field] ? `${type}-${field}-error` : undefined;
+  const messageLabel =
+    type === "prayer"
+      ? "Your prayer request"
+      : type === "visitor"
+      ? "Anything you'd like us to know before your visit?"
+      : "How can we help?";
 
-  return <form className={compact ? "space-y-4" : "space-y-5"} noValidate onSubmit={handleSubmit(submit)}>
-    <div className="grid gap-4 sm:grid-cols-2">
-      <label className="block text-sm font-semibold" htmlFor={`${type}-name`}>Your name
-        <input {...register("name")} aria-describedby={fieldDescription("name")} aria-invalid={Boolean(errors.name)} aria-required="true" autoComplete="name" className={fieldClass("name")} id={`${type}-name`} maxLength={140} />
-        {errors.name?.message && <span className="mt-1 block text-sm text-error" id={`${type}-name-error`} role="alert">{errors.name.message}</span>}
+  const fieldClass = (field: FieldPath<SubmissionValues>) =>
+    `form-field mt-2 ${errors[field] ? "border-error" : ""}`;
+  const fieldDescription = (field: FieldPath<SubmissionValues>) =>
+    errors[field] ? `${type}-${field}-error` : undefined;
+
+  return (
+    <form className={compact ? "space-y-4" : "space-y-5"} noValidate onSubmit={handleSubmit(submit)}>
+      {/* Type selector */}
+      {showTypeSelector && (
+        <div>
+          <p className="mb-3 text-sm font-semibold text-text">I&apos;d like to&hellip;</p>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {TYPES.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => setType(t.value)}
+                className={[
+                  "flex flex-col gap-1 rounded-xl border-2 p-3.5 text-left transition-all focus:outline-none focus:ring-2 focus:ring-primary/30",
+                  type === t.value
+                    ? "border-primary bg-primary/5"
+                    : "border-border/60 bg-surface hover:border-primary/40",
+                ].join(" ")}
+                aria-pressed={type === t.value}
+              >
+                <span className="text-lg leading-none">{t.icon}</span>
+                <span className="mt-1 text-xs font-bold text-text">{t.label}</span>
+                <span className="text-[11px] leading-relaxed text-muted">{t.description}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-semibold" htmlFor={`${type}-name`}>
+          Your name
+          <input
+            {...register("name")}
+            aria-describedby={fieldDescription("name")}
+            aria-invalid={Boolean(errors.name)}
+            aria-required="true"
+            autoComplete="name"
+            className={fieldClass("name")}
+            id={`${type}-name`}
+            maxLength={140}
+          />
+          {errors.name?.message && (
+            <span className="mt-1 block text-sm text-error" id={`${type}-name-error`} role="alert">
+              {errors.name.message}
+            </span>
+          )}
+        </label>
+        <label className="block text-sm font-semibold" htmlFor={`${type}-email`}>
+          Email address
+          <input
+            {...register("email")}
+            aria-describedby={fieldDescription("email")}
+            aria-invalid={Boolean(errors.email)}
+            aria-required="true"
+            autoComplete="email"
+            className={fieldClass("email")}
+            id={`${type}-email`}
+            maxLength={254}
+            type="email"
+          />
+          {errors.email?.message && (
+            <span className="mt-1 block text-sm text-error" id={`${type}-email-error`} role="alert">
+              {errors.email.message}
+            </span>
+          )}
+        </label>
+      </div>
+
+      <label className="block text-sm font-semibold" htmlFor={`${type}-phone`}>
+        Phone <span className="font-normal text-muted">(optional)</span>
+        <input
+          {...register("phone")}
+          aria-describedby={fieldDescription("phone")}
+          aria-invalid={Boolean(errors.phone)}
+          autoComplete="tel"
+          className={fieldClass("phone")}
+          id={`${type}-phone`}
+          maxLength={40}
+          type="tel"
+        />
+        {errors.phone?.message && (
+          <span className="mt-1 block text-sm text-error" id={`${type}-phone-error`} role="alert">
+            {errors.phone.message}
+          </span>
+        )}
       </label>
-      <label className="block text-sm font-semibold" htmlFor={`${type}-email`}>Email address
-        <input {...register("email")} aria-describedby={fieldDescription("email")} aria-invalid={Boolean(errors.email)} aria-required="true" autoComplete="email" className={fieldClass("email")} id={`${type}-email`} maxLength={254} type="email" />
-        {errors.email?.message && <span className="mt-1 block text-sm text-error" id={`${type}-email-error`} role="alert">{errors.email.message}</span>}
+
+      <label className="block text-sm font-semibold" htmlFor={`${type}-message`}>
+        {messageLabel}
+        <textarea
+          {...register("message")}
+          aria-describedby={fieldDescription("message")}
+          aria-invalid={Boolean(errors.message)}
+          aria-required="true"
+          className={`${fieldClass("message")} min-h-32 resize-y`}
+          id={`${type}-message`}
+          maxLength={5000}
+        />
+        {errors.message?.message && (
+          <span className="mt-1 block text-sm text-error" id={`${type}-message-error`} role="alert">
+            {errors.message.message}
+          </span>
+        )}
       </label>
-    </div>
-    <label className="block text-sm font-semibold" htmlFor={`${type}-phone`}>Phone <span className="font-normal text-muted">(optional)</span>
-      <input {...register("phone")} aria-describedby={fieldDescription("phone")} aria-invalid={Boolean(errors.phone)} autoComplete="tel" className={fieldClass("phone")} id={`${type}-phone`} maxLength={40} type="tel" />
-      {errors.phone?.message && <span className="mt-1 block text-sm text-error" id={`${type}-phone-error`} role="alert">{errors.phone.message}</span>}
-    </label>
-    <label className="block text-sm font-semibold" htmlFor={`${type}-message`}>{messageLabel}
-      <textarea {...register("message")} aria-describedby={fieldDescription("message")} aria-invalid={Boolean(errors.message)} aria-required="true" className={`${fieldClass("message")} min-h-32 resize-y`} id={`${type}-message`} maxLength={5000} />
-      {errors.message?.message && <span className="mt-1 block text-sm text-error" id={`${type}-message-error`} role="alert">{errors.message.message}</span>}
-    </label>
-    {type === "prayer" && <p className="text-xs leading-5 text-muted">Prayer requests are personal. Share only what you are comfortable sending to the church team.</p>}
-    <button className="button button-primary disabled:cursor-wait disabled:opacity-60" disabled={isSubmitting} type="submit">{isSubmitting ? "Sending…" : type === "prayer" ? "Share request" : "Send message"}<span aria-hidden="true">↗</span></button>
-    {status && <p className={`text-sm ${status.kind === "error" ? "text-error" : "text-success"}`} aria-live={status.kind === "error" ? "assertive" : "polite"} role={status.kind === "error" ? "alert" : "status"}>{status.message}</p>}
-  </form>;
+
+      {type === "prayer" && (
+        <p className="text-xs leading-5 text-muted">
+          Prayer requests are personal. Share only what you are comfortable sending to the church team.
+        </p>
+      )}
+
+      <button
+        className="button button-primary disabled:cursor-wait disabled:opacity-60"
+        disabled={isSubmitting}
+        type="submit"
+      >
+        {isSubmitting
+          ? "Sending…"
+          : type === "prayer"
+          ? "Share request"
+          : type === "visitor"
+          ? "Notify the team"
+          : "Send message"}
+        <span aria-hidden="true">↗</span>
+      </button>
+
+      {status && (
+        <p
+          className={`rounded-xl border p-4 text-sm leading-relaxed ${
+            status.kind === "error"
+              ? "border-red-200 bg-red-50 text-error"
+              : "border-green-200 bg-green-50 text-success"
+          }`}
+          aria-live={status.kind === "error" ? "assertive" : "polite"}
+          role={status.kind === "error" ? "alert" : "status"}
+        >
+          {status.message}
+        </p>
+      )}
+    </form>
+  );
 }

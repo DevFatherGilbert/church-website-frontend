@@ -7,8 +7,34 @@ const path = "/faqs";
 export const metadata: Metadata = { title: "Frequently asked questions", description: sitePages[path].description, alternates: { canonical: path } };
 type PublicFaq = { id: string; question: string; answer: string; category: string | null; displayOrder: number };
 type FaqResponse = { items?: PublicFaq[] };
+export const revalidate = 300;
+
 export default async function FAQsPage() {
   const response = await getPublicData<FaqResponse>("/content/faqs?limit=100");
   const faqs = (response?.items ?? []).slice().sort((a, b) => a.displayOrder - b.displayOrder);
-  return <FaqContentPage page={sitePages[path]} faqs={faqs}/>;
+
+  const faqJsonLd = faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  } : null;
+
+  return (
+    <>
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
+      <FaqContentPage page={sitePages[path]} faqs={faqs} />
+    </>
+  );
 }

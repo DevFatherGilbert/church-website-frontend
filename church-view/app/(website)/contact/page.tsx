@@ -5,24 +5,23 @@ import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 export default async function ContactPage({
   searchParams,
 }: {
-  searchParams: Promise<{ topic?: string }>;
+  searchParams: Promise<{ topic?: string; type?: string }>;
 }) {
-  const { topic } = await searchParams;
+  const { topic, type } = await searchParams;
   const { church, churchRecord } = await getPublicWebsiteSettings();
-  const initialMessage = topic
-    ? `I’d like to learn more about ${topic.slice(0, 120)}.`
-    : "";
+  const initialMessage = topic ? `I'd like to learn more about ${topic.slice(0, 120)}.` : "";
 
   return (
     <main>
       <PageHero
         breadcrumbs={[{ label: "Home", href: "/" }]}
         eyebrow="VISIT · CONNECT · PRAY"
-        title="We’d love to"
+        title="We'd love to"
         emphasis="hear from you."
-        description="Planning your first visit, asking about a ministry or carrying something you’d like prayer for? Reach out and our team will follow up."
+        description="Whether you're planning a visit, asking about a ministry, or carrying something you'd like prayer for — reach out and our team will follow up."
       />
       <section className="page-container section-space grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+        {/* Left column — church info */}
         <aside className="space-y-8">
           <div>
             <div className="flex items-center gap-2">
@@ -104,44 +103,23 @@ export default async function ContactPage({
           )}
         </aside>
 
-        <div className="space-y-8">
-          <div className="surface-card rounded-2xl p-7 sm:p-10">
-            <div className="flex items-center gap-2">
-              <span className="size-2 rounded-full bg-secondary" />
-              <p className="eyebrow text-primary">SEND US A MESSAGE</p>
-            </div>
-            <h2 className="mt-3 font-display text-2xl font-bold text-text">
-              General Contact & Questions
-            </h2>
-            <p className="mb-6 mt-2 text-sm leading-relaxed text-muted">
-              For general questions, visitor inquiries, or ministry connections.
-            </p>
-            <SubmissionForm initialMessage={initialMessage} type="contact" />
+        {/* Right column — single unified form */}
+        <div className="surface-card rounded-2xl p-7 sm:p-10">
+          <div className="flex items-center gap-2">
+            <span className="size-2 rounded-full bg-secondary" />
+            <p className="eyebrow text-primary">SEND US A MESSAGE</p>
           </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="surface-card rounded-2xl p-6 sm:p-8">
-              <p className="eyebrow text-primary">PLAN A VISIT</p>
-              <h3 className="mt-2 font-display text-xl font-bold text-text">
-                We’ll save you a seat.
-              </h3>
-              <p className="mb-5 mt-2 text-xs leading-relaxed text-muted">
-                Tell us you’re coming and we can help you know what to expect.
-              </p>
-              <SubmissionForm type="visitor" compact />
-            </div>
-
-            <div className="surface-card rounded-2xl p-6 sm:p-8">
-              <p className="eyebrow text-secondary">PRAYER REQUEST</p>
-              <h3 className="mt-2 font-display text-xl font-bold text-text">
-                You don’t walk alone.
-              </h3>
-              <p className="mb-5 mt-2 text-xs leading-relaxed text-muted">
-                Share a confidential request with the church prayer team.
-              </p>
-              <SubmissionForm type="prayer" compact />
-            </div>
-          </div>
+          <h2 className="mt-3 font-display text-2xl font-bold text-text">
+            How can we help?
+          </h2>
+          <p className="mb-7 mt-2 text-sm leading-relaxed text-muted">
+            Choose what best describes your message, fill in the form, and someone from our team will follow up.
+          </p>
+          <SubmissionForm
+            type={(type as "contact" | "visitor" | "prayer") || "contact"}
+            initialMessage={initialMessage}
+            showTypeSelector
+          />
         </div>
       </section>
     </main>
