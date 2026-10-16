@@ -1,153 +1,258 @@
 import Link from "next/link";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-const footerLinks = [
-  ["Our story", "/about/our-story"],
-  ["Ministries", "/ministries"],
-  ["Services", "/services"],
-  ["Events", "/events"],
-  ["Sermons", "/sermons"],
-  ["Resources", "/resources"],
-  ["Prayer request", "/prayer-request"],
-  ["Contact", "/contact"],
+const churchLinks = [
+  { label: "About Us", href: "/about" },
+  { label: "Our Story", href: "/about/our-story" },
+  { label: "Mission & Vision", href: "/about/mission-vision" },
+  { label: "Beliefs & Statement of Faith", href: "/about/beliefs" },
+  { label: "Leadership", href: "/about/leadership" },
+] as const;
+
+const ministryLinks = [
+  { label: "Children's Ministry", href: "/ministries" },
+  { label: "Youth Ministry", href: "/ministries" },
+  { label: "Women's Ministry", href: "/ministries" },
+  { label: "Men's Ministry", href: "/ministries" },
+  { label: "Worship & Choir", href: "/ministries" },
+  { label: "Prayer Ministry", href: "/ministries" },
+  { label: "Outreach & Service", href: "/ministries" },
+] as const;
+
+const resourceLinks = [
+  { label: "Sermons & Media", href: "/sermons" },
+  { label: "Upcoming Events", href: "/events" },
+  { label: "Announcements", href: "/announcements" },
+  { label: "Bible Study Resources", href: "/resources" },
+] as const;
+
+const supportLinks = [
+  { label: "Contact Us", href: "/contact" },
+  { label: "Prayer Request", href: "/prayer-request" },
+  { label: "Frequently Asked Questions", href: "/faqs" },
+  { label: "Plan Your Visit", href: "/plan-your-visit" },
+] as const;
+
+const legalLinks = [
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
+  { label: "Cookie Policy", href: "/cookie-policy" },
 ] as const;
 
 export async function SiteFooter() {
   const { church, churchRecord, churchName } = await getPublicWebsiteSettings();
-  const displayChurchName = churchName || "Church";
+  const displayChurchName = churchName || "Faith Community Church";
   const location = [church.contact.city, church.contact.country].filter(Boolean).join(" · ");
   const socials = church.socialLinks.filter((item) => item.visible);
 
   return (
-    <footer className="relative border-t border-slate-800/80 bg-gradient-to-b from-[#0a1526] to-[#050a14] px-5 pb-8 pt-16 text-slate-300">
-      <div className="page-container grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1.4fr]">
-        {/* Brand column */}
-        <div>
-          <Link
-            className="group inline-flex items-center gap-3"
-            href="/"
-            aria-label={`${displayChurchName} home`}
-          >
-            <div className="flex size-12 items-center justify-center rounded-xl bg-white p-1.5 shadow-md transition-transform group-hover:scale-105">
-              <ChurchLogo
-                alt={church.profile.logoAlt || displayChurchName}
-                className="size-full object-contain"
-                src={church.profile.logoUrl || "/logo-c.png"}
-              />
-            </div>
-            <div>
-              <span className="block font-display text-xl font-bold tracking-tight text-white group-hover:text-amber-400 transition-colors">
-                {displayChurchName}
-              </span>
-              {location && (
-                <span className="mt-0.5 block text-[10px] font-bold tracking-[0.2em] text-amber-400 uppercase">
-                  {location}
+    <footer className="relative border-t border-slate-800/80 bg-gradient-to-b from-[#0a1526] via-[#070e1c] to-[#040811] px-5 pb-8 pt-16 text-slate-300">
+      <div className="page-container">
+        {/* Top Brand Banner & Visit CTA */}
+        <div className="grid gap-8 rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 sm:p-8 lg:grid-cols-[1.5fr_1fr] lg:items-center">
+          <div>
+            <Link
+              className="group inline-flex items-center gap-3.5"
+              href="/"
+              aria-label={`${displayChurchName} home`}
+            >
+              <div className="flex size-12 items-center justify-center rounded-xl bg-white p-1.5 shadow-md transition-transform group-hover:scale-105">
+                <ChurchLogo
+                  alt={church.profile.logoAlt || displayChurchName}
+                  className="size-full object-contain"
+                  src={church.profile.logoUrl || "/logo-c.png"}
+                />
+              </div>
+              <div>
+                <span className="block font-display text-2xl font-bold tracking-tight text-white transition-colors group-hover:text-amber-400">
+                  {displayChurchName}
                 </span>
-              )}
-            </div>
-          </Link>
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-amber-400">
+                  A Welcoming Community of Faith
+                </span>
+              </div>
+            </Link>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-400 font-normal">
+              {churchRecord?.description ||
+                "A Christ-centered church committed to authentic worship, spiritual growth, fellowship, and compassionate community outreach."}
+            </p>
+          </div>
 
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400 font-normal">
-            {churchRecord?.description ||
-              "A welcoming faith community committed to worship, spiritual growth, and heartfelt service."}
-          </p>
+          <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
+            <Link
+              className="button button-secondary text-xs uppercase tracking-wider font-bold"
+              href="/plan-your-visit"
+            >
+              Plan Your Visit <span aria-hidden="true">→</span>
+            </Link>
+            <Link
+              className="button border border-amber-400/50 bg-amber-400/10 text-xs uppercase tracking-wider font-bold text-amber-300 hover:bg-amber-400/20"
+              href="/prayer-request"
+            >
+              Submit Prayer Request
+            </Link>
+            <Link
+              className="button border border-slate-700 bg-transparent text-xs uppercase tracking-wider text-slate-300 hover:border-white hover:bg-white hover:text-slate-950"
+              href="/contact"
+            >
+              Contact Us
+            </Link>
+          </div>
         </div>
 
-        {/* Navigation links */}
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-amber-400" />
-            <h2 className="eyebrow text-slate-400">EXPLORE</h2>
+        {/* 4 Multi-Column Organized Navigation (SRS Section 48) */}
+        <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Column 1: Church */}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-amber-400" />
+              <h2 className="eyebrow text-slate-200">CHURCH</h2>
+            </div>
+            <ul className="mt-5 space-y-3 text-sm">
+              {churchLinks.map((item) => (
+                <li key={item.label}>
+                  <Link className="text-slate-400 transition-colors hover:text-amber-400" href={item.href}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-          <nav
-            className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3.5 text-sm font-semibold"
-            aria-label="Footer navigation"
+
+          {/* Column 2: Ministries */}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-amber-400" />
+              <h2 className="eyebrow text-slate-200">MINISTRIES</h2>
+            </div>
+            <ul className="mt-5 space-y-3 text-sm">
+              {ministryLinks.map((item) => (
+                <li key={item.label}>
+                  <Link className="text-slate-400 transition-colors hover:text-amber-400" href={item.href}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Resources & Support */}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-amber-400" />
+              <h2 className="eyebrow text-slate-200">RESOURCES & SUPPORT</h2>
+            </div>
+            <ul className="mt-5 space-y-3 text-sm">
+              {resourceLinks.map((item) => (
+                <li key={item.label}>
+                  <Link className="text-slate-400 transition-colors hover:text-amber-400" href={item.href}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              {supportLinks.map((item) => (
+                <li key={item.label}>
+                  <Link className="text-slate-400 transition-colors hover:text-amber-400" href={item.href}>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Contact & Service Times */}
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-amber-400" />
+              <h2 className="eyebrow text-slate-200">SERVICE & CONTACT</h2>
+            </div>
+            <div className="mt-5 space-y-4 text-xs leading-relaxed text-slate-400">
+              <div className="flex items-start gap-2.5">
+                <Clock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-400" />
+                <div>
+                  <span className="block font-semibold text-white">Sundays: 9:00 AM & 10:30 AM</span>
+                  <span className="block text-slate-400">Wednesdays: 6:00 PM Bible Study</span>
+                </div>
+              </div>
+
+              {(church.contact.address || location) && (
+                <div className="flex items-start gap-2.5">
+                  <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-400" />
+                  <span>{[church.contact.address, location].filter(Boolean).join(", ")}</span>
+                </div>
+              )}
+
+              {church.contact.phone && (
+                <div className="flex items-center gap-2.5">
+                  <Phone aria-hidden="true" className="size-4 shrink-0 text-amber-400" />
+                  <a className="transition-colors hover:text-white" href={`tel:${church.contact.phone}`}>
+                    {church.contact.phone}
+                  </a>
+                </div>
+              )}
+
+              {church.contact.email && (
+                <div className="flex items-center gap-2.5">
+                  <Mail aria-hidden="true" className="size-4 shrink-0 text-amber-400" />
+                  <a className="transition-colors hover:text-white" href={`mailto:${church.contact.email}`}>
+                    {church.contact.email}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Social Links Row (SRS Section 48 & 55) */}
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800/60 pt-6 text-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Connect With Us:
+            </span>
+            {socials.length > 0 ? (
+              socials.map((item) => (
+                <a
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-900/80 px-3.5 py-1.5 font-medium text-slate-300 transition-colors hover:border-amber-400/50 hover:text-amber-400"
+                  href={item.url}
+                  key={`${item.label}-${item.url}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {item.label} <span aria-hidden="true">↗</span>
+                </a>
+              ))
+            ) : (
+              <>
+                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://facebook.com" rel="noreferrer" target="_blank">Facebook ↗</a>
+                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://instagram.com" rel="noreferrer" target="_blank">Instagram ↗</a>
+                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://youtube.com" rel="noreferrer" target="_blank">YouTube ↗</a>
+                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://whatsapp.com" rel="noreferrer" target="_blank">WhatsApp ↗</a>
+              </>
+            )}
+          </div>
+          <a
+            className="inline-flex items-center gap-1 text-slate-400 transition-colors hover:text-amber-400"
+            href="#top"
           >
-            {footerLinks.map(([label, href]) => (
-              <Link
-                className="text-slate-300 transition-colors hover:text-amber-400"
-                href={href}
-                key={href}
-              >
-                {label}
+            Back to top <span aria-hidden="true">↑</span>
+          </a>
+        </div>
+
+        {/* Copyright & Legal Row (SRS Section 48) */}
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800/60 pt-6 text-xs text-slate-500">
+          <span>
+            © {new Date().getFullYear()} {displayChurchName}. All rights reserved.
+          </span>
+          <nav className="flex flex-wrap gap-6" aria-label="Legal navigation">
+            {legalLinks.map((item) => (
+              <Link className="transition-colors hover:text-slate-300" href={item.href} key={item.label}>
+                {item.label}
               </Link>
             ))}
           </nav>
         </div>
-
-        {/* Visit & Connect */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 backdrop-blur-sm">
-          <div className="flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-amber-400" />
-            <h2 className="eyebrow text-amber-400">COME AS YOU ARE</h2>
-          </div>
-          <p className="mt-3 text-sm leading-relaxed text-slate-300 font-normal">
-            {[church.contact.address, location].filter(Boolean).join(", ") ||
-              "We would be honored to welcome you this Sunday."}
-          </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Link
-              className="button button-secondary text-xs uppercase tracking-wider"
-              href="/plan-your-visit"
-            >
-              Plan your visit <span aria-hidden="true">→</span>
-            </Link>
-            <Link
-              className="button button-outline border-slate-700 text-xs uppercase tracking-wider text-slate-200 hover:border-white hover:bg-white hover:text-slate-950"
-              href="/contact"
-            >
-              Contact us
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Social links */}
-      {socials.length > 0 && (
-        <nav
-          aria-label="Social media"
-          className="page-container mt-12 flex flex-wrap items-center gap-3 border-t border-slate-800/60 pt-6 text-xs"
-        >
-          <span className="text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
-            Follow us:
-          </span>
-          {socials.map((item) => (
-            <a
-              className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/60 px-3 py-1 font-semibold text-slate-300 transition-colors hover:border-amber-400/40 hover:text-amber-400"
-              href={item.url}
-              key={`${item.label}-${item.url}`}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {item.label} <span aria-hidden="true">↗</span>
-            </a>
-          ))}
-        </nav>
-      )}
-
-      {/* Copyright row */}
-      <div className="page-container mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800/60 pt-6 text-xs text-slate-400">
-        <span>
-          © {new Date().getFullYear()} {displayChurchName}. All rights reserved.
-        </span>
-        <nav className="flex flex-wrap gap-5" aria-label="Legal">
-          <Link className="transition-colors hover:text-white" href="/privacy-policy">
-            Privacy Policy
-          </Link>
-          <Link className="transition-colors hover:text-white" href="/terms-and-conditions">
-            Terms of Service
-          </Link>
-          <Link className="transition-colors hover:text-white" href="/cookie-policy">
-            Cookie Policy
-          </Link>
-        </nav>
-        <a
-          className="inline-flex items-center gap-1 text-slate-400 transition-colors hover:text-amber-400"
-          href="#top"
-        >
-          Back to top <span aria-hidden="true">↑</span>
-        </a>
       </div>
     </footer>
   );
