@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Clock, Menu, Phone, X } from "lucide-react";
+import { ArrowRight, Clock, LogIn, Menu, Phone, X } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
 
 const navigationLinks = [
@@ -190,7 +190,7 @@ export function HeaderView({
           <div
             aria-labelledby="mobile-navigation-title"
             aria-modal="true"
-            className="absolute inset-y-0 right-0 flex w-[min(88vw,24rem)] flex-col border-l border-border bg-white px-5 py-6 shadow-2xl sm:px-6"
+            className="absolute inset-y-0 right-0 flex max-h-dvh w-[min(88vw,24rem)] flex-col overflow-y-auto overscroll-contain border-l border-border bg-white px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl sm:px-6"
             id="mobile-navigation"
             ref={mobileNavigationRef}
             role="dialog"
@@ -254,6 +254,14 @@ export function HeaderView({
 
             {/* Drawer footer CTAs */}
             <div className="mt-auto grid gap-3 border-t border-stone-200 pt-6">
+              <Link
+                className="flex min-h-11 items-center gap-2 rounded-sm border border-stone-200 px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-primary hover:bg-stone-50 hover:text-primary"
+                href="/admin/login"
+                onClick={closeMobileMenu}
+              >
+                <LogIn aria-hidden="true" className="size-4 text-primary" />
+                Login
+              </Link>
               <Link
                 className="flex min-h-11 items-center gap-2 rounded-sm border border-stone-200 px-4 text-sm font-semibold text-stone-700 transition-colors hover:border-primary hover:bg-stone-50 hover:text-primary"
                 href="/services"
