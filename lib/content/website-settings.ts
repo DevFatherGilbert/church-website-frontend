@@ -233,14 +233,12 @@ function mergeChurchInformation(details: Record<string, unknown>): ChurchInforma
 }
 
 export async function getPublicWebsiteSettings() {
-  const result = await getPublicData<{ items: WebsiteSettingRecord[] }>("/content/settings?limit=100").catch((error: unknown) => {
-    if (process.env.NODE_ENV === "production") throw error;
-    return null;
-  });
+  const result = await getPublicData<{ items: WebsiteSettingRecord[] }>("/content/settings?limit=100").catch(() => null);
   const items = result?.items ?? [];
   const homepage = items.find((item) => item.details?.contentKey === "homepage");
   const church = items.find((item) => item.details?.contentKey === "church-information") ?? items.find((item) => !item.details?.contentKey);
   return {
+    backendAvailable: result !== null,
     homepage: homepage ? mergeHomepageSettings(homepage.details) : defaultHomepageSettings,
     church: church ? mergeChurchInformation(church.details) : defaultChurchInformation,
     churchRecord: church ?? null,
