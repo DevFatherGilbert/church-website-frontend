@@ -19,6 +19,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { FlipCard } from "@/components/ui/flip-card";
+import { ServiceUnavailable } from "@/components/feedback/service-unavailable";
 import {
   getPublicData,
   type ChurchEvent,
@@ -373,6 +374,10 @@ export default async function HomeView() {
     getPublicData<{ items: Testimonial[] }>("/content/testimonials?limit=12").catch(() => null),
     getPublicData<{ items: Leader[] }>("/content/leaders?limit=100").catch(() => null),
   ]);
+
+  if (!websiteSettings?.backendAvailable) {
+    return <ServiceUnavailable />;
+  }
 
   const homepage = websiteSettings?.homepage ?? defaultHomepageSettings;
   const church = websiteSettings?.church ?? defaultChurchInformation;
