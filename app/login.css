@@ -12,6 +12,22 @@
    ========================================================================== */
 
 /* Outer Auth Wrapper */
+.auth-page-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 12% 12%, hsl(var(--brand-secondary) / 0.12), transparent 34rem),
+    radial-gradient(ellipse at 92% 82%, hsl(var(--brand-primary) / 0.3), transparent 40rem),
+    linear-gradient(135deg, hsl(220 56% 9%), hsl(var(--brand-primary-dark)) 54%, hsl(220 56% 8%));
+}
+
+.auth-page-footer {
+  border-color: hsl(0 0% 100% / 0.12);
+  background: hsl(220 56% 6% / 0.22);
+  color: hsl(0 0% 100% / 0.62);
+}
+
 .auth-wrapper {
   display: flex;
   align-items: center;
