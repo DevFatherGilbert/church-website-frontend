@@ -43,7 +43,7 @@ const legalLinks = [
 
 export async function SiteFooter() {
   const { church, churchRecord, churchName } = await getPublicWebsiteSettings();
-  const displayChurchName = churchName || "Faith Community Church";
+  const displayChurchName = churchName || "Seventh-day Adventist Fellowship";
   const location = [church.contact.city, church.contact.country].filter(Boolean).join(" · ");
   const socials = church.socialLinks.filter((item) => item.visible);
 
@@ -172,8 +172,8 @@ export async function SiteFooter() {
               <div className="flex items-start gap-2.5">
                 <Clock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-400" />
                 <div>
-                  <span className="block font-semibold text-white">Sundays: 9:00 AM & 10:30 AM</span>
-                  <span className="block text-slate-400">Wednesdays: 6:00 PM Bible Study</span>
+                  <span className="block font-semibold text-white">Sabbath worship</span>
+                  <span className="block text-slate-400">Contact the congregation for gathering times.</span>
                 </div>
               </div>
 
@@ -223,14 +223,7 @@ export async function SiteFooter() {
                   {item.label} <span aria-hidden="true">↗</span>
                 </a>
               ))
-            ) : (
-              <>
-                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://facebook.com" rel="noreferrer" target="_blank">Facebook ↗</a>
-                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://instagram.com" rel="noreferrer" target="_blank">Instagram ↗</a>
-                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://youtube.com" rel="noreferrer" target="_blank">YouTube ↗</a>
-                <a className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-900/80 px-3 py-1 text-slate-300 hover:text-amber-400" href="https://whatsapp.com" rel="noreferrer" target="_blank">WhatsApp ↗</a>
-              </>
-            )}
+            ) : <span className="text-xs text-slate-400">Social profiles will be added when verified.</span>}
           </div>
           <a
             className="inline-flex items-center gap-1 text-slate-400 transition-colors hover:text-amber-400"

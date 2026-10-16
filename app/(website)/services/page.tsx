@@ -6,11 +6,11 @@ import { formatServiceDate, formatServiceTime, sortServices, toChurchService, ty
 
 export const metadata: Metadata = {
   title: "Worship Services & Gathering Times | Church",
-  description: "Find current weekly worship gatherings, prayer meetings, Bible studies, and upcoming special services.",
+    description: "Find current Sabbath worship gatherings, Bible studies, prayer meetings, and special services.",
   alternates: { canonical: "/services" },
   openGraph: {
     title: "Worship Services & Gathering Times",
-    description: "Join us for weekly Sunday worship, prayer meetings, and special church gatherings.",
+    description: "Join us for Sabbath worship, prayer, Bible study, and special gatherings.",
   },
 };
 
@@ -122,7 +122,7 @@ function ServiceList({ services }: { services: ChurchService[] }) {
               <div className="flex items-center justify-between gap-2">
                 <span className="font-bold text-muted uppercase tracking-wider">Location</span>
                 <span className="font-semibold text-text">
-                  {service.location || "Main Sanctuary"}
+                  {service.location || "Contact the congregation to confirm"}
                 </span>
               </div>
               {service.targetAudience && (

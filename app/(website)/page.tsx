@@ -46,7 +46,7 @@ export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicWebsiteSettings().catch(() => null);
-  const churchName = settings?.churchName || "Faith Community Church";
+  const churchName = settings?.churchName || "Seventh-day Adventist Fellowship";
   const title = `${churchName} | Faith, Worship & Community`;
   const description =
     settings?.churchDescription ||
@@ -119,241 +119,6 @@ function LinkArrow({ children, href }: { children: string; href: string }) {
 }
 
 /* ── Fallback datasets matching SRS Section 12, 19, 27, 30, 34 ── */
-const defaultServices: ChurchService[] = [
-  {
-    id: "svc-1",
-    title: "Sunday Worship",
-    scheduleType: "weekly",
-    dayOfWeek: 0,
-    serviceDate: null,
-    startTime: "09:00",
-    endTime: "10:15",
-    location: "Main Sanctuary",
-    serviceType: "Worship service",
-    description: "An inspiring morning worship service with heartfelt praise, prayer, and life-changing biblical preaching.",
-    targetAudience: "All are welcome",
-    instructions: "Children's Sunday school available during service.",
-    active: true,
-    displayOrder: 1,
-    publicationStatus: "published",
-  },
-  {
-    id: "svc-2",
-    title: "Main Worship Service",
-    scheduleType: "weekly",
-    dayOfWeek: 0,
-    serviceDate: null,
-    startTime: "10:30",
-    endTime: "12:15",
-    location: "Main Sanctuary & Livestream",
-    serviceType: "Worship service",
-    description: "Our main celebratory gathering with uplifting worship, choir ministrations, and an empowering message.",
-    targetAudience: "Families & visitors",
-    instructions: "First-time guests are invited to the Welcome Lounge afterwards.",
-    active: true,
-    displayOrder: 2,
-    publicationStatus: "published",
-  },
-  {
-    id: "svc-3",
-    title: "Midweek Bible Study & Prayer",
-    scheduleType: "weekly",
-    dayOfWeek: 3,
-    serviceDate: null,
-    startTime: "18:00",
-    endTime: "19:30",
-    location: "Fellowship Hall",
-    serviceType: "Bible study",
-    description: "In-depth verse-by-verse scripture study, fellowship discussions, and targeted congregational prayer.",
-    targetAudience: "Adults, youth & young adults",
-    instructions: "Study materials provided at the entrance.",
-    active: true,
-    displayOrder: 3,
-    publicationStatus: "published",
-  },
-];
-
-const defaultMinistries: Ministry[] = [
-  {
-    id: "min-children",
-    name: "Children's Ministry",
-    slug: "children",
-    description: "Nurturing faith in young hearts through joyful Bible lessons, Sunday school, songs, and fun activities in a safe environment.",
-    targetAudience: "Ages 2–12",
-    meetingSchedule: "Sundays at 9:00 AM & 10:30 AM",
-    imageUrl: "https://images.unsplash.com/photo-1485546246426-74dc88dec4d9?auto=format&fit=crop&w=800&q=80",
-    status: "published",
-  },
-  {
-    id: "min-youth",
-    name: "Youth Ministry",
-    slug: "youth",
-    description: "Empowering teenagers to live boldly for Christ through energetic fellowship, youth camps, discipleship, and community outreach.",
-    targetAudience: "Ages 13–18",
-    meetingSchedule: "Saturdays at 4:00 PM",
-    imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80",
-    status: "published",
-  },
-  {
-    id: "min-women",
-    name: "Women's Ministry",
-    slug: "women",
-    description: "Encouraging and uplifting women through monthly prayer circles, Bible studies, annual conferences, and heartfelt sisterhood.",
-    targetAudience: "All women",
-    meetingSchedule: "Bi-weekly Saturdays at 9:00 AM",
-    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
-    status: "published",
-  },
-  {
-    id: "min-men",
-    name: "Men's Ministry",
-    slug: "men",
-    description: "Equipping men of God to lead with integrity, faith, and purpose in their families, workplaces, and community.",
-    targetAudience: "All men",
-    meetingSchedule: "Monthly Men's Breakfast & Prayer",
-    imageUrl: "https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?auto=format&fit=crop&w=800&q=80",
-    status: "published",
-  },
-  {
-    id: "min-worship",
-    name: "Worship Ministry",
-    slug: "worship",
-    description: "Leading the church family in vibrant, spirit-filled worship and praise through choir, band, and creative arts.",
-    targetAudience: "Vocalists & musicians",
-    meetingSchedule: "Rehearsals Thursdays at 6:30 PM",
-    imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80",
-    status: "published",
-  },
-  {
-    id: "min-outreach",
-    name: "Outreach & Compassion",
-    slug: "outreach",
-    description: "Extending the love and hands of Jesus Christ to our city through food distribution, hospital visits, and community support.",
-    targetAudience: "All church volunteers",
-    meetingSchedule: "Monthly Community Service",
-    imageUrl: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=800&q=80",
-    status: "published",
-  },
-];
-
-const defaultEvents: ChurchEvent[] = [
-  {
-    id: "evt-1",
-    name: "Annual Worship Conference",
-    date: "2026-10-20",
-    time: "09:00 AM",
-    endTime: "04:00 PM",
-    location: "Main Church Auditorium",
-    description: "Join pastors, worship leaders, and believers for an uplifting day of deep praise, spiritual renewal, and biblical ministry.",
-    flyerUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1000&q=80",
-    organizer: "Worship Ministry",
-    speaker: "Pastor John Doe",
-    registrationRequired: true,
-    status: "published",
-  },
-  {
-    id: "evt-2",
-    name: "Community Outreach & Family Day",
-    date: "2026-10-28",
-    time: "10:00 AM",
-    endTime: "02:00 PM",
-    location: "Church Grounds & Park",
-    description: "A fun-filled day of games, free medical screenings, food hampers, and sharing the love of Christ with our neighbors.",
-    flyerUrl: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1000&q=80",
-    organizer: "Outreach Ministry",
-    registrationRequired: false,
-    status: "published",
-  },
-  {
-    id: "evt-3",
-    name: "Night of Prayer & Revival",
-    date: "2026-11-06",
-    time: "07:00 PM",
-    endTime: "10:00 PM",
-    location: "Main Sanctuary",
-    description: "An evening dedicated to fervent prayer, intercession for families and our nation, and encountering God's transforming presence.",
-    flyerUrl: "https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=1000&q=80",
-    organizer: "Prayer Ministry",
-    registrationRequired: false,
-    status: "published",
-  },
-];
-
-const defaultSermons: Sermon[] = [
-  {
-    id: "sermon-1",
-    title: "Walking in Faith",
-    slug: "walking-in-faith",
-    speaker: "Pastor John Doe",
-    date: "15 September 2026",
-    scripture: "Hebrews 11:1",
-    category: "Faith",
-    series: "Unshakable Faith",
-    description: "A powerful message on learning to trust God's promises completely, even when facing uncertain seasons in life.",
-    thumbnailUrl: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=800&q=80",
-    audioUrl: "https://example.com/audio/walking-in-faith.mp3",
-    videoUrl: "https://youtube.com",
-    status: "published",
-  },
-  {
-    id: "sermon-2",
-    title: "The Power of Compassion",
-    slug: "the-power-of-compassion",
-    speaker: "Pastor Sarah Doe",
-    date: "08 September 2026",
-    scripture: "Colossians 3:12-14",
-    category: "Love & Service",
-    series: "Love in Action",
-    description: "Discover how Christ calls us to clothe ourselves with compassion, kindness, humility, and patience every single day.",
-    thumbnailUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
-    audioUrl: "https://example.com/audio/power-of-compassion.mp3",
-    videoUrl: "https://youtube.com",
-    status: "published",
-  },
-  {
-    id: "sermon-3",
-    title: "Anchored in Prayer",
-    slug: "anchored-in-prayer",
-    speaker: "Pastor John Doe",
-    date: "01 September 2026",
-    scripture: "Philippians 4:6-7",
-    category: "Prayer",
-    series: "Devoted Life",
-    description: "How to experience the supernatural peace of God that guards our hearts and minds through continuous, thankful prayer.",
-    thumbnailUrl: "https://images.unsplash.com/photo-1509021436665-8f07dbf5bf1d?auto=format&fit=crop&w=800&q=80",
-    audioUrl: "https://example.com/audio/anchored-in-prayer.mp3",
-    videoUrl: "https://youtube.com",
-    status: "published",
-  },
-];
-
-const defaultAnnouncements: PublicContent[] = [
-  {
-    id: "ann-1",
-    title: "Sunday Service Schedule & Welcome Lounge",
-    slug: "sunday-service-schedule-welcome-lounge",
-    description: "All first-time visitors are warmly invited to join our pastoral team for refreshments in the Welcome Lounge immediately following both morning services.",
-    details: { category: "Church Life", publishedAt: "2026-10-12" },
-    publishedAt: "2026-10-12",
-  },
-  {
-    id: "ann-2",
-    title: "Midweek Bible Study Series Commencing This Wednesday",
-    slug: "midweek-bible-study-series",
-    description: "We begin an exciting 6-week teaching journey through the Book of Romans. Free study guides and childcare provided.",
-    details: { category: "Bible Study", publishedAt: "2026-10-10" },
-    publishedAt: "2026-10-10",
-  },
-  {
-    id: "ann-3",
-    title: "New Volunteer Opportunities in Children's & Media Ministries",
-    slug: "volunteer-opportunities",
-    description: "Looking to serve? Orientation and training for new volunteers in the AV production team and Sunday school will take place this Saturday morning.",
-    details: { category: "Ministry", publishedAt: "2026-10-08" },
-    publishedAt: "2026-10-08",
-  },
-];
-
 export default async function HomeView() {
   const [
     websiteSettings,
@@ -381,7 +146,7 @@ export default async function HomeView() {
 
   const homepage = websiteSettings?.homepage ?? defaultHomepageSettings;
   const church = websiteSettings?.church ?? defaultChurchInformation;
-  const churchName = websiteSettings?.churchName || "Faith Community Church";
+  const churchName = websiteSettings?.churchName || "Seventh-day Adventist Fellowship";
   const churchDescription = websiteSettings?.churchDescription || "";
   const events = eventResponse ?? [];
   const sermons = sermonResponse ?? [];
@@ -404,31 +169,27 @@ export default async function HomeView() {
       : "hsl(var(--background))";
 
   /* Ministries: use DB records or fallback to SRS defaults */
-  const publishedMinistries = (ministries && ministries.length > 0) ? ministries : defaultMinistries;
+  const publishedMinistries = ministries ?? [];
   const ministrySelection = homepage.sections.ministries.featuredMinistryIds ?? [];
   const chosenMinistries = ministrySelection.length
     ? publishedMinistries.filter((item) => ministrySelection.includes(item.id))
     : publishedMinistries.slice(0, 6);
 
-  /* Sermons: use DB records or fallback to SRS defaults */
   const loadedSermons = (sermons ?? []).filter((item) => item.status === "published" || !item.status);
-  const allPublicSermons = loadedSermons.length > 0 ? loadedSermons : defaultSermons;
+  const allPublicSermons = loadedSermons;
   const publicSermons = allPublicSermons.slice(0, homepage.sections.sermons.limit ?? 3);
 
-  /* Events: use DB records or fallback to SRS defaults */
   const loadedEvents = (events ?? [])
     .filter((item) => item.status === "published" || !item.status)
     .filter((item) => Date.parse(item.date) >= new Date(new Date().toDateString()).getTime());
-  const allPublicEvents = loadedEvents.length > 0 ? loadedEvents : defaultEvents;
+  const allPublicEvents = loadedEvents;
   const publicEvents = allPublicEvents.slice(0, homepage.sections.events.limit ?? 3);
 
-  /* Services: use DB records or fallback to SRS Section 12 defaults */
   const loadedServices = sortServices((services?.items ?? []).map(toChurchService));
-  const publicServices = loadedServices.length > 0 ? loadedServices : defaultServices;
+  const publicServices = loadedServices;
 
-  /* Announcements: use DB records or fallback to SRS defaults */
   const loadedAnnouncements = announcements?.items ?? [];
-  const allPublicAnnouncements = loadedAnnouncements.length > 0 ? loadedAnnouncements : defaultAnnouncements;
+  const allPublicAnnouncements = loadedAnnouncements;
   const publicAnnouncements = allPublicAnnouncements.slice(0, homepage.sections.announcements.limit ?? 3);
 
   /* Testimonials */
@@ -464,7 +225,7 @@ export default async function HomeView() {
     { label: "Worship Gatherings", value: String(publicServices.length), href: "/services" },
     { label: "Ministries to Connect", value: String(publishedMinistries.length), href: "/ministries" },
     { label: "Upcoming Events", value: String(allPublicEvents.length), href: "/events" },
-    { label: "Our Community", value: location || "Kigali, Rwanda", href: "/contact" },
+    { label: "Our Community", value: location || "A place to belong", href: "/contact" },
   ];
 
   const hero = homepage.hero;
@@ -564,11 +325,11 @@ export default async function HomeView() {
               <div className="mt-10 flex flex-wrap items-center gap-6 border-t border-white/20 pt-6 text-xs text-white/80">
                 <span className="flex items-center gap-2">
                   <Clock3 aria-hidden="true" className="size-4 text-secondary" />
-                  <span>Sunday Services: <strong>9:00 AM & 10:30 AM</strong></span>
+                  <span>Sabbath worship: <strong>{publicServices[0] ? `${formatServiceDate(publicServices[0])} · ${formatServiceTime(publicServices[0])}` : "Contact us for details"}</strong></span>
                 </span>
                 <span className="flex items-center gap-2">
                   <MapPin aria-hidden="true" className="size-4 text-secondary" />
-                  <span>{[church.contact.address, location].filter(Boolean).join(", ") || "Main Sanctuary"}</span>
+                  <span>{[church.contact.address, location].filter(Boolean).join(", ") || "Contact us to confirm the location"}</span>
                 </span>
               </div>
             </div>
@@ -1054,7 +815,7 @@ export default async function HomeView() {
                   <SectionHeading
                     eyebrow="God's Word"
                     title={config.heading || "Latest Sermons & Teachings"}
-                    description={config.description || "Listen or watch inspiring messages from our Sunday services and teaching series wherever you are."}
+                    description={config.description || "Watch or listen to Bible messages shared by the congregation."}
                   />
                   <LinkArrow href="/sermons">Browse sermon library</LinkArrow>
                 </div>
@@ -1310,10 +1071,10 @@ export default async function HomeView() {
                   <div className="p-8 sm:p-12 lg:p-14">
                     <p className="eyebrow text-primary uppercase tracking-widest text-xs font-bold">Visit Our Church</p>
                     <h3 className="mt-3 font-display text-3xl font-bold text-text sm:text-4xl">
-                      Join Us This Sunday
+                      Join Us for Sabbath Worship
                     </h3>
                     <p className="mt-3 text-sm leading-relaxed text-muted">
-                      We warmly invite you, your family, and friends to experience God&apos;s love and community in our worship services.
+                      We welcome you to worship, study the Bible, and share fellowship with our community.
                     </p>
 
                     <div className="mt-8 space-y-5 text-sm">
@@ -1321,7 +1082,7 @@ export default async function HomeView() {
                         <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
                         <div>
                           <strong className="block text-stone-900">Physical Address</strong>
-                          <span className="text-muted">{[church.contact.address, location].filter(Boolean).join(", ") || "Main Church Auditorium"}</span>
+                          <span className="text-muted">{[church.contact.address, location].filter(Boolean).join(", ") || "Contact the congregation to confirm the location"}</span>
                         </div>
                       </div>
 
@@ -1329,8 +1090,11 @@ export default async function HomeView() {
                         <Clock3 aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
                         <div>
                           <strong className="block text-stone-900">Service Times</strong>
-                          <span className="text-muted">Sundays: 9:00 AM (Worship) & 10:30 AM (Main Service)</span>
-                          <span className="block text-muted">Wednesdays: 6:00 PM (Bible Study & Prayer)</span>
+                          {publicServices.length ? publicServices.slice(0, 3).map((service) => (
+                            <span className="block text-muted" key={service.id}>
+                              {formatServiceDate(service)}: {formatServiceTime(service)}
+                            </span>
+                          )) : <span className="text-muted">Contact the congregation to confirm gathering times.</span>}
                         </div>
                       </div>
 
@@ -1388,14 +1152,7 @@ export default async function HomeView() {
                               {item.label} <ArrowUpRight className="size-3" />
                             </a>
                           ))
-                        ) : (
-                          <>
-                            <a className="rounded-full border border-stone-300 px-3.5 py-1 text-xs font-semibold text-stone-700 hover:border-primary hover:text-primary" href="https://facebook.com" rel="noreferrer" target="_blank">Facebook ↗</a>
-                            <a className="rounded-full border border-stone-300 px-3.5 py-1 text-xs font-semibold text-stone-700 hover:border-primary hover:text-primary" href="https://instagram.com" rel="noreferrer" target="_blank">Instagram ↗</a>
-                            <a className="rounded-full border border-stone-300 px-3.5 py-1 text-xs font-semibold text-stone-700 hover:border-primary hover:text-primary" href="https://youtube.com" rel="noreferrer" target="_blank">YouTube ↗</a>
-                            <a className="rounded-full border border-stone-300 px-3.5 py-1 text-xs font-semibold text-stone-700 hover:border-primary hover:text-primary" href="https://whatsapp.com" rel="noreferrer" target="_blank">WhatsApp ↗</a>
-                          </>
-                        )}
+                        ) : <p className="text-xs text-muted">Social profiles will be added when verified.</p>}
                       </div>
                     </div>
                   </div>
