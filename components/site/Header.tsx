@@ -26,11 +26,13 @@ export function HeaderView({
   logoUrl = "/logo-c.png",
   logoAlt,
   phone,
+  variant = "overlay",
 }: {
   churchName?: string;
   logoUrl?: string;
   logoAlt?: string;
   phone?: string;
+  variant?: "overlay" | "solid";
 }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -84,7 +86,7 @@ export function HeaderView({
   const desktopLinks = navigationLinks;
 
   return (
-    <header className="site-header absolute top-0 left-0 z-50 w-full">
+    <header className={variant === "solid" ? "site-header relative z-50 w-full border-b border-border bg-white shadow-sm" : "site-header absolute top-0 left-0 z-50 w-full"}>
       {/* ── Single header row — overlays the hero ──────────────────────── */}
       <div className="flex w-full items-stretch">
 
@@ -128,7 +130,7 @@ export function HeaderView({
                   className={`site-nav-link whitespace-nowrap px-2.5 py-1.5 text-[0.74rem] font-semibold uppercase tracking-[0.1em] transition-colors xl:px-3.5 xl:text-[0.8rem] ${
                     active
                       ? "text-secondary font-bold"
-                      : "text-white/90 hover:text-secondary"
+                      : variant === "solid" ? "text-text/80 hover:text-primary" : "text-white/90 hover:text-secondary"
                   }`}
                   href={href}
                   key={href}
