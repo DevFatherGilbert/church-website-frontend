@@ -1,3 +1,5 @@
+"use client";
+
 import { AdminLoginForm } from "./admin-login-form";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import { useChurchBrand } from "@/components/brand/church-brand-provider";

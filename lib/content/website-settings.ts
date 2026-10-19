@@ -168,8 +168,9 @@ function asObject(value: unknown): Record<string, unknown> {
     : {};
 }
 
-function mergeHomepageSettings(details: Record<string, unknown>): HomepageSettings {
-  const sectionValues = asObject(details.sections);
+function mergeHomepageSettings(details?: Record<string, unknown> | null): HomepageSettings {
+  const safeDetails = asObject(details);
+  const sectionValues = asObject(safeDetails.sections);
   const sections = {} as HomepageSettings["sections"];
   for (const key of Object.keys(defaultHomepageSettings.sections) as HomepageSectionKey[]) {
     sections[key] = {
@@ -179,50 +180,51 @@ function mergeHomepageSettings(details: Record<string, unknown>): HomepageSettin
   }
   return {
     ...defaultHomepageSettings,
-    ...details,
+    ...safeDetails,
     contentKey: "homepage",
-    hero: { ...defaultHomepageSettings.hero, ...asObject(details.hero) } as HomepageSettings["hero"],
+    hero: { ...defaultHomepageSettings.hero, ...asObject(safeDetails.hero) } as HomepageSettings["hero"],
     sections,
   };
 }
 
-function mergeChurchInformation(details: Record<string, unknown>): ChurchInformation {
+function mergeChurchInformation(details?: Record<string, unknown> | null): ChurchInformation {
+  const safeDetails = asObject(details);
   const legacyContact = {
-    city: details.city,
-    country: details.country,
-    address: details.address,
-    phone: details.publicPhone,
-    email: details.publicEmail,
+    city: safeDetails.city,
+    country: safeDetails.country,
+    address: safeDetails.address,
+    phone: safeDetails.publicPhone,
+    email: safeDetails.publicEmail,
   };
   return {
     ...defaultChurchInformation,
-    ...details,
+    ...safeDetails,
     contentKey: "church-information",
     contact: {
       ...defaultChurchInformation.contact,
       ...legacyContact,
-      ...asObject(details.contact),
+      ...asObject(safeDetails.contact),
     } as ChurchInformation["contact"],
     profile: {
       ...defaultChurchInformation.profile,
-      ...asObject(details.profile),
+      ...asObject(safeDetails.profile),
     } as ChurchInformation["profile"],
     mission: {
       ...defaultChurchInformation.mission,
-      ...asObject(details.mission),
+      ...asObject(safeDetails.mission),
     } as ChurchInformation["mission"],
     vision: {
       ...defaultChurchInformation.vision,
-      ...asObject(details.vision),
+      ...asObject(safeDetails.vision),
     } as ChurchInformation["vision"],
-    coreValues: Array.isArray(details.coreValues)
-      ? details.coreValues as ChurchInformation["coreValues"]
+    coreValues: Array.isArray(safeDetails.coreValues)
+      ? safeDetails.coreValues as ChurchInformation["coreValues"]
       : defaultChurchInformation.coreValues,
-    beliefs: Array.isArray(details.beliefs)
-      ? details.beliefs as ChurchInformation["beliefs"]
+    beliefs: Array.isArray(safeDetails.beliefs)
+      ? safeDetails.beliefs as ChurchInformation["beliefs"]
       : defaultChurchInformation.beliefs,
-    socialLinks: Array.isArray(details.socialLinks)
-      ? details.socialLinks as ChurchInformation["socialLinks"]
+    socialLinks: Array.isArray(safeDetails.socialLinks)
+      ? safeDetails.socialLinks as ChurchInformation["socialLinks"]
       : defaultChurchInformation.socialLinks,
   };
 }

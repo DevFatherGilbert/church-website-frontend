@@ -22,9 +22,13 @@ const inter = Inter({
 
 export async function generateMetadata(): Promise<Metadata> {
   await connection();
-  const { churchName, churchDescription, church } = await getPublicWebsiteSettings();
+  const { churchName, churchDescription, church } = await getPublicWebsiteSettings().catch(() => ({
+    churchName: "Church",
+    churchDescription: "",
+    church: { profile: { logoUrl: "/logo-c.png", logoAlt: "Church Logo" } },
+  }));
   const name = churchName || "Church";
-  const logo = church.profile?.logoUrl || "/logo-c.png";
+  const logo = church?.profile?.logoUrl || "/logo-c.png";
 
   return {
     title: { default: name, template: `%s | ${name}` },
