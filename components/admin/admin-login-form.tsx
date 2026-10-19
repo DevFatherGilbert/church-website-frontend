@@ -67,7 +67,7 @@ function PasswordField({
   );
 }
 
-export function AdminLoginForm({ initialStep = "login" }: { initialStep?: AuthStep }) {
+export function AdminLoginForm({ initialStep = "login", basePath = "" }: { initialStep?: AuthStep; basePath?: string }) {
   const router = useRouter();
   const step = initialStep;
   const [requestId, setRequestId] = useState("");
@@ -81,8 +81,9 @@ export function AdminLoginForm({ initialStep = "login" }: { initialStep?: AuthSt
   const [notice, setNotice] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const authPrefix = typeof window !== "undefined" && window.location.pathname.startsWith("/admin") ? "/admin" : "";
+  const authPrefix = basePath;
   const loginUrl = `${authPrefix}/login`;
+  const forgotPasswordUrl = `${authPrefix}/forgot-password`;
   const signupUrl = `${authPrefix}/signup`;
   const verifyUrl = `${authPrefix}/verify-email`;
   const setupPasswordUrl = `${authPrefix}/setup-password`;
@@ -253,6 +254,12 @@ export function AdminLoginForm({ initialStep = "login" }: { initialStep?: AuthSt
               {showPassword ? <EyeOff aria-hidden="true" className="size-4" /> : <Eye aria-hidden="true" className="size-4" />}
             </button>
           </div>
+
+          <p className="-mt-4 mb-5 text-right text-sm">
+            <Link className="font-semibold text-primary underline-offset-4 hover:underline" href={forgotPasswordUrl}>
+              Forgot password?
+            </Link>
+          </p>
 
           {error && <p className="error" role="alert">{error}</p>}
           {notice && <p className="notice" role="status">{notice}</p>}

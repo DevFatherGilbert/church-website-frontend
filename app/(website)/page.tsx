@@ -283,9 +283,9 @@ export default async function HomeView() {
           <div aria-hidden="true" className="home-hero-overlay absolute inset-0" />
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-primary-dark/30 to-primary-dark/40" />
 
-          {/* Faith Symbols */}
-          <Image aria-hidden="true" alt="" className="scripture-emblem" height={268} src="/bible-cutout.png" width={375} />
-          <div aria-hidden="true" className="faith-symbol-orbit">
+          {/* Faith Symbols — desktop only */}
+          <Image aria-hidden="true" alt="" className="scripture-emblem hidden lg:block" height={268} src="/bible-cutout.png" width={375} />
+          <div aria-hidden="true" className="faith-symbol-orbit hidden lg:block">
             <div className="faith-symbol-path">
               <svg className="faith-symbol" fill="none" viewBox="0 0 80 96">
                 <circle className="faith-symbol-halo" cx="40" cy="48" r="36" />

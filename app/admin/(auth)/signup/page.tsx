@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 export default function AdminSignupPage() {
   return <AdminAuthPage
+    basePath="/admin"
     step="register"
     title="Register"
     description="Create your account to join the church community."

@@ -143,10 +143,13 @@ a { text-underline-offset: .2em; }
 .form-field, .auth-field { width: 100%; min-height: 3rem; border: 1.5px solid hsl(var(--border)); border-radius: .625rem; background: var(--color-surface); padding: .75rem 1rem; color: var(--color-text); font: inherit; transition: border-color .18s ease, box-shadow .18s ease; }
 .form-field:focus, .auth-field:focus { border-color: var(--color-primary); outline: none; box-shadow: 0 0 0 3px hsl(var(--brand-primary) / 0.15); }
 @media (max-width: 480px) { :root { --content-gutter: 1rem; } }
-@media (max-width: 639px) {
-  .scripture-emblem { top: 9%; left: .75rem; width: 6rem; }
-  .faith-symbol-orbit { top: 9%; right: .75rem; width: 10rem; height: 5.5rem; opacity: .82; }
-  .faith-symbol { width: 2rem; }
+@media (max-width: 1023px) {
+  /* Hide decorative hero overlays on mobile & tablet to keep content clean and readable */
+  .scripture-emblem { display: none !important; }
+  .faith-symbol-orbit { display: none !important; }
+  .faith-symbol-path { display: none !important; }
+  /* Tighten hero wave divider on small screens */
+  .hero-return-divider { height: 2rem !important; }
 }
 @media (max-width: 63.99rem) { .mobile-nav-toggle { position: absolute; top: 50%; right: 1rem; transform: translateY(-50%); } }
 @media (min-width: 64rem) { .mobile-nav-toggle { display: none; } }

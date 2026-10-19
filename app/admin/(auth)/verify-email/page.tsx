@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 export default function AdminVerifyEmailPage() {
   return <AdminAuthPage
+    basePath="/admin"
     step="verify"
     title="Confirm your email"
     description="Enter the verification code we sent to your inbox."

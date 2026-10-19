@@ -51,20 +51,20 @@ export function PlanYourVisitPage({
       />
 
       {/* ── Visual Experience Preview Section ── */}
-      <section className="page-container py-16 sm:py-20 border-b border-border/80">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <section className="page-container py-12 sm:py-20 border-b border-border/80">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
               FIRST-TIME VISITOR GUIDE
             </p>
-            <h2 className="font-headline mt-3 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary leading-tight">
-              We Can’t Wait to Meet You
+            <h2 className="font-headline mt-3 text-2xl sm:text-4xl font-bold uppercase tracking-wide text-primary leading-tight">
+              We Can&apos;t Wait to Meet You
             </h2>
-            <p className="mt-5 text-base sm:text-lg leading-relaxed text-muted">
-              Whether you’ve grown up attending church or this is your very first time walking into a Christian gathering, you will find warm smiles, uplifting music, and an environment of peace.
+            <p className="mt-4 text-base leading-relaxed text-muted">
+              Whether you&apos;ve grown up attending church or this is your very first time, you will find warm smiles, uplifting music, and an environment of peace.
             </p>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {visitAssurances.map((item) => (
                 <div className="rounded-xl border border-primary/10 bg-white p-4 shadow-xs" key={item.title}>
                   <span className="text-2xl" role="img" aria-hidden="true">{item.icon}</span>
@@ -75,8 +75,8 @@ export function PlanYourVisitPage({
             </div>
           </div>
 
-          {/* 3-Photo Visual Collage */}
-          <div className="grid grid-cols-12 gap-3 sm:gap-4">
+          {/* 3-Photo Visual Collage — hidden on mobile, shown on lg+ */}
+          <div className="hidden lg:grid grid-cols-12 gap-3 sm:gap-4">
             <div className="col-span-7 relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-900 shadow-lg">
               <Image
                 alt="Hospitality team welcoming church visitors"
@@ -114,6 +114,22 @@ export function PlanYourVisitPage({
                 />
               </div>
             </div>
+          </div>
+
+          {/* Mobile-only: single wide photo */}
+          <div className="relative aspect-video overflow-hidden rounded-2xl bg-stone-900 shadow-lg lg:hidden">
+            <Image
+              alt="Hospitality team welcoming church visitors"
+              className="object-cover"
+              fill
+              sizes="100vw"
+              src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=900&q=80"
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+            <span className="absolute bottom-4 left-4 text-xs font-bold text-white uppercase tracking-wider">
+              A Warm Welcome Awaits You
+            </span>
           </div>
         </div>
       </section>

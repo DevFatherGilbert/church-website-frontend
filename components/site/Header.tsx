@@ -228,22 +228,8 @@ export function HeaderView({
               );
             })}
 
-            {/* Prayer request link */}
-            <Link
-              className="hidden px-2.5 py-1.5 text-[0.74rem] font-bold uppercase tracking-wider text-amber-300 hover:text-amber-200 xl:inline-flex xl:text-[0.78rem]"
-              href="/prayer-request"
-            >
-              Prayer
-            </Link>
-
-            {/* Visit CTA button as required by SRS Section 10 */}
-            <Link
-              className="ml-2 hidden rounded-md bg-secondary px-3.5 py-1.5 text-[0.74rem] font-bold uppercase tracking-wider text-stone-950 transition hover:bg-secondary/90 xl:inline-flex xl:text-[0.78rem]"
-              href="/plan-your-visit"
-            >
-              Plan Your Visit
-            </Link>
           </nav>
+
 
           {/* ── MENU button — tall red/primary block on far right ──────── */}
           <button
@@ -429,22 +415,15 @@ export function HeaderView({
               </Link>
             </nav>
 
-            {/* Drawer footer CTAs */}
-            <div className="mt-auto grid gap-3 border-t border-stone-200 pt-6">
+            {/* Drawer footer — staff login only */}
+            <div className="mt-auto border-t border-stone-200 pt-5">
               <Link
-                className="flex min-h-11 items-center gap-2 rounded-md border border-stone-200 px-4 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50"
+                className="flex min-h-11 items-center gap-2 rounded-md border border-stone-200 px-4 text-xs font-bold uppercase tracking-wider text-stone-600 hover:bg-stone-50 hover:text-primary"
                 href="/admin/login"
                 onClick={closeMobileMenu}
               >
                 <LogIn aria-hidden="true" className="size-4 text-primary" />
                 Staff Login
-              </Link>
-              <Link
-                className="flex min-h-12 items-center justify-center gap-2 rounded-md bg-secondary text-xs font-extrabold uppercase tracking-wider text-stone-950 shadow-sm"
-                href="/plan-your-visit"
-                onClick={closeMobileMenu}
-              >
-                Plan a Visit <ArrowRight className="size-4" />
               </Link>
             </div>
           </div>

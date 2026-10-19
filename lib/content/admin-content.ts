@@ -14,6 +14,7 @@ export const adminSections = [
   ["Inquiries", "/admin/inquiries"],
   ["Prayer requests", "/admin/prayer-requests"],
   ["Church Information", "/admin/settings"],
+  ["Audit logs", "/admin/audit"],
 ] as const;
 
 export type AdminContentSection =
@@ -28,4 +29,5 @@ export type AdminContentSection =
   | "media"
   | "inquiries"
   | "prayer-requests"
-  | "settings";
+  | "settings"
+  | "audit";

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import {
+  Activity,
   BookOpen,
   CalendarDays,
   HandHeart,
@@ -51,6 +52,7 @@ const navigationGroups: { label: string; items: { label: string; href: string; i
   { label: "System", items: [
     { label: "Users & Roles", href: "/admin/users", icon: ShieldCheck },
     { label: "Church Information", href: "/admin/settings", icon: Settings },
+    { label: "Audit & Activity Logs", href: "/admin/audit", icon: Activity },
   ] },
 ];
 

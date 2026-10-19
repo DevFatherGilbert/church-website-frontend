@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 export default function AdminSetupPasswordPage() {
   return <AdminAuthPage
+    basePath="/admin"
     step="password"
     title="Set your password"
     description="Choose a password to finish setting up your account."

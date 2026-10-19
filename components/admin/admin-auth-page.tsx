@@ -7,10 +7,12 @@ export function AdminAuthPage({
   step,
   title,
   description,
+  basePath = "",
 }: {
   step: AuthStep;
   title: string;
   description: string;
+  basePath?: string;
 }) {
   const isLogin = step === "login";
   const isRegistrationFlow = !isLogin;
@@ -49,7 +51,7 @@ export function AdminAuthPage({
         <div className={`form-section side-a ${isRegistrationFlow ? "register-section" : "login-section"}`}>
           <div className="form-box">
             <h2>{isLogin ? "Login" : step === "register" ? "Register" : title}</h2>
-            <AdminLoginForm initialStep={step} />
+            <AdminLoginForm basePath={basePath} initialStep={step} />
           </div>
         </div>
       </div>

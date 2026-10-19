@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 export default function AdminLoginPage() {
   return <AdminAuthPage
+    basePath="/admin"
     step="login"
     title="Welcome back"
     description="Sign in to continue to your account."
