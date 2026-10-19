@@ -1,8 +1,30 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Calendar, Clock, MapPin } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type ChurchEvent } from "@/lib/api/church-api";
+
+const EVENT_TYPE_PHOTOS = [
+  {
+    src: "https://images.unsplash.com/photo-1519817914152-22d216bb9170?w=700&q=80",
+    alt: "Sabbath worship service",
+    label: "Worship Services",
+    desc: "Sabbath & weekday gatherings",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700&q=80",
+    alt: "Youth group gathering",
+    label: "Youth Programs",
+    desc: "Camps, rallies & Bible studies",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=700&q=80",
+    alt: "Community outreach volunteers",
+    label: "Community Outreach",
+    desc: "Serving our neighbours together",
+  },
+];
 
 function displayDate(date: string) {
   return new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "Africa/Kigali" }).format(new Date(`${date}T12:00:00`));
@@ -37,6 +59,42 @@ export default async function EventsPage() {
         emphasis="coming up."
         description="Keep up with worship gatherings, conferences, retreats, community activities, youth programs and special celebrations."
       />
+      {/* Event Type Photos */}
+      <section className="bg-surface-strong border-y border-border">
+        <div className="page-container py-10">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {EVENT_TYPE_PHOTOS.map(({ src, alt, label, desc }) => (
+              <div key={label} className="group relative overflow-hidden rounded-2xl aspect-[4/3] bg-primary-dark">
+                <Image
+                  src={src}
+                  alt={alt}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-85"
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-4 left-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-white/70">{desc}</p>
+                  <p className="mt-0.5 text-base font-bold text-white">{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-muted">
+            {[
+              { icon: Calendar, text: "Regular Sabbath gatherings" },
+              { icon: Clock, text: "Evening & midweek meetings" },
+              { icon: MapPin, text: "On-site & community locations" },
+            ].map(({ icon: Icon, text }) => (
+              <span key={text} className="flex items-center gap-2 font-medium">
+                <Icon className="size-4 text-primary" />
+                {text}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="page-container section-space">
         {events?.length ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
