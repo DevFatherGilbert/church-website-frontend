@@ -35,6 +35,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html data-scroll-behavior="smooth" lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap" rel="stylesheet" />
+      </head>
       <body className={`${manrope.variable} ${inter.variable} antialiased font-sans`}>
         {children}
       </body>

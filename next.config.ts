@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const customCloudinaryHost = process.env.NEXT_PUBLIC_CLOUDINARY_DELIVERY_HOST?.trim() || "";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   images: {
     remotePatterns: [
       // Cloudinary shared CDN
@@ -20,4 +21,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-

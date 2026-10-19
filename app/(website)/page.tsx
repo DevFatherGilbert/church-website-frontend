@@ -89,26 +89,35 @@ function SectionHeading({
   title,
   description,
   light = false,
+  align = "left",
 }: {
   eyebrow: string;
   title: string;
   description?: string;
   light?: boolean;
+  align?: "left" | "center";
 }) {
   return (
-    <header className="max-w-2xl">
-      <p className={`eyebrow ${light ? "text-secondary" : "text-primary"}`}>{eyebrow}</p>
-      <h2 className={`section-heading mt-3 font-bold ${light ? "text-white" : "text-text"}`}>
+    <header className={`max-w-2xl ${align === "center" ? "mx-auto text-center" : ""}`}>
+      <p className={`text-xs font-extrabold uppercase tracking-[0.24em] ${light ? "text-secondary" : "text-secondary"}`}>
+        {eyebrow}
+      </p>
+      <h2
+        className={`font-headline mt-2 text-3xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-wide leading-tight ${
+          light ? "text-white" : "text-primary"
+        }`}
+      >
         {title}
       </h2>
       {description && (
-        <p className={`mt-4 max-w-xl text-base leading-7 sm:text-lg ${light ? "text-white/75" : "text-muted"}`}>
+        <p className={`mt-3.5 max-w-xl text-base leading-7 sm:text-lg ${align === "center" ? "mx-auto" : ""} ${light ? "text-white/80" : "text-muted"}`}>
           {description}
         </p>
       )}
     </header>
   );
 }
+
 
 function LinkArrow({ children, href }: { children: string; href: string }) {
   return (
@@ -355,52 +364,131 @@ export default async function HomeView() {
       {/* ── SECTIONS (SRS Section 9 items 3 to 13) ────────────────────────── */}
       {sections.map(([key, config]) => {
         /* ── 3. WELCOME MESSAGE (SRS Section 9 #3 & Section 13) ─────────────── */
+        /* ── 3. WELCOME MESSAGE (SRS Section 9 #3 & Section 13 - Inspired by Kigali Harvest) ── */
         if (key === "welcome") {
           return (
-            <section className="py-20 sm:py-28" id={key} key={key}>
-              <div className={`${container} grid items-center gap-12 lg:grid-cols-[1.05fr_.95fr] lg:gap-20`}>
-                <div className="relative">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-stone-200 shadow-xl">
-                    <Image
-                      alt={config.imageAlt || "Church community gathering"}
-                      className="object-cover transition-transform duration-700 hover:scale-105"
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                      src={config.imageUrl || church.profile.imageUrl || "https://images.unsplash.com/photo-1548625361-195fe61a55c3?auto=format&fit=crop&w=1200&q=80"}
-                      unoptimized
-                    />
-                  </div>
-                  <div className="absolute -bottom-5 right-4 hidden rounded-xl bg-secondary px-6 py-4 shadow-lg sm:block">
-                    <p className="font-display text-lg font-bold text-stone-950 italic">
-                      “Come as you are — there’s a place for you.”
-                    </p>
-                  </div>
-                </div>
-
+            <section className="relative overflow-hidden py-20 sm:py-28 bg-harvest-pattern" id={key} key={key}>
+              <div className={`${container} grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16`}>
+                {/* Left Column: Heading, description, pillars, CTAs */}
                 <div className="lg:py-4">
-                  <SectionHeading
-                    eyebrow="Welcome to Our Church"
-                    title={config.heading || "We Are a Community of Faith"}
-                    description={
-                      config.description ||
-                      `${churchName} is a community committed to worship, spiritual growth, fellowship, service and sharing the message of Christ with individuals, families and the wider community.`
-                    }
-                  />
+                  <header>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+                      WELCOME TO
+                    </p>
+                    <h2 className="font-headline mt-3 text-4xl sm:text-5xl lg:text-6xl font-bold uppercase tracking-wide text-primary leading-[1.12]">
+                      {churchName}
+                    </h2>
+                  </header>
+
+                  <p className="mt-6 text-base sm:text-lg leading-relaxed text-muted font-medium">
+                    {config.description ||
+                      `At ${churchName}, we are a warm, welcoming community rooted in faith, worship, and fellowship. Whether you are seeking a church family or exploring faith for the first time, there is a place for you to belong, grow, and serve.`}
+                  </p>
 
                   {(churchDescription || church.profile.history) && (
-                    <div className="mt-6 space-y-4 text-base leading-7 text-muted">
+                    <div className="mt-4 space-y-2 border-l-3 border-secondary/70 pl-4 py-1 text-sm leading-relaxed text-muted">
                       {churchDescription && <p>{churchDescription}</p>}
                       {church.profile.history && <p>{church.profile.history}</p>}
                     </div>
                   )}
 
-                  <div className="mt-8 flex flex-wrap items-center gap-4">
-                    <Link className="button button-primary min-h-12 px-6" href={config.primaryCtaHref || "/about/our-story"}>
+                  {/* Church Pillars Cards */}
+                  <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-3.5">
+                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <Heart className="size-4" />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold text-text">Christ-Centered Faith</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <BookOpen className="size-4" />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold text-text">Bible-Rooted Truth</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <Users className="size-4" />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold text-text">Loving Fellowship</span>
+                    </div>
+
+                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <Sparkles className="size-4" />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold text-text">Youth & Children Care</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-9 flex flex-wrap items-center gap-4">
+                    <Link
+                      className="button button-primary min-h-12 px-7 font-bold uppercase tracking-wider text-xs shadow-md hover:shadow-lg transition-all"
+                      href={config.primaryCtaHref || "/about/our-story"}
+                    >
                       {config.primaryCtaLabel || "Our Story & Heart"}<ArrowRight aria-hidden="true" className="size-4" />
                     </Link>
-                    <Link className="button button-outline min-h-12 px-6" href="/plan-your-visit">
+                    <Link
+                      className="button button-outline min-h-12 px-6 font-bold uppercase tracking-wider text-xs border-2"
+                      href="/plan-your-visit"
+                    >
                       Plan Your Visit
                     </Link>
+                  </div>
+                </div>
+
+                {/* Right Column: 2x2 Photo Collage with floating quote pill */}
+                <div className="relative">
+                  <div className="grid grid-cols-2 gap-3.5 sm:gap-4.5">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md">
+                      <Image
+                        alt="Congregation gathered in worship"
+                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        src={config.imageUrl || church.profile.imageUrl || "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=800&q=80"}
+                        unoptimized
+                      />
+                    </div>
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md sm:translate-y-4">
+                      <Image
+                        alt="Warm church community fellowship"
+                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md -translate-y-2 sm:translate-y-0">
+                      <Image
+                        alt="Children and family ministry"
+                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800&q=80"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md translate-y-2 sm:translate-y-4">
+                      <Image
+                        alt="Church choir and music worship"
+                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        fill
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=800&q=80"
+                        unoptimized
+                      />
+                    </div>
+                  </div>
+
+                  {/* Floating Gold Quote Pill */}
+                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:-bottom-5 sm:right-6 rounded-2xl bg-secondary px-6 py-3.5 shadow-xl border-2 border-white">
+                    <p className="font-display text-sm sm:text-base font-bold text-stone-950 italic whitespace-nowrap">
+                      “Come as you are — there’s a place for you.”
+                    </p>
                   </div>
                 </div>
               </div>
@@ -408,21 +496,55 @@ export default async function HomeView() {
           );
         }
 
-        /* ── FACTS / AT A GLANCE ─────────────────────────────────────────── */
+        /* ── FACTS / AT A GLANCE (Inspired by Kigali Harvest FAST FACTS) ──── */
         if (key === "facts") {
           return (
-            <section className="border-y border-border/70 bg-surface py-10" id={key} key={key}>
+            <section className="relative border-y border-border/80 bg-white py-14" id={key} key={key}>
               <div className={container}>
-                <dl className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  {fastFacts.map((fact) => (
-                    <div className="border-l-2 border-secondary pl-4" key={fact.label}>
-                      <dt className="text-xs font-semibold uppercase tracking-[.14em] text-muted">{fact.label}</dt>
-                      <dd className="mt-1.5 font-display text-2xl font-bold leading-tight text-text">
-                        <Link className="hover:text-primary transition-colors" href={fact.href}>{fact.value}</Link>
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 pb-6 border-b border-border/60">
+                  <div>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+                      MORE ABOUT US
+                    </p>
+                    <h2 className="font-headline mt-2 text-3xl sm:text-4xl text-primary font-bold uppercase tracking-wide">
+                      FAST FACTS
+                    </h2>
+                  </div>
+                  <p className="text-sm text-muted max-w-md">
+                    Key pillars of our community life, gathering times, and active ministries serving Kigali and beyond.
+                  </p>
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {fastFacts.map((fact, index) => {
+                    const icons = [Clock3, Users, CalendarDays, MapPin];
+                    const IconComponent = icons[index % icons.length];
+                    return (
+                      <Link
+                        key={fact.label}
+                        href={fact.href}
+                        className="group relative flex flex-col justify-between rounded-2xl border border-primary/10 bg-surface-strong p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider text-muted group-hover:text-primary transition-colors">
+                            {fact.label}
+                          </span>
+                          <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                            <IconComponent className="size-4" />
+                          </div>
+                        </div>
+                        <div className="mt-6">
+                          <p className="font-headline text-3xl sm:text-4xl font-bold text-primary tracking-tight">
+                            {fact.value}
+                          </p>
+                          <span className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary group-hover:translate-x-1 transition-transform">
+                            Explore <ArrowUpRight className="size-3.5" />
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             </section>
           );

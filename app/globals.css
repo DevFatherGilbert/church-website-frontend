@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap');
 @import "tailwindcss";
 @import "./login.css";
 
@@ -43,6 +44,7 @@
   --color-forest: var(--color-primary);
   --color-leaf: var(--color-accent);
   --color-clay: hsl(var(--brand-primary));
+  --font-headline: "Finger Paint", cursive, system-ui, sans-serif;
   --font-display: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-brand: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -55,6 +57,26 @@
   --text-meta: 0.75rem;
   --radius-card: 1rem;
   --shadow-card: 0 4px 20px -2px hsl(var(--brand-primary) / 0.06), 0 2px 6px -1px hsl(var(--brand-primary) / 0.04);
+}
+
+.font-headline {
+  font-family: var(--font-headline);
+  letter-spacing: 0.03em;
+}
+
+.bg-harvest-pattern {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(20, 40, 82, 0.04) 0px,
+    rgba(20, 40, 82, 0.04) 1px,
+    transparent 1px,
+    transparent 18px
+  );
+}
+
+.bg-harvest-dots {
+  background-image: radial-gradient(rgba(20, 40, 82, 0.07) 1.5px, transparent 1.5px);
+  background-size: 22px 22px;
 }
 
 :root {
