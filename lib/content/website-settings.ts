@@ -119,7 +119,7 @@ export const defaultChurchInformation: ChurchInformation = {
   contentKey: "church-information",
   profile: {
     history: "A Seventh-day Adventist faith community centered on Scripture, Jesus Christ, Sabbath worship, spiritual growth, fellowship, and service.",
-    imageUrl: "https://images.unsplash.com/photo-1548625361-195fe61a55c3?auto=format&fit=crop&w=1200&q=80",
+    imageUrl: "",
     imageAlt: "Church sanctuary and congregation",
     logoUrl: "/logo-c.png",
     logoAlt: "Church Logo",
