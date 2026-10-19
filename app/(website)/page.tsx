@@ -922,6 +922,11 @@ export default async function HomeView() {
                       }
                     />
                   ))}
+                  {publicEvents.length === 0 && (
+                    <p className="rounded-xl border border-border bg-white p-6 text-sm leading-6 text-muted md:col-span-2 lg:col-span-3">
+                      No upcoming events are listed right now. Visit the <Link className="font-semibold text-primary hover:underline" href="/events">events page</Link> for updates.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -1017,6 +1022,11 @@ export default async function HomeView() {
                       </div>
                     </article>
                   ))}
+                  {publicSermons.length === 0 && (
+                    <p className="rounded-xl border border-border bg-white p-6 text-sm leading-6 text-muted sm:col-span-2 lg:col-span-3">
+                      No sermons are available yet. Browse the <Link className="font-semibold text-primary hover:underline" href="/sermons">sermon library</Link> for messages as they are published.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -1064,6 +1074,11 @@ export default async function HomeView() {
                       </Link>
                     </article>
                   ))}
+                  {publicAnnouncements.length === 0 && (
+                    <p className="p-6 text-sm leading-6 text-muted">
+                      There are no new announcements right now. Check the <Link className="font-semibold text-primary hover:underline" href="/announcements">announcements page</Link> for updates.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
