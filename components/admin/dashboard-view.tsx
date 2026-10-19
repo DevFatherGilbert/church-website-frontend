@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, HandHeart, Megaphone, Mic2 } from "lucide-react";
+import { CalendarDays, HandHeart, Inbox, Megaphone, Mic2, UsersRound, CheckCircle2, FileEdit } from "lucide-react";
 import { authGet } from "@/lib/api/church-api";
 import { QuickActionsView } from "./quick-actions-view";
 import { RecentActivityTableView, type RecentActivityItem } from "./recent-activity-table-view";
@@ -26,7 +26,9 @@ type DashboardData = {
   events: DatedRecord[];
   announcements: DatedRecord[];
   prayerRequests: DatedRecord[];
-  available: [boolean, boolean, boolean, boolean];
+  ministries: DatedRecord[];
+  inquiries: DatedRecord[];
+  available: boolean[];
   loading: boolean;
 };
 
@@ -35,7 +37,9 @@ const initialData: DashboardData = {
   events: [],
   announcements: [],
   prayerRequests: [],
-  available: [false, false, false, false],
+  ministries: [],
+  inquiries: [],
+  available: [false, false, false, false, false, false],
   loading: true,
 };
 
@@ -155,20 +159,31 @@ export function DashboardView() {
     let cancelled = false;
 
     async function loadDashboard() {
-      const [sermonsResult, eventsResult, announcementsResult, prayersResult] = await Promise.allSettled([
+      const [
+        sermonsResult,
+        eventsResult,
+        announcementsResult,
+        prayersResult,
+        ministriesResult,
+        inquiriesResult,
+      ] = await Promise.allSettled([
         authGet<DatedRecord[]>("/admin/sermons").catch(() => authGet<DatedRecord[]>("/sermons")),
         authGet<DatedRecord[]>("/events"),
         authGet<DashboardAnnouncementList>("/admin/announcements"),
         authGet<DatedRecord[]>("/inquiries/prayer"),
+        authGet<DatedRecord[]>("/admin/ministries").catch(() => authGet<DatedRecord[]>("/ministries")),
+        authGet<DatedRecord[]>("/inquiries/contact"),
       ]);
 
       if (cancelled) return;
 
-      const available: [boolean, boolean, boolean, boolean] = [
+      const available = [
         sermonsResult.status === "fulfilled",
         eventsResult.status === "fulfilled",
         announcementsResult.status === "fulfilled",
         prayersResult.status === "fulfilled",
+        ministriesResult.status === "fulfilled",
+        inquiriesResult.status === "fulfilled",
       ];
 
       setData({
@@ -176,6 +191,8 @@ export function DashboardView() {
         events: eventsResult.status === "fulfilled" ? eventsResult.value : [],
         announcements: announcementsResult.status === "fulfilled" ? announcementsResult.value.items : [],
         prayerRequests: prayersResult.status === "fulfilled" ? prayersResult.value : [],
+        ministries: ministriesResult.status === "fulfilled" ? ministriesResult.value : [],
+        inquiries: inquiriesResult.status === "fulfilled" ? inquiriesResult.value : [],
         available,
         loading: false,
       });
@@ -197,15 +214,46 @@ export function DashboardView() {
     const createdAt = request.createdAt ? new Date(request.createdAt).getTime() : 0;
     return createdAt >= currentPeriodStart && createdAt <= now;
   });
+  const recentInquiries = data.inquiries.filter((inquiry) => {
+    const createdAt = inquiry.createdAt ? new Date(inquiry.createdAt).getTime() : 0;
+    return createdAt >= currentPeriodStart && createdAt <= now;
+  });
+
+  // Calculate Draft vs Published Breakdown (SRS Section 57)
+  const publishedCount =
+    data.sermons.filter((s) => s.status !== "draft").length +
+    data.events.filter((e) => e.status !== "draft").length +
+    data.announcements.filter((a) => a.details?.status === "PUBLISHED" || a.status === "published").length;
+
+  const draftCount =
+    data.sermons.filter((s) => s.status === "draft").length +
+    data.events.filter((e) => e.status === "draft").length +
+    data.announcements.filter((a) => a.details?.status === "DRAFT" || a.status === "draft").length;
 
   const statDefinitions: Omit<StatCardData, "value" | "change" | "direction" | "comparisonLabel">[] = [
     { title: "Published Sermons", icon: Mic2, tone: "indigo" },
     { title: "Upcoming Events", icon: CalendarDays, tone: "indigo" },
+    { title: "Active Ministries", icon: UsersRound, tone: "indigo" },
     { title: "Announcements", icon: Megaphone, tone: "indigo" },
-    { title: "New Prayer Requests", icon: HandHeart, tone: "indigo" },
+    { title: "New Inquiries", icon: Inbox, tone: "indigo" },
+    { title: "Prayer Requests", icon: HandHeart, tone: "indigo" },
   ];
-  const metricSources = [data.sermons, data.events, data.announcements, data.prayerRequests];
-  const metricCounts = [data.sermons.length, upcomingEvents.length, data.announcements.length, recentPrayerRequests.length];
+  const metricSources = [
+    data.sermons,
+    data.events,
+    data.ministries,
+    data.announcements,
+    data.inquiries,
+    data.prayerRequests,
+  ];
+  const metricCounts = [
+    data.sermons.length,
+    upcomingEvents.length,
+    data.ministries.length,
+    data.announcements.length,
+    recentInquiries.length || data.inquiries.length,
+    recentPrayerRequests.length || data.prayerRequests.length,
+  ];
   const stats: StatCardData[] = statDefinitions.map((definition, index) => {
     const change = getPeriodChange(metricSources[index]);
     const available = data.available[index];
@@ -229,17 +277,35 @@ export function DashboardView() {
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-primary">Church website management</p>
         <h1 className="mt-1.5 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Dashboard overview</h1>
-        <p className="mt-2 text-sm text-slate-500">A snapshot of content and activity across your church website.</p>
+        <p className="mt-2 text-sm text-slate-500">A snapshot of content and activity across your church website (SRS Section 57).</p>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${data.loading ? "bg-slate-100 text-slate-600" : loadedSources === 4 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>
-          {data.loading ? "Loading data" : loadedSources === 4 ? "Live data" : `${loadedSources}/4 sources available`}
+        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${data.loading ? "bg-slate-100 text-slate-600" : loadedSources >= 4 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>
+          {data.loading ? "Loading data" : loadedSources >= 4 ? "Live data" : `${loadedSources}/6 sources available`}
         </span>
         <time className="text-sm text-slate-500">{formattedDate}</time>
       </div>
     </div>
 
-    <section aria-label="Church website statistics" className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    {/* Publication Status Summary Banner (SRS Section 57: Published & Draft content) */}
+    <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:px-6">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+        Content Status Overview:
+      </div>
+      <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+        <CheckCircle2 className="size-3.5" />
+        <span>{publishedCount} Published Records</span>
+      </div>
+      <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
+        <FileEdit className="size-3.5" />
+        <span>{draftCount} Draft Items</span>
+      </div>
+      <div className="ml-auto text-xs text-slate-400">
+        Automatic sync with database
+      </div>
+    </div>
+
+    <section aria-label="Church website statistics" className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {stats.map((stat) => <StatCardView key={stat.title} stat={stat} />)}
     </section>
 
