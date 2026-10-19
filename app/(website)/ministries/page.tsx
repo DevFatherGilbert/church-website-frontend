@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type Ministry } from "@/lib/api/church-api";
+import { DEFAULT_MINISTRIES } from "@/lib/content/default-ministries";
 
 export const metadata: Metadata = {
   title: "Ministries",
@@ -12,9 +13,9 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-
 export default async function MinistriesPage() {
-  const items = await getPublicData<Ministry[]>("/ministries");
+  const apiItems = await getPublicData<Ministry[]>("/ministries");
+  const items = apiItems && apiItems.length > 0 ? apiItems : DEFAULT_MINISTRIES;
 
   return <main>
     <PageHero eyebrow="FIND YOUR PEOPLE" title="There’s more than" emphasis="one way in." description="Explore the ministries and groups that help people connect, grow in faith, and serve the community." breadcrumbs={[{ label: "Home", href: "/" }]} />

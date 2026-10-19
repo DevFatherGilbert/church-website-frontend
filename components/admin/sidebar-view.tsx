@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChurchLogo } from "@/components/brand/church-logo";
+import { useChurchBrand } from "@/components/brand/church-brand-provider";
 import {
   Activity,
   BookOpen,
@@ -58,6 +59,7 @@ const navigationGroups: { label: string; items: { label: string; href: string; i
 
 export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
   const pathname = usePathname();
+  const { churchName, logoUrl, logoAlt } = useChurchBrand();
 
   return <>
     {isOpen && <button
@@ -68,9 +70,27 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
     />}
     <aside id="admin-dashboard-sidebar" className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-slate-900 text-slate-300 transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0 ${isOpen ? "visible translate-x-0" : "invisible -translate-x-full lg:visible"}`}>
       <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
-        <Link aria-label="Church admin dashboard" className="flex items-center gap-3 text-white" href="/admin/dashboard" onClick={onClose}>
-          <ChurchLogo className="size-10 rounded-xl bg-white object-contain p-0.5" />
-          <span><span className="block text-sm font-semibold tracking-wide">OUR CHURCH</span><span className="mt-0.5 block text-xs text-slate-400">Church Admin</span></span>
+        <Link
+          aria-label={`${churchName || "Church"} admin dashboard`}
+          className="flex min-w-0 items-center gap-3 text-white transition-opacity hover:opacity-90"
+          href="/admin/dashboard"
+          onClick={onClose}
+        >
+          <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">
+            <ChurchLogo
+              alt={logoAlt || churchName}
+              className="size-full object-contain"
+              src={logoUrl}
+            />
+          </div>
+          <span className="min-w-0">
+            <span className="block truncate font-display text-sm font-extrabold uppercase leading-tight tracking-wide text-white">
+              {churchName || "Our Church"}
+            </span>
+            <span className="mt-0.5 block text-[0.68rem] font-semibold uppercase tracking-wider text-slate-400">
+              Admin Workspace
+            </span>
+          </span>
         </Link>
         <button aria-label="Close navigation menu" className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" onClick={onClose} type="button"><X aria-hidden="true" className="size-5" /></button>
       </div>

@@ -1,8 +1,9 @@
+const directUrl = (process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL)?.trim();
 const protocol = process.env.NEXT_PUBLIC_API_PROTOCOL ?? "http";
 const host = process.env.NEXT_PUBLIC_API_HOST ?? "localhost";
 const port = process.env.NEXT_PUBLIC_API_PORT?.trim();
 const apiPrefix = `/${(process.env.NEXT_PUBLIC_API_PREFIX ?? "api").replace(/^\/+|\/+$/g, "")}`;
-const apiBase = `${protocol}://${host}${port ? `:${port}` : ""}${apiPrefix}`.replace(/\/$/, "");
+const apiBase = (directUrl || `${protocol}://${host}${port ? `:${port}` : ""}${apiPrefix}`).replace(/\/$/, "");
 
 type ApiEnvelope<T> = {
   success?: boolean;

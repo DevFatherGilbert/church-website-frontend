@@ -12,13 +12,13 @@ const churchLinks = [
 ] as const;
 
 const ministryLinks = [
-  { label: "Children's Ministry", href: "/ministries" },
-  { label: "Youth Ministry", href: "/ministries" },
-  { label: "Women's Ministry", href: "/ministries" },
-  { label: "Men's Ministry", href: "/ministries" },
-  { label: "Worship & Choir", href: "/ministries" },
-  { label: "Prayer Ministry", href: "/ministries" },
-  { label: "Outreach & Service", href: "/ministries" },
+  { label: "Children's Ministry", href: "/ministries/children" },
+  { label: "Youth Ministry", href: "/ministries/youth" },
+  { label: "Women's Ministry", href: "/ministries/women" },
+  { label: "Men's Ministry", href: "/ministries/men" },
+  { label: "Worship & Choir", href: "/ministries/worship" },
+  { label: "Prayer Ministry", href: "/ministries/prayer" },
+  { label: "Outreach & Service", href: "/ministries/outreach" },
 ] as const;
 
 const resourceLinks = [

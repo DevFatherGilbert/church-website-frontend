@@ -232,13 +232,18 @@ export async function getPublicWebsiteSettings() {
   const items = result?.items ?? [];
   const homepage = items.find((item) => item.details?.contentKey === "homepage");
   const church = items.find((item) => item.details?.contentKey === "church-information") ?? items.find((item) => !item.details?.contentKey);
+  const mergedChurch = church ? mergeChurchInformation(church.details) : defaultChurchInformation;
+  const rawChurchName = church?.title?.trim() || ((church?.details?.profile as Record<string, unknown> | undefined)?.name as string)?.trim();
+  const churchName = rawChurchName || "Seventh-day Adventist Fellowship";
+
   return {
     backendAvailable: result !== null,
     homepage: homepage ? mergeHomepageSettings(homepage.details) : defaultHomepageSettings,
-    church: church ? mergeChurchInformation(church.details) : defaultChurchInformation,
+    church: mergedChurch,
     churchRecord: church ?? null,
     homepageRecord: homepage ?? null,
-    churchName: church?.title ?? "",
-    churchDescription: church?.description ?? "",
+    churchName,
+    churchDescription: church?.description?.trim() || "",
   };
 }
+

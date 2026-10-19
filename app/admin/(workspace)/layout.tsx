@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
+import { useChurchBrand } from "@/components/brand/church-brand-provider";
 import { authGet, authRequest } from "@/lib/api/church-api";
 import { AdminShellView } from "@/components/admin/admin-shell-view";
 import { ConfirmationDialogProvider } from "@/components/admin/confirmation-dialog";
@@ -16,6 +17,7 @@ type SessionProfile = {
 };
 
 export default function AdminWorkspaceLayout({ children }: { children: ReactNode }) {
+  const { churchName, logoUrl, logoAlt } = useChurchBrand();
   const pathname = usePathname();
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState<"checking" | "authorized" | "redirecting">("checking");
@@ -65,12 +67,20 @@ export default function AdminWorkspaceLayout({ children }: { children: ReactNode
   if (authStatus !== "authorized") {
     return <main className="grid min-h-screen place-items-center bg-background px-5 py-10">
       <section aria-live="polite" className="surface-card w-full max-w-sm p-8 text-center" role="status">
-        <span className="mx-auto grid size-14 place-items-center rounded-xl bg-primary/10 text-primary">
-          <ChurchLogo className="size-10 rounded-full object-contain" />
+        <span className="mx-auto grid size-14 place-items-center rounded-xl bg-white p-1 shadow-sm">
+          <ChurchLogo
+            alt={logoAlt || churchName}
+            className="size-10 object-contain"
+            src={logoUrl}
+          />
         </span>
         <div className="mt-6 flex items-center justify-center gap-2">
           <LoaderCircle aria-hidden="true" className="size-4 animate-spin text-primary" />
-          <p className="text-sm font-semibold text-text">{authStatus === "redirecting" ? "WELCOME TO ADMIN PAGE" : "FAITHFULNESS AND DEDICATION IS IMPORTANT"}</p>
+          <p className="text-sm font-bold uppercase tracking-wide text-text">
+            {authStatus === "redirecting"
+              ? `Welcome to ${churchName || "Church"} Admin`
+              : "Faithfulness and dedication is important"}
+          </p>
         </div>
         <p className="mt-2 text-sm leading-6 text-muted">{authStatus === "redirecting" ? "Taking you to the secure sign-in page." : "One moment while we get your dashboard ready."}</p>
         <div aria-hidden="true" className="mt-7 space-y-2.5">

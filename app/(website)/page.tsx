@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -42,9 +43,10 @@ import {
   type ChurchService,
 } from "@/lib/content/services";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
+  await connection();
   const settings = await getPublicWebsiteSettings().catch(() => null);
   const churchName = settings?.churchName || "Seventh-day Adventist Fellowship";
   const title = `${churchName} | Faith, Worship & Community`;
@@ -129,6 +131,7 @@ function LinkArrow({ children, href }: { children: string; href: string }) {
 
 /* ── Fallback datasets matching SRS Section 12, 19, 27, 30, 34 ── */
 export default async function HomeView() {
+  await connection();
   const [
     websiteSettings,
     eventResponse,

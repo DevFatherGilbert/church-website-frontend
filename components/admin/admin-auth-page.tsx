@@ -1,5 +1,6 @@
 import { AdminLoginForm } from "./admin-login-form";
 import { ChurchLogo } from "@/components/brand/church-logo";
+import { useChurchBrand } from "@/components/brand/church-brand-provider";
 
 type AuthStep = "register" | "verify" | "password" | "login";
 
@@ -14,6 +15,7 @@ export function AdminAuthPage({
   description: string;
   basePath?: string;
 }) {
+  const { churchName, logoUrl, logoAlt } = useChurchBrand();
   const isLogin = step === "login";
   const isRegistrationFlow = !isLogin;
 
@@ -26,7 +28,7 @@ export function AdminAuthPage({
     : "SECURE\n ACCOUNT!";
 
   const subtitle = isLogin
-    ? "Sign in to continue to your church administration workspace."
+    ? `Sign in to continue to your ${churchName || "church"} administration workspace.`
     : description;
 
   return (
@@ -34,9 +36,14 @@ export function AdminAuthPage({
       <div className={`container ${isRegistrationFlow ? "registration-layout" : "login-layout"}`}>
         <div className={`slide-panel side-b ${isRegistrationFlow ? "register-panel" : "login-panel"}`}>
           <div className="slide-panel-inner">
-            <div className="church-tag">
-              <ChurchLogo className="size-6 object-contain" priority />
-              <span>Church Portal</span>
+            <div className="church-tag flex items-center gap-2">
+              <ChurchLogo
+                alt={logoAlt || churchName}
+                className="size-6 object-contain"
+                priority
+                src={logoUrl}
+              />
+              <span className="font-bold">{churchName || "Church Portal"}</span>
             </div>
 
             <h1 className="welcome-text">

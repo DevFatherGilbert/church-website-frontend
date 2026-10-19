@@ -43,9 +43,21 @@ const initialData: DashboardData = {
   loading: true,
 };
 
+function extractItems<T>(value: unknown): T[] {
+  if (Array.isArray(value)) return value as T[];
+  if (value && typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+  }
+  return [];
+}
+
 function countInRange(records: DatedRecord[], start: number, end: number) {
+  if (!Array.isArray(records)) return 0;
   return records.filter((record) => {
-    const value = record.publishedAt ?? record.createdAt ?? record.updatedAt;
+    const value = record?.publishedAt ?? record?.createdAt ?? record?.updatedAt;
     if (!value) return false;
     const time = new Date(value).getTime();
     return Number.isFinite(time) && time >= start && time < end;
@@ -53,6 +65,9 @@ function countInRange(records: DatedRecord[], start: number, end: number) {
 }
 
 function getPeriodChange(records: DatedRecord[]) {
+  if (!Array.isArray(records)) {
+    return { change: "0", direction: "steady" as const };
+  }
   const now = Date.now();
   const currentStart = now - 30 * 24 * 60 * 60 * 1000;
   const previousStart = now - 60 * 24 * 60 * 60 * 1000;
@@ -94,7 +109,9 @@ function toActivityItems(data: DashboardData): RecentActivityItem[] {
   const today = getKigaliDateKey(new Date());
   const items: RecentActivityItem[] = [];
 
-  for (const sermon of data.sermons) {
+  const sermons = Array.isArray(data?.sermons) ? data.sermons : [];
+  for (const sermon of sermons) {
+    if (!sermon) continue;
     const rawDate = getActivityTime(sermon);
     if (!rawDate) continue;
     const formatted = formatActivityDate(rawDate);
@@ -108,7 +125,9 @@ function toActivityItems(data: DashboardData): RecentActivityItem[] {
     });
   }
 
-  for (const event of data.events) {
+  const events = Array.isArray(data?.events) ? data.events : [];
+  for (const event of events) {
+    if (!event) continue;
     const rawDate = getActivityTime(event);
     if (!rawDate) continue;
     const formatted = formatActivityDate(rawDate);
@@ -123,7 +142,9 @@ function toActivityItems(data: DashboardData): RecentActivityItem[] {
     });
   }
 
-  for (const announcement of data.announcements) {
+  const announcements = Array.isArray(data?.announcements) ? data.announcements : [];
+  for (const announcement of announcements) {
+    if (!announcement) continue;
     const rawDate = getActivityTime(announcement);
     if (!rawDate) continue;
     const formatted = formatActivityDate(rawDate);
@@ -169,9 +190,9 @@ export function DashboardView() {
       ] = await Promise.allSettled([
         authGet<DatedRecord[]>("/admin/sermons").catch(() => authGet<DatedRecord[]>("/sermons")),
         authGet<DatedRecord[]>("/events"),
-        authGet<DashboardAnnouncementList>("/admin/announcements"),
+        authGet<unknown>("/admin/announcements").catch(() => authGet<unknown>("/content/announcements")),
         authGet<DatedRecord[]>("/inquiries/prayer"),
-        authGet<DatedRecord[]>("/admin/ministries").catch(() => authGet<DatedRecord[]>("/ministries")),
+        authGet<unknown>("/admin/ministries").catch(() => authGet<unknown>("/ministries")),
         authGet<DatedRecord[]>("/inquiries/contact"),
       ]);
 
@@ -187,12 +208,12 @@ export function DashboardView() {
       ];
 
       setData({
-        sermons: sermonsResult.status === "fulfilled" ? sermonsResult.value : [],
-        events: eventsResult.status === "fulfilled" ? eventsResult.value : [],
-        announcements: announcementsResult.status === "fulfilled" ? announcementsResult.value.items : [],
-        prayerRequests: prayersResult.status === "fulfilled" ? prayersResult.value : [],
-        ministries: ministriesResult.status === "fulfilled" ? ministriesResult.value : [],
-        inquiries: inquiriesResult.status === "fulfilled" ? inquiriesResult.value : [],
+        sermons: sermonsResult.status === "fulfilled" ? extractItems<DatedRecord>(sermonsResult.value) : [],
+        events: eventsResult.status === "fulfilled" ? extractItems<DatedRecord>(eventsResult.value) : [],
+        announcements: announcementsResult.status === "fulfilled" ? extractItems<DatedRecord>(announcementsResult.value) : [],
+        prayerRequests: prayersResult.status === "fulfilled" ? extractItems<DatedRecord>(prayersResult.value) : [],
+        ministries: ministriesResult.status === "fulfilled" ? extractItems<DatedRecord>(ministriesResult.value) : [],
+        inquiries: inquiriesResult.status === "fulfilled" ? extractItems<DatedRecord>(inquiriesResult.value) : [],
         available,
         loading: false,
       });
@@ -209,26 +230,34 @@ export function DashboardView() {
   const now = currentTime;
   const currentPeriodStart = now - 30 * 24 * 60 * 60 * 1000;
   const today = currentTime ? getKigaliDateKey(new Date(currentTime)) : "";
-  const upcomingEvents = data.events.filter((event) => Boolean(event.date) && event.date! >= today);
-  const recentPrayerRequests = data.prayerRequests.filter((request) => {
+
+  const sermons = Array.isArray(data.sermons) ? data.sermons : [];
+  const events = Array.isArray(data.events) ? data.events : [];
+  const announcements = Array.isArray(data.announcements) ? data.announcements : [];
+  const prayerRequests = Array.isArray(data.prayerRequests) ? data.prayerRequests : [];
+  const ministries = Array.isArray(data.ministries) ? data.ministries : [];
+  const inquiries = Array.isArray(data.inquiries) ? data.inquiries : [];
+
+  const upcomingEvents = events.filter((event) => Boolean(event.date) && event.date! >= today);
+  const recentPrayerRequests = prayerRequests.filter((request) => {
     const createdAt = request.createdAt ? new Date(request.createdAt).getTime() : 0;
     return createdAt >= currentPeriodStart && createdAt <= now;
   });
-  const recentInquiries = data.inquiries.filter((inquiry) => {
+  const recentInquiries = inquiries.filter((inquiry) => {
     const createdAt = inquiry.createdAt ? new Date(inquiry.createdAt).getTime() : 0;
     return createdAt >= currentPeriodStart && createdAt <= now;
   });
 
   // Calculate Draft vs Published Breakdown (SRS Section 57)
   const publishedCount =
-    data.sermons.filter((s) => s.status !== "draft").length +
-    data.events.filter((e) => e.status !== "draft").length +
-    data.announcements.filter((a) => a.details?.status === "PUBLISHED" || a.status === "published").length;
+    sermons.filter((s) => s.status !== "draft").length +
+    events.filter((e) => e.status !== "draft").length +
+    announcements.filter((a) => a.details?.status === "PUBLISHED" || a.status === "published").length;
 
   const draftCount =
-    data.sermons.filter((s) => s.status === "draft").length +
-    data.events.filter((e) => e.status === "draft").length +
-    data.announcements.filter((a) => a.details?.status === "DRAFT" || a.status === "draft").length;
+    sermons.filter((s) => s.status === "draft").length +
+    events.filter((e) => e.status === "draft").length +
+    announcements.filter((a) => a.details?.status === "DRAFT" || a.status === "draft").length;
 
   const statDefinitions: Omit<StatCardData, "value" | "change" | "direction" | "comparisonLabel">[] = [
     { title: "Published Sermons", icon: Mic2, tone: "indigo" },
@@ -239,20 +268,20 @@ export function DashboardView() {
     { title: "Prayer Requests", icon: HandHeart, tone: "indigo" },
   ];
   const metricSources = [
-    data.sermons,
-    data.events,
-    data.ministries,
-    data.announcements,
-    data.inquiries,
-    data.prayerRequests,
+    sermons,
+    events,
+    ministries,
+    announcements,
+    inquiries,
+    prayerRequests,
   ];
   const metricCounts = [
-    data.sermons.length,
+    sermons.length,
     upcomingEvents.length,
-    data.ministries.length,
-    data.announcements.length,
-    recentInquiries.length || data.inquiries.length,
-    recentPrayerRequests.length || data.prayerRequests.length,
+    ministries.length,
+    announcements.length,
+    recentInquiries.length || inquiries.length,
+    recentPrayerRequests.length || prayerRequests.length,
   ];
   const stats: StatCardData[] = statDefinitions.map((definition, index) => {
     const change = getPeriodChange(metricSources[index]);

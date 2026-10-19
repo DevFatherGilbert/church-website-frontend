@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { authRequest } from "@/lib/api/church-api";
+import { ChurchLogo } from "@/components/brand/church-logo";
+import { useChurchBrand } from "@/components/brand/church-brand-provider";
 
 type Step = "email" | "code" | "password" | "done";
 type ForgotPasswordResult = { requestId: string; destination?: string };
 type VerifyResult = { resetToken: string };
 
 export function ForgotPasswordForm({ admin = false }: { admin?: boolean }) {
+  const { churchName, logoUrl, logoAlt } = useChurchBrand();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [destination, setDestination] = useState("");
@@ -74,7 +77,15 @@ export function ForgotPasswordForm({ admin = false }: { admin?: boolean }) {
       <div className="container login-layout">
         <div className="slide-panel side-b login-panel">
           <div className="slide-panel-inner">
-            <div className="church-tag"><span>Church Portal</span></div>
+            <div className="church-tag flex items-center gap-2">
+              <ChurchLogo
+                alt={logoAlt || churchName}
+                className="size-6 object-contain"
+                priority
+                src={logoUrl}
+              />
+              <span className="font-bold">{churchName || "Church Portal"}</span>
+            </div>
             <h1 className="welcome-text"><pre>ACCOUNT<br />RECOVERY</pre></h1>
             <div className="slide-divider" aria-hidden="true" />
             <p className="welcome-subtext">{step === "done" ? "Your account is secure again." : "We’ll help you get back into your account."}</p>

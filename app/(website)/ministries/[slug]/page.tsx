@@ -4,13 +4,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type Ministry } from "@/lib/api/church-api";
+import { getDefaultMinistry } from "@/lib/content/default-ministries";
 
 type MinistryPageProps = { params: Promise<{ slug: string }> };
 
 export const revalidate = 60;
 
 async function getMinistry(slug: string) {
-  return getPublicData<Ministry>(`/ministries/${encodeURIComponent(slug)}`, { allowNotFound: true });
+  const ministry = await getPublicData<Ministry>(`/ministries/${encodeURIComponent(slug)}`, { allowNotFound: true });
+  return ministry ?? getDefaultMinistry(slug) ?? null;
 }
 
 export async function generateMetadata({ params }: MinistryPageProps): Promise<Metadata> {
