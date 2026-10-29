@@ -1,74 +1,145 @@
-﻿import type { MetadataRoute } from "next";
-import { getPublicData, type Sermon, type ChurchEvent, type Ministry } from "@/lib/api/church-api";
+import type { MetadataRoute } from "next";
+import {
+  getPublicData,
+  type Sermon,
+  type ChurchEvent,
+  type Ministry,
+  type PublicContent,
+} from "@/lib/api/church-api";
+import { absoluteUrl } from "@/lib/site-url";
 
-const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
-
-function url(path: string, lastModified?: string | Date | null): MetadataRoute.Sitemap[number] {
-  return {
-    url: `${siteUrl}${path}`,
-    lastModified: lastModified ? new Date(lastModified) : new Date(),
-    changeFrequency: "weekly",
-    priority: 0.7,
-  };
-}
+/**
+ * Revalidate sitemap periodically (hourly) so newly published
+ * sermons, events, ministries, or announcements are automatically discovered.
+ */
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static public pages
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: `${siteUrl}/`, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
-    { url: `${siteUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteUrl}/about/our-story`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/about/mission-vision`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/about/beliefs`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/about/leadership`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/ministries`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${siteUrl}/services`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-    { url: `${siteUrl}/sermons`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${siteUrl}/events`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${siteUrl}/announcements`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
-    { url: `${siteUrl}/resources`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${siteUrl}/faqs`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${siteUrl}/plan-your-visit`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${siteUrl}/prayer-request`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${siteUrl}/privacy-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${siteUrl}/terms-and-conditions`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${siteUrl}/cookie-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+  const sitemapMap = new Map<string, MetadataRoute.Sitemap[number]>();
+
+  function addEntry(
+    path: string,
+    lastModified?: string | Date | null,
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] = "weekly",
+    priority: number = 0.7,
+  ) {
+    const url = absoluteUrl(path);
+    if (!sitemapMap.has(url)) {
+      sitemapMap.set(url, {
+        url,
+        lastModified: lastModified ? new Date(lastModified) : new Date(),
+        changeFrequency,
+        priority,
+      });
+    }
+  }
+
+  // 1. Core static public routes (preserves all original 19 static routes + 7 static ministry pages = 26 total)
+  const staticRoutes: {
+    path: string;
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+    priority: number;
+  }[] = [
+    { path: "/", changeFrequency: "daily", priority: 1.0 },
+    // About section
+    { path: "/about", changeFrequency: "monthly", priority: 0.8 },
+    { path: "/about/our-story", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/about/mission-vision", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/about/beliefs", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/about/leadership", changeFrequency: "monthly", priority: 0.7 },
+    // Ministries
+    { path: "/ministries", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/ministries/children", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/ministries/youth", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/ministries/women", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/ministries/men", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/ministries/worship", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/ministries/prayer", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/ministries/outreach", changeFrequency: "monthly", priority: 0.7 },
+    // Services, Media & Engagement
+    { path: "/services", changeFrequency: "weekly", priority: 0.8 },
+    { path: "/sermons", changeFrequency: "daily", priority: 0.9 },
+    { path: "/events", changeFrequency: "daily", priority: 0.9 },
+    { path: "/announcements", changeFrequency: "daily", priority: 0.8 },
+    { path: "/resources", changeFrequency: "weekly", priority: 0.7 },
+    { path: "/faqs", changeFrequency: "monthly", priority: 0.6 },
+    { path: "/contact", changeFrequency: "monthly", priority: 0.7 },
+    { path: "/plan-your-visit", changeFrequency: "monthly", priority: 0.8 },
+    { path: "/prayer-request", changeFrequency: "monthly", priority: 0.6 },
+    // Legal & Policy
+    { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/terms-and-conditions", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/cookie-policy", changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  // Dynamic content — fetch in parallel, ignore failures
-  const [sermons, events, ministries] = await Promise.all([
+  for (const route of staticRoutes) {
+    addEntry(route.path, new Date(), route.changeFrequency, route.priority);
+  }
+
+  // 2. Dynamic content — fetched in parallel with graceful fallback
+  const [sermons, events, ministries, announcements] = await Promise.all([
     getPublicData<Sermon[]>("/sermons?limit=200").catch(() => null),
     getPublicData<ChurchEvent[]>("/events?limit=200").catch(() => null),
     getPublicData<Ministry[]>("/ministries?limit=200").catch(() => null),
+    getPublicData<{ items: PublicContent[] }>("/content/announcements?limit=200").catch(() => null),
   ]);
 
-  const sermonPages: MetadataRoute.Sitemap = (sermons ?? [])
-    .filter((s) => s.slug && (s.status === "published" || !s.status))
-    .map((s) => ({
-      url: `${siteUrl}/sermons/${encodeURIComponent(s.slug)}`,
-      lastModified: s.updatedAt ? new Date(s.updatedAt) : new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
+  // Dynamic sermons
+  if (Array.isArray(sermons)) {
+    for (const sermon of sermons) {
+      if (sermon?.slug && (sermon.status === "published" || !sermon.status)) {
+        addEntry(
+          `/sermons/${encodeURIComponent(sermon.slug)}`,
+          sermon.updatedAt || sermon.date,
+          "monthly",
+          0.7,
+        );
+      }
+    }
+  }
 
-  const eventPages: MetadataRoute.Sitemap = (events ?? [])
-    .filter((e) => e.status === "published" || !e.status)
-    .map((e) => ({
-      url: `${siteUrl}/events/${e.id}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.7,
-    }));
+  // Dynamic events
+  if (Array.isArray(events)) {
+    for (const event of events) {
+      if (event?.id && (event.status === "published" || !event.status)) {
+        addEntry(
+          `/events/${encodeURIComponent(event.id)}`,
+          event.date,
+          "weekly",
+          0.7,
+        );
+      }
+    }
+  }
 
-  const ministryPages: MetadataRoute.Sitemap = (ministries ?? [])
-    .filter((m) => m.slug && (m.status === "published" || !m.status))
-    .map((m) => ({
-      url: `${siteUrl}/ministries/${encodeURIComponent(m.slug)}`,
-      lastModified: m.updatedAt ? new Date(m.updatedAt) : new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
+  // Dynamic ministries
+  if (Array.isArray(ministries)) {
+    for (const ministry of ministries) {
+      if (ministry?.slug && (ministry.status === "published" || !ministry.status)) {
+        addEntry(
+          `/ministries/${encodeURIComponent(ministry.slug)}`,
+          ministry.updatedAt,
+          "monthly",
+          0.7,
+        );
+      }
+    }
+  }
 
-  return [...staticPages, ...sermonPages, ...eventPages, ...ministryPages];
+  // Dynamic announcements
+  const announcementItems = announcements?.items;
+  if (Array.isArray(announcementItems)) {
+    for (const item of announcementItems) {
+      if (item?.slug) {
+        addEntry(
+          `/announcements/${encodeURIComponent(item.slug)}`,
+          item.publishedAt,
+          "daily",
+          0.8,
+        );
+      }
+    }
+  }
+
+  return Array.from(sitemapMap.values());
 }

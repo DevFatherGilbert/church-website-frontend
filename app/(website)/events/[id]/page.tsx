@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type ChurchEvent } from "@/lib/api/church-api";
+import { absoluteUrl, getSiteUrl } from "@/lib/site-url";
 
 export const revalidate = 60;
 
@@ -52,7 +53,7 @@ export default async function EventDetailPage({ params }: Props) {
   const name = event?.name ?? id.replaceAll("-", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 
   // Build Event JSON-LD structured data
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
   const eventJsonLd = event ? {
     "@context": "https://schema.org",
     "@type": "Event",

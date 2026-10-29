@@ -24,6 +24,7 @@ import { FlipCard } from "@/components/ui/flip-card";
 import { ServiceUnavailable } from "@/components/feedback/service-unavailable";
 import { ArrangedAudienceStrip } from "@/components/site/arranged-audience-strip";
 import { ArrangedServicesFilter } from "@/components/site/arranged-services-filter";
+import { getSiteUrl } from "@/lib/site-url";
 import {
   getPublicData,
   type ChurchEvent,
@@ -239,7 +240,7 @@ export default async function HomeView() {
 
   const hero = homepage.hero;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getSiteUrl();
   const churchJsonLd = {
     "@context": "https://schema.org",
     "@type": "Church",

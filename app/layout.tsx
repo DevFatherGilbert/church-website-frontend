@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 import { ChurchBrandProvider } from "@/components/brand/church-brand-provider";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -23,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const logo = church?.profile?.logoUrl?.trim() || "/logo-c.png";
 
   return {
+    metadataBase: new URL(getSiteUrl()),
     title: { default: name, template: `%s | ${name}` },
     description: churchDescription || "Find church information, services, ministries, events and ways to connect.",
     openGraph: {
