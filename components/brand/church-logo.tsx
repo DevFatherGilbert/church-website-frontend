@@ -1,14 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { useChurchBrand } from "./church-brand-provider";
+
+const fallbackLogo = "/logo-c.png";
 
 type ChurchLogoProps = {
   size?: number;
   alt?: string;
   className?: string;
   priority?: boolean;
-  src?: string;
 };
 
 export function ChurchLogo({
@@ -16,10 +18,11 @@ export function ChurchLogo({
   alt,
   className = "",
   priority = false,
-  src,
 }: ChurchLogoProps) {
   const brand = useChurchBrand();
-  const effectiveSrc = (src || brand.logoUrl || "/logo-c.png").trim();
+  const source = brand.logoUrl.trim() || fallbackLogo;
+  const [failedSource, setFailedSource] = useState<string | null>(null);
+  const effectiveSrc = failedSource === source ? fallbackLogo : source;
   const effectiveAlt = alt || brand.logoAlt || brand.churchName || "Church Logo";
   const isExternal =
     effectiveSrc.startsWith("http://") || effectiveSrc.startsWith("https://");
@@ -29,6 +32,7 @@ export function ChurchLogo({
       alt={effectiveAlt}
       className={className}
       height={size}
+      onError={() => setFailedSource(source)}
       priority={priority}
       src={effectiveSrc}
       unoptimized={isExternal}
@@ -36,4 +40,3 @@ export function ChurchLogo({
     />
   );
 }
-

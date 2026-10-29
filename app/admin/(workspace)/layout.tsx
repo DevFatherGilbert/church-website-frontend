@@ -17,7 +17,7 @@ type SessionProfile = {
 };
 
 export default function AdminWorkspaceLayout({ children }: { children: ReactNode }) {
-  const { churchName, logoUrl, logoAlt } = useChurchBrand();
+  const { churchName } = useChurchBrand();
   const pathname = usePathname();
   const router = useRouter();
   const [authStatus, setAuthStatus] = useState<"checking" | "authorized" | "redirecting">("checking");
@@ -69,9 +69,7 @@ export default function AdminWorkspaceLayout({ children }: { children: ReactNode
       <section aria-live="polite" className="surface-card w-full max-w-sm p-8 text-center" role="status">
         <span className="mx-auto grid size-14 place-items-center rounded-xl bg-white p-1 shadow-sm">
           <ChurchLogo
-            alt={logoAlt || churchName}
             className="size-10 object-contain"
-            src={logoUrl}
           />
         </span>
         <div className="mt-6 flex items-center justify-center gap-2">

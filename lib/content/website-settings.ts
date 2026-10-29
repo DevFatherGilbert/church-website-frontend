@@ -283,7 +283,7 @@ export const defaultChurchInformation: ChurchInformation = {
     history: "A Seventh-day Adventist faith community centered on Scripture, Jesus Christ, Sabbath worship, spiritual growth, fellowship, and service.",
     imageUrl: "",
     imageAlt: "Church sanctuary and congregation",
-    logoUrl: "/logo-c.png",
+    logoUrl: "",
     logoAlt: "Church Logo",
   },
   contact: {
@@ -430,4 +430,3 @@ export async function getPublicWebsiteSettings() {
     churchDescription: church?.description?.trim() || "",
   };
 }
-

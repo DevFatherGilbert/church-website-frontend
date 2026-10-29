@@ -17,10 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const { churchName, churchDescription, church } = await getPublicWebsiteSettings().catch(() => ({
     churchName: "Church",
     churchDescription: "",
-    church: { profile: { logoUrl: "/logo-c.png", logoAlt: "Church Logo" } },
+    church: { profile: { logoUrl: "", logoAlt: "Church Logo" } },
   }));
   const name = churchName || "Church";
-  const logo = church?.profile?.logoUrl || "/logo-c.png";
+  const logo = church?.profile?.logoUrl?.trim() || "/logo-c.png";
 
   return {
     title: { default: name, template: `%s | ${name}` },
@@ -40,12 +40,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const { churchName, churchDescription, church } = await getPublicWebsiteSettings().catch(() => ({
     churchName: "Church",
     churchDescription: "",
-    church: { profile: { logoUrl: "/logo-c.png", logoAlt: "Church Logo" } },
+    church: { profile: { logoUrl: "", logoAlt: "Church Logo" } },
   }));
 
   const initialBrand = {
     churchName: churchName || "Church",
-    logoUrl: church.profile?.logoUrl || "/logo-c.png",
+    logoUrl: church.profile?.logoUrl?.trim() || "",
     logoAlt: church.profile?.logoAlt || churchName || "Church Logo",
     description: churchDescription || "",
   };

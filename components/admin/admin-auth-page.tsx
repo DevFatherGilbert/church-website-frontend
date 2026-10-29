@@ -17,7 +17,7 @@ export function AdminAuthPage({
   description: string;
   basePath?: string;
 }) {
-  const { churchName, logoUrl, logoAlt } = useChurchBrand();
+  const { churchName } = useChurchBrand();
   const isLogin = step === "login";
   const isRegistrationFlow = !isLogin;
 
@@ -40,10 +40,8 @@ export function AdminAuthPage({
           <div className="slide-panel-inner">
             <div className="church-tag flex items-center gap-2">
               <ChurchLogo
-                alt={logoAlt || churchName}
                 className="size-6 object-contain"
                 priority
-                src={logoUrl}
               />
               <span className="font-bold">{churchName || "Church Portal"}</span>
             </div>

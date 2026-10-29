@@ -20,7 +20,7 @@ export type ChurchBrand = {
 
 const defaultBrand: ChurchBrand = {
   churchName: "Church",
-  logoUrl: "/logo-c.png",
+  logoUrl: "",
   logoAlt: "Church Logo",
   description: "",
   refresh: async () => {},
@@ -37,7 +37,7 @@ export function ChurchBrandProvider({
 }) {
   const [brand, setBrand] = useState<Omit<ChurchBrand, "refresh">>({
     churchName: initialBrand?.churchName || "Church",
-    logoUrl: initialBrand?.logoUrl || "/logo-c.png",
+    logoUrl: initialBrand?.logoUrl?.trim() || "",
     logoAlt: initialBrand?.logoAlt || initialBrand?.churchName || "Church Logo",
     description: initialBrand?.description || "",
   });
@@ -45,8 +45,11 @@ export function ChurchBrandProvider({
   const refresh = useCallback(async () => {
     try {
       const settings = await getPublicWebsiteSettings();
+      if (!settings.backendAvailable) {
+        throw new Error("The church settings service is unavailable.");
+      }
       const churchName = settings.churchName || "Church";
-      const logoUrl = settings.church.profile.logoUrl || "/logo-c.png";
+      const logoUrl = settings.church.profile.logoUrl?.trim() || "";
       const logoAlt =
         settings.church.profile.logoAlt || churchName || "Church Logo";
       setBrand({
@@ -55,8 +58,8 @@ export function ChurchBrandProvider({
         logoAlt,
         description: settings.churchDescription || "",
       });
-    } catch {
-      // Ignore network errors on background refresh
+    } catch (error) {
+      console.error("Could not refresh church branding from public settings.", error);
     }
   }, []);
 

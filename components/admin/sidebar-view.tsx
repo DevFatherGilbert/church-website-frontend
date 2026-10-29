@@ -59,7 +59,7 @@ const navigationGroups: { label: string; items: { label: string; href: string; i
 
 export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
   const pathname = usePathname();
-  const { churchName, logoUrl, logoAlt } = useChurchBrand();
+  const { churchName } = useChurchBrand();
 
   return <>
     {isOpen && <button
@@ -78,9 +78,7 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
         >
           <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow-xs">
             <ChurchLogo
-              alt={logoAlt || churchName}
               className="size-full object-contain"
-              src={logoUrl}
             />
           </div>
           <span className="min-w-0">

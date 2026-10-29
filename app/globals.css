@@ -2,7 +2,7 @@
 @import "./login.css";
 
 :root {
-  /* Aligned strictly with logo-c.png (Sapphire Royal Blue & Radiant Warm Gold) */
+  /* Aligned with the church brand colors (Sapphire Royal Blue & Radiant Warm Gold) */
   --brand-primary: 214 100% 24%; /* #00387B Sapphire Royal Blue (Cross & Bible Pages) */
   --brand-primary-hover: 212 95% 32%; /* #0754A3 Vibrant Royal Sapphire */
   --brand-primary-dark: 218 100% 14%; /* #001C46 Deep Midnight Navy (Logo base) */

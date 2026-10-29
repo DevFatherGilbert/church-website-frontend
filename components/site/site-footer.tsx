@@ -29,9 +29,7 @@ export async function SiteFooter() {
             >
               <div className="flex size-12 items-center justify-center rounded-xl bg-white p-1.5 shadow-md transition-transform group-hover:scale-105">
                 <ChurchLogo
-                  alt={church.profile.logoAlt || displayChurchName}
                   className="size-full object-contain"
-                  src={church.profile.logoUrl || "/logo-c.png"}
                 />
               </div>
               <div>

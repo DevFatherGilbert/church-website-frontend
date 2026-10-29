@@ -11,7 +11,7 @@ type ForgotPasswordResult = { requestId: string; destination?: string };
 type VerifyResult = { resetToken: string };
 
 export function ForgotPasswordForm({ admin = false }: { admin?: boolean }) {
-  const { churchName, logoUrl, logoAlt } = useChurchBrand();
+  const { churchName } = useChurchBrand();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [destination, setDestination] = useState("");
@@ -79,10 +79,8 @@ export function ForgotPasswordForm({ admin = false }: { admin?: boolean }) {
           <div className="slide-panel-inner">
             <div className="church-tag flex items-center gap-2">
               <ChurchLogo
-                alt={logoAlt || churchName}
                 className="size-6 object-contain"
                 priority
-                src={logoUrl}
               />
               <span className="font-bold">{churchName || "Church Portal"}</span>
             </div>

@@ -7,7 +7,7 @@ import { getPublicData, type PublicContent } from "@/lib/api/church-api";
 
 export async function SiteChrome({ children }: { children: ReactNode }) {
   await connection();
-  const [{ churchName, church, homepage }, announcementsData] = await Promise.all([
+  const [{ church, homepage }, announcementsData] = await Promise.all([
     getPublicWebsiteSettings(),
     getPublicData<{ items: PublicContent[] }>("/content/announcements?limit=5").catch(() => null),
   ]);
@@ -33,9 +33,6 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
         Skip to main content
       </a>
       <HeaderView
-        churchName={churchName || "Church"}
-        logoUrl={church.profile.logoUrl || "/logo-c.png"}
-        logoAlt={church.profile.logoAlt || churchName || "Church logo"}
         phone={church.contact.phone}
         email={church.contact.email}
         location={[church.contact.city, church.contact.country].filter(Boolean).join(", ") || "Kigali, Rwanda"}

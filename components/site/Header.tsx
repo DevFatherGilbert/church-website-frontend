@@ -17,6 +17,7 @@ import {
   Megaphone,
 } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
+import { useChurchBrand } from "@/components/brand/church-brand-provider";
 import { defaultHomepageSettings, type HomepageSettings } from "@/lib/content/website-settings";
 
 const subscribeNever = () => () => {};
@@ -36,18 +37,12 @@ export type UrgentAnnouncementData = {
 };
 
 export function HeaderView({
-  churchName = "Church",
-  logoUrl = "/logo-c.png",
-  logoAlt,
   phone,
   email,
   location = "Kigali, Rwanda",
   siteHeader,
   urgentAnnouncement,
 }: {
-  churchName?: string;
-  logoUrl?: string;
-  logoAlt?: string;
   phone?: string;
   email?: string;
   location?: string;
@@ -55,6 +50,7 @@ export function HeaderView({
   urgentAnnouncement?: UrgentAnnouncementData | null;
 }) {
   const pathname = usePathname();
+  const { churchName, logoAlt } = useChurchBrand();
   const headerSettings = siteHeader ?? defaultHomepageSettings.siteHeader;
   const configuredNavigation = headerSettings.navigation
     .filter((item) => item.visible)
@@ -207,7 +203,6 @@ export function HeaderView({
               alt={logoAlt || churchName}
               className="size-10 object-contain sm:size-11"
               priority
-              src={logoUrl}
             />
           </span>
           <span className="min-w-0">
@@ -312,7 +307,7 @@ export function HeaderView({
                 onClick={closeMobileMenu}
               >
                 <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-xs">
-                  <ChurchLogo alt={logoAlt || churchName} className="size-8 object-contain" src={logoUrl} />
+                  <ChurchLogo className="size-8 object-contain" />
                 </span>
                 <span className="min-w-0">
                   <span className="block truncate font-display text-xs font-extrabold uppercase leading-tight tracking-wide text-primary">
