@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent } from "react";
-import { Archive, CalendarClock, Check, ImagePlus, Pencil, Search, Upload, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { Archive, CalendarClock, Check, ImagePlus, Pencil, Search, X } from "lucide-react";
 import { authGet, authMutation, authUpload } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
+import { ImageUploadDropzone } from "@/components/admin/management/image-upload-dropzone";
 import {
   announcementCategories,
   announcementCategoryLabel,
@@ -77,7 +78,6 @@ export function AnnouncementManager() {
   const [saving, setSaving] = useState(false);
   const [processingId, setProcessingId] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const loadAnnouncements = useCallback(async () => {
     const result = await authGet<{ items: Announcement[] }>("/admin/announcements");
@@ -127,7 +127,6 @@ export function AnnouncementManager() {
     setImageName("");
     setError("");
     setNotice("");
-    if (inputRef.current) inputRef.current.value = "";
     setModalOpen(true);
   }
 
@@ -147,7 +146,7 @@ export function AnnouncementManager() {
     try {
       const form = new FormData();
       form.set("file", file);
-      const uploaded = await authUpload<{ url: string }>("/media/upload?purpose=image", form);
+      const uploaded = await authUpload<{ url: string }>("/media/upload?purpose=announcements", form);
       if (!uploaded?.url) throw new Error("The backend did not return an image URL.");
       if (!isCloudinaryImageUrl(uploaded.url)) {
         let host = "an invalid URL";
@@ -159,14 +158,7 @@ export function AnnouncementManager() {
       setError(cause instanceof Error ? cause.message : "Could not upload this image.");
     } finally {
       setUploading(false);
-      if (inputRef.current) inputRef.current.value = "";
     }
-  }
-
-  function onDropImage(event: DragEvent<HTMLButtonElement>) {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
-    if (file) void uploadImage(file);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -550,15 +542,16 @@ export function AnnouncementManager() {
                         {previewUrl && !uploading && !imageUrl && (
                           <p className="mt-1 text-xs text-red-600">Upload failed. Replace the image and try again.</p>
                         )}
-                        <div className="mt-3 flex gap-2.5">
-                          <button
-                            className="min-h-9 rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-foreground transition hover:bg-surface-strong"
+                        <div className="mt-3 flex flex-wrap items-start gap-2.5">
+                          <ImageUploadDropzone
+                            className="min-w-44 flex-1"
+                            compact
                             disabled={uploading}
-                            onClick={() => inputRef.current?.click()}
-                            type="button"
-                          >
-                            Replace
-                          </button>
+                            label="Replace image or drop a new one here"
+                            onFile={(file) => void uploadImage(file)}
+                            onSelectAsset={(asset) => { setImageUrl(asset.secureUrl); setImageName(asset.publicId.split("/").at(-1) ?? "Selected image"); setPreviewUrl(""); }}
+                            uploading={uploading}
+                          />
                           <button
                             className="min-h-9 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300"
                             disabled={uploading}
@@ -575,45 +568,20 @@ export function AnnouncementManager() {
                       </div>
                     </div>
                   ) : (
-                    <button
-                      className="mt-2 flex min-h-36 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface px-4 py-6 text-center text-muted transition hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    <ImageUploadDropzone
+                      className="mt-2"
                       disabled={uploading}
-                      onClick={() => inputRef.current?.click()}
-                      onDragOver={(event) => event.preventDefault()}
-                      onDrop={onDropImage}
-                      type="button"
-                    >
-                      {uploading ? (
-                        <>
-                          <Upload aria-hidden="true" className="size-7 animate-pulse text-primary" />
-                          <span className="mt-2 text-xs font-bold text-primary">Uploading image…</span>
-                        </>
-                      ) : (
-                        <>
-                          <ImagePlus aria-hidden="true" className="size-7 text-muted/60" />
-                          <span className="mt-2 text-xs font-bold text-foreground">
-                            Drag &amp; drop an image here or click to browse
-                          </span>
-                          <span className="mt-1 text-[11px] text-muted">JPEG, PNG, WebP, or GIF · maximum 15 MB</span>
-                        </>
-                      )}
-                    </button>
+                      label="Drag and drop an image here or click to browse"
+                      onFile={(file) => void uploadImage(file)}
+                      onSelectAsset={(asset) => { setImageUrl(asset.secureUrl); setImageName(asset.publicId.split("/").at(-1) ?? "Selected image"); setPreviewUrl(""); }}
+                      uploading={uploading}
+                    />
                   )}
                   {imageUrl && !isCloudinaryImageUrl(imageUrl) && (
                     <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
                       This image is not stored in Cloudinary. Replace it with a new upload before saving.
                     </p>
                   )}
-                  <input
-                    accept={acceptedImageTypes.join(",")}
-                    className="sr-only"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) void uploadImage(file);
-                    }}
-                    ref={inputRef}
-                    type="file"
-                  />
                 </div>
               </div>
 

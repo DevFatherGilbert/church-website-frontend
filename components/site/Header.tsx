@@ -2,64 +2,96 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import {
   ArrowRight,
-  BookOpen,
-  ChevronDown,
-  Clock,
+  Clock3,
   Heart,
-  LogIn,
+  Mail,
+  MapPin,
   Menu,
   Phone,
-  Shield,
-  Sparkles,
-  Users,
   X,
+  Compass,
+  Megaphone,
 } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
+import { defaultHomepageSettings, type HomepageSettings } from "@/lib/content/website-settings";
 
-const aboutSubLinks = [
-  { label: "Our Story & Heritage", href: "/about/our-story", icon: BookOpen, desc: "Our history and journey of faith" },
-  { label: "Mission & Vision", href: "/about/mission-vision", icon: Sparkles, desc: "Purpose, direction & core values" },
-  { label: "Statement of Faith", href: "/about/beliefs", icon: Shield, desc: "Biblical doctrines and Sabbath truth" },
-  { label: "Pastoral Leadership", href: "/about/leadership", icon: Users, desc: "Meet pastors and ministry leaders" },
-] as const;
-
-const navigationLinks = [
-  { label: "Home", href: "/" },
-  { label: "About Us", href: "/about", hasDropdown: true },
-  { label: "Ministries", href: "/ministries" },
-  { label: "Services", href: "/services" },
-  { label: "Sermons", href: "/sermons" },
-  { label: "Events", href: "/events" },
-  { label: "Resources", href: "/resources" },
-  { label: "Contact", href: "/contact" },
-] as const;
+const subscribeNever = () => () => {};
 
 function isCurrentPage(pathname: string, href: string) {
   return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 }
+
+export type UrgentAnnouncementData = {
+  id?: string;
+  title: string;
+  description?: string | null;
+  slug?: string;
+  category?: string;
+  href?: string;
+  ctaLabel?: string;
+};
 
 export function HeaderView({
   churchName = "Church",
   logoUrl = "/logo-c.png",
   logoAlt,
   phone,
+  email,
+  location = "Kigali, Rwanda",
+  siteHeader,
+  urgentAnnouncement,
 }: {
   churchName?: string;
   logoUrl?: string;
   logoAlt?: string;
   phone?: string;
+  email?: string;
+  location?: string;
+  siteHeader: HomepageSettings["siteHeader"];
+  urgentAnnouncement?: UrgentAnnouncementData | null;
 }) {
   const pathname = usePathname();
+  const headerSettings = siteHeader ?? defaultHomepageSettings.siteHeader;
+  const configuredNavigation = headerSettings.navigation
+    .filter((item) => item.visible)
+    .sort((left, right) => left.order - right.order);
+  const mounted = useSyncExternalStore(subscribeNever, () => true, () => false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
-  const [mobileAboutExpanded, setMobileAboutExpanded] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavigationRef = useRef<HTMLDivElement>(null);
-  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Active announcement prioritizing database announcement records then site settings announcement
+  const activeAnnouncement = urgentAnnouncement
+    ? {
+        title: urgentAnnouncement.title,
+        description: urgentAnnouncement.description,
+        href: urgentAnnouncement.href || `/announcements/${urgentAnnouncement.slug}`,
+        ctaLabel: urgentAnnouncement.ctaLabel || "Read Notice",
+        isUrgent: true,
+      }
+    : headerSettings.announcement?.visible && headerSettings.announcement.text
+      ? {
+          title: headerSettings.announcement.text,
+          description: null,
+          href: headerSettings.announcement.href || "/announcements",
+          ctaLabel: headerSettings.announcement.ctaLabel || "Learn More",
+          isUrgent: false,
+        }
+      : null;
+
+  // Sticky scroll effect
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -103,163 +135,155 @@ export function HeaderView({
     menuButtonRef.current?.focus();
   }
 
-  function handleDropdownEnter() {
-    if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
-    setAboutDropdownOpen(true);
-  }
-
-  function handleDropdownLeave() {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setAboutDropdownOpen(false);
-    }, 150);
-  }
+  const isHeroPage = pathname === "/";
+  const navTextColor = scrolled || !isHeroPage ? "text-stone-800" : "text-white/90";
+  const navHoverColor = scrolled || !isHeroPage ? "hover:text-primary" : "hover:text-secondary";
+  const navActiveColor = scrolled || !isHeroPage ? "text-primary font-bold" : "text-secondary font-bold";
 
   return (
-    <header className="site-header absolute top-0 left-0 z-50 w-full">
-      {/* ── Single header row — overlays the hero ──────────────────────── */}
-      <div className="flex w-full items-stretch">
+    <header
+      className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "bg-white/98 shadow-md backdrop-blur-md border-b border-stone-200/90"
+          : isHeroPage
+            ? "bg-gradient-to-b from-stone-950/85 via-stone-950/45 to-transparent"
+            : "bg-white/98 shadow-sm backdrop-blur-md border-b border-stone-200/80"
+      }`}
+    >
+      {/* ── 1. Top Section: Urgent Announcement from Database ── */}
+      {activeAnnouncement && bannerVisible && (
+        <aside
+          aria-label="Urgent church announcement"
+          className="relative z-20 flex min-h-10 items-center justify-between border-b border-amber-600/30 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 px-3.5 py-2 sm:px-6 lg:px-8 text-stone-950 shadow-sm"
+          role="region"
+        >
+          <div className="mx-auto flex flex-1 max-w-7xl items-center justify-center gap-2 sm:gap-3 text-xs">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-stone-950 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-amber-300 shadow-xs">
+              <Megaphone className="size-3 animate-pulse" aria-hidden="true" />
+              {activeAnnouncement.isUrgent ? "URGENT" : "ANNOUNCEMENT"}
+            </span>
 
-        {/* ── Logo block (white bg, row layout: big logo + text beside it) ── */}
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-center">
+              <span className="font-extrabold tracking-tight text-stone-950 text-xs sm:text-[13px]">
+                {activeAnnouncement.title}
+              </span>
+              {activeAnnouncement.description && (
+                <span className="hidden lg:inline text-stone-900/80 text-xs font-medium max-w-md truncate">
+                  — {activeAnnouncement.description}
+                </span>
+              )}
+            </div>
+
+            <Link
+              className="inline-flex shrink-0 whitespace-nowrap items-center gap-1 rounded-full bg-stone-950/15 hover:bg-stone-950 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-stone-950 hover:text-amber-300 transition-colors shadow-2xs"
+              href={activeAnnouncement.href}
+            >
+              <span>{activeAnnouncement.ctaLabel}</span>
+              <ArrowRight className="size-3" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <button
+            aria-label="Dismiss announcement"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full text-stone-950/70 transition hover:bg-stone-950/15 hover:text-stone-950 ml-2"
+            onClick={() => setBannerVisible(false)}
+            type="button"
+          >
+            <X className="size-3.5" />
+          </button>
+        </aside>
+      )}
+
+      {/* ── 2. Main Navigation Bar with Logo, Nav Links & Re-arranged Actions ── */}
+      <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-10">
+        {/* Brand / Logo */}
         <Link
           aria-label={`${churchName} home`}
-          className="site-header-brand relative z-10 flex shrink-0 items-center gap-3 bg-white px-4 py-3 text-text transition-opacity hover:opacity-85 sm:px-6 sm:py-3.5 shadow-sm"
+          className="flex items-center gap-3.5 transition-opacity hover:opacity-90 shrink-0"
           href="/"
         >
-          <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full sm:size-12">
+          <span className="flex size-11 sm:size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-stone-900/10">
             <ChurchLogo
               alt={logoAlt || churchName}
-              className="size-11 object-contain sm:size-12"
+              className="size-10 object-contain sm:size-11"
               priority
               src={logoUrl}
             />
           </span>
           <span className="min-w-0">
-            <span className="block max-w-[12rem] font-display text-[0.82rem] font-extrabold uppercase leading-tight tracking-wide text-primary-dark sm:text-[0.92rem]">
+            <span
+              className={`block max-w-[12rem] sm:max-w-[16rem] font-display text-[0.85rem] sm:text-[0.98rem] font-extrabold uppercase leading-tight tracking-wide ${
+                scrolled || !isHeroPage ? "text-primary" : "text-white"
+              }`}
+            >
               {churchName}
             </span>
-            <span className="mt-0.5 block text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-muted sm:text-[0.62rem]">
-              A community of faith
+            <span
+              className={`mt-0.5 block text-[0.58rem] sm:text-[0.62rem] font-bold uppercase tracking-[0.16em] ${
+                scrolled || !isHeroPage ? "text-muted" : "text-white/80"
+              }`}
+            >
+              {headerSettings.brandTagline}
             </span>
           </span>
         </Link>
 
-        {/* ── Transparent right section (nav + actions) ─────────────────── */}
-        <div className="flex flex-1 items-stretch">
+        {/* Desktop Nav Links */}
+        <nav aria-label="Main navigation" className="hidden items-center gap-0.5 lg:flex xl:gap-1 shrink min-w-0">
+          {configuredNavigation.map((link) => {
+            const active = isCurrentPage(pathname, link.href);
+            return (
+              <Link
+                aria-current={active ? "page" : undefined}
+                className={`whitespace-nowrap rounded-lg px-2 lg:px-2.5 xl:px-3 py-2 text-[0.72rem] lg:text-[0.75rem] xl:text-[0.78rem] font-bold uppercase tracking-[0.06em] xl:tracking-[0.08em] transition-colors ${
+                  active ? navActiveColor : `${navTextColor} ${navHoverColor}`
+                }`}
+                href={link.href}
+                key={`${link.href}-${link.order}`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-          {/* ── Desktop nav links ─────── */}
-          <nav
-            aria-label="Main navigation"
-            className="hidden flex-1 items-center justify-end gap-0.5 px-3 lg:flex xl:gap-1.5 xl:px-5"
-          >
-            {navigationLinks.map((link) => {
-              const active = isCurrentPage(pathname, link.href);
+        {/* Desktop Primary CTA Button */}
+        {headerSettings.primaryCta.visible && (
+          <div className="hidden shrink-0 items-center lg:flex">
+            <Link
+              className="flex shrink-0 whitespace-nowrap min-h-11 items-center gap-2 rounded-full bg-secondary px-5 xl:px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-stone-950 shadow-md transition-all hover:bg-secondary/90 hover:shadow-lg hover:-translate-y-0.5"
+              href={headerSettings.primaryCta.href}
+            >
+              <span className="whitespace-nowrap">{headerSettings.primaryCta.label}</span>
+              <ArrowRight className="size-3.5 shrink-0" aria-hidden="true" />
+            </Link>
+          </div>
+        )}
 
-              if ("hasDropdown" in link && link.hasDropdown) {
-                return (
-                  <div
-                    className="relative"
-                    key={link.href}
-                    onMouseEnter={handleDropdownEnter}
-                    onMouseLeave={handleDropdownLeave}
-                  >
-                    <Link
-                      aria-current={active ? "page" : undefined}
-                      className={`site-nav-link inline-flex items-center gap-1 whitespace-nowrap px-2.5 py-1.5 text-[0.74rem] font-semibold uppercase tracking-[0.1em] transition-colors xl:px-3.5 xl:text-[0.8rem] ${
-                        active
-                          ? "text-secondary font-bold"
-                          : "text-white/90 hover:text-secondary"
-                      }`}
-                      href={link.href}
-                    >
-                      {link.label}
-                      <ChevronDown className="size-3 transition-transform" />
-                    </Link>
-
-                    {/* About Dropdown Menu */}
-                    {aboutDropdownOpen && (
-                      <div className="absolute left-0 top-full mt-1 w-64 rounded-xl border border-stone-200 bg-white p-2.5 shadow-2xl backdrop-blur-md">
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-muted px-2.5 py-1">
-                          About the Church
-                        </div>
-                        <div className="space-y-1">
-                          {aboutSubLinks.map((sub) => {
-                            const SubIcon = sub.icon;
-                            return (
-                              <Link
-                                className="flex items-start gap-2.5 rounded-lg p-2 transition-colors hover:bg-stone-100"
-                                href={sub.href}
-                                key={sub.href}
-                                onClick={() => setAboutDropdownOpen(false)}
-                              >
-                                <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded bg-primary/10 text-primary">
-                                  <SubIcon className="size-3.5" />
-                                </div>
-                                <div>
-                                  <span className="block text-xs font-bold text-stone-900">
-                                    {sub.label}
-                                  </span>
-                                  <span className="block text-[10px] text-muted leading-tight">
-                                    {sub.desc}
-                                  </span>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              return (
-                <Link
-                  aria-current={active ? "page" : undefined}
-                  className={`site-nav-link whitespace-nowrap px-2.5 py-1.5 text-[0.74rem] font-semibold uppercase tracking-[0.1em] transition-colors xl:px-3.5 xl:text-[0.8rem] ${
-                    active
-                      ? "text-secondary font-bold"
-                      : "text-white/90 hover:text-secondary"
-                  }`}
-                  href={link.href}
-                  key={link.href}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-
-          </nav>
-
-
-          {/* ── MENU button — tall red/primary block on far right ──────── */}
-          <button
-            aria-controls="mobile-navigation"
-            aria-expanded={mobileMenuOpen}
-            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            className="site-menu-btn ml-auto flex min-w-[4rem] flex-col items-center justify-center gap-1.5 bg-primary px-4 py-3 text-white transition-colors hover:bg-primary-hover sm:min-w-[5.5rem] sm:px-5"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            ref={menuButtonRef}
-            type="button"
-          >
-            {mobileMenuOpen ? (
-              <X aria-hidden="true" className="size-6" />
-            ) : (
-              <span className="flex flex-col gap-[5px]">
-                <span className="block h-[2px] w-6 bg-white" />
-                <span className="block h-[2px] w-6 bg-white" />
-                <span className="block h-[2px] w-6 bg-white" />
-              </span>
-            )}
-            <span className="text-[0.6rem] font-bold uppercase tracking-[0.18em]">
-              {mobileMenuOpen ? "Close" : "Menu"}
-            </span>
-          </button>
-        </div>
+        {/* Mobile Hamburger Button */}
+        <button
+          aria-controls="mobile-navigation"
+          aria-expanded={mobileMenuOpen}
+          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-white shadow-sm transition hover:bg-primary-hover lg:hidden"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+          ref={menuButtonRef}
+          type="button"
+        >
+          {mobileMenuOpen ? (
+            <X className="size-5" aria-hidden="true" />
+          ) : (
+            <Menu className="size-5" aria-hidden="true" />
+          )}
+          <span className="text-xs font-bold uppercase tracking-wider">
+            {mobileMenuOpen ? "Close" : "Menu"}
+          </span>
+        </button>
       </div>
 
-      {/* ── Full-screen mobile navigation drawer ─────────────────────────── */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[60] bg-text/50 backdrop-blur-sm">
+      {/* ── 3. Full-screen Mobile Navigation Drawer ── */}
+      {mobileMenuOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[100] bg-stone-950/60 backdrop-blur-sm lg:hidden">
           <button
             aria-label="Close navigation menu"
             className="absolute inset-0 size-full cursor-default"
@@ -270,164 +294,130 @@ export function HeaderView({
           <div
             aria-labelledby="mobile-navigation-title"
             aria-modal="true"
-            className="absolute inset-y-0 right-0 flex max-h-dvh w-[min(90vw,25rem)] flex-col overflow-y-auto overscroll-contain border-l border-border bg-white px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl sm:px-6"
+            className="absolute inset-y-0 right-0 flex max-h-dvh w-[min(90vw,24rem)] flex-col overflow-y-auto overscroll-contain bg-white px-5 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-2xl"
             id="mobile-navigation"
             ref={mobileNavigationRef}
             role="dialog"
           >
             <h2 className="sr-only" id="mobile-navigation-title">
-              Navigation menu
+              Mobile Navigation Menu
             </h2>
 
-            {/* Drawer header */}
-            <div className="flex items-center justify-between border-b border-stone-200 pb-5">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between border-b border-stone-200 pb-4">
               <Link
                 aria-label={`${churchName} home`}
-                className="flex min-w-0 items-center gap-3 text-text"
+                className="flex items-center gap-3 text-stone-900"
                 href="/"
                 onClick={closeMobileMenu}
               >
-                <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white">
-                  <ChurchLogo alt={logoAlt || churchName} className="size-9 object-contain" src={logoUrl} />
+                <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-xs">
+                  <ChurchLogo alt={logoAlt || churchName} className="size-8 object-contain" src={logoUrl} />
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate font-display text-sm font-extrabold uppercase leading-tight tracking-wide text-primary-dark">
+                  <span className="block truncate font-display text-xs font-extrabold uppercase leading-tight tracking-wide text-primary">
                     {churchName}
                   </span>
-                  <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-muted">
-                    A community of faith
+                  <span className="block text-[0.6rem] font-bold uppercase tracking-[0.14em] text-muted">
+                    {headerSettings.brandTagline}
                   </span>
                 </span>
               </Link>
               <button
                 aria-label="Close navigation menu"
-                className="flex size-10 shrink-0 items-center justify-center rounded-md border border-stone-200 text-text transition-colors hover:bg-stone-100"
+                className="flex size-10 items-center justify-center rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-100"
                 onClick={closeMobileMenu}
                 ref={closeButtonRef}
                 type="button"
               >
-                <X aria-hidden="true" className="size-5" />
+                <X className="size-5" aria-hidden="true" />
               </button>
             </div>
 
-            {/* Drawer nav links */}
-            <nav aria-label="Mobile navigation links" className="mt-5 grid gap-1">
-              <Link
-                className={`flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider ${
-                  isCurrentPage(pathname, "/")
-                    ? "bg-primary/10 text-primary"
-                    : "text-stone-700 hover:bg-stone-50 hover:text-primary"
-                }`}
-                href="/"
-                onClick={closeMobileMenu}
-              >
-                Home
-              </Link>
-
-              {/* About Us collapsible */}
-              <div>
-                <button
-                  className="flex w-full min-h-11 items-center justify-between rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50"
-                  onClick={() => setMobileAboutExpanded((prev) => !prev)}
-                  type="button"
+            {/* Quick Action Grid */}
+            <div className="mt-4 grid grid-cols-2 gap-2 border-b border-stone-200 pb-4">
+              {headerSettings.primaryCta.visible && (
+                <Link
+                  href={headerSettings.primaryCta.href}
+                  onClick={closeMobileMenu}
+                  className="col-span-2 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-secondary px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wider text-stone-950 shadow-xs whitespace-nowrap"
                 >
-                  <span>About Us</span>
-                  <ChevronDown className={`size-4 transition-transform ${mobileAboutExpanded ? "rotate-180" : ""}`} />
-                </button>
-                {mobileAboutExpanded && (
-                  <div className="ml-3 my-1 space-y-1 border-l-2 border-stone-200 pl-3">
-                    <Link
-                      className="block py-1.5 text-xs font-semibold text-stone-600 hover:text-primary"
-                      href="/about"
-                      onClick={closeMobileMenu}
-                    >
-                      About Overview
-                    </Link>
-                    {aboutSubLinks.map((sub) => (
-                      <Link
-                        className="block py-1.5 text-xs font-semibold text-stone-600 hover:text-primary"
-                        href={sub.href}
-                        key={sub.href}
-                        onClick={closeMobileMenu}
-                      >
-                        {sub.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-
+                  <Compass className="size-4 shrink-0" />
+                  <span className="whitespace-nowrap">{headerSettings.primaryCta.label}</span>
+                </Link>
+              )}
               <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
-                href="/ministries"
-                onClick={closeMobileMenu}
-              >
-                Ministries
-              </Link>
-              <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
-                href="/services"
-                onClick={closeMobileMenu}
-              >
-                Services
-              </Link>
-              <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
-                href="/sermons"
-                onClick={closeMobileMenu}
-              >
-                Sermons
-              </Link>
-              <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
-                href="/events"
-                onClick={closeMobileMenu}
-              >
-                Events
-              </Link>
-              <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
-                href="/resources"
-                onClick={closeMobileMenu}
-              >
-                Resources
-              </Link>
-              <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
                 href="/prayer-request"
                 onClick={closeMobileMenu}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-stone-100 px-3 py-2 text-center text-xs font-bold uppercase tracking-wider text-primary hover:bg-stone-200"
               >
-                Prayer Request
+                <Heart className="size-3.5 text-primary" />
+                <span>Prayer</span>
               </Link>
+              {phone && (
+                <a
+                  href={`tel:${phone}`}
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-stone-200 px-3 py-2 text-center text-xs font-semibold text-stone-700 hover:bg-stone-50"
+                >
+                  <Phone className="size-3.5 text-primary" />
+                  <span>Call Church</span>
+                </a>
+              )}
               <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
-                href="/faqs"
+                href={headerSettings.directionsHref}
                 onClick={closeMobileMenu}
+                className="col-span-2 flex min-h-11 items-center justify-center gap-2 rounded-xl border border-stone-200 px-3 py-2 text-center text-xs font-semibold text-stone-700 hover:bg-stone-50"
               >
-                FAQs
-              </Link>
-              <Link
-                className="flex min-h-11 items-center rounded-md px-3 text-xs font-bold uppercase tracking-wider text-stone-700 hover:bg-stone-50 hover:text-primary"
-                href="/contact"
-                onClick={closeMobileMenu}
-              >
-                Contact Us
-              </Link>
-            </nav>
-
-            {/* Drawer footer — staff login only */}
-            <div className="mt-auto border-t border-stone-200 pt-5">
-              <Link
-                className="flex min-h-11 items-center gap-2 rounded-md border border-stone-200 px-4 text-xs font-bold uppercase tracking-wider text-stone-600 hover:bg-stone-50 hover:text-primary"
-                href="/admin/login"
-                onClick={closeMobileMenu}
-              >
-                <LogIn aria-hidden="true" className="size-4 text-primary" />
-                Staff Login
+                <MapPin className="size-3.5 text-primary" />
+                <span>{headerSettings.directionsLabel}</span>
               </Link>
             </div>
+
+            <nav aria-label="Mobile navigation links" className="mt-4 space-y-1">
+              {configuredNavigation.map((link) => {
+                const active = isCurrentPage(pathname, link.href);
+                return (
+                  <Link
+                    aria-current={active ? "page" : undefined}
+                    className={`flex min-h-12 items-center rounded-xl px-4 text-xs font-bold uppercase tracking-wider ${
+                      active ? "bg-primary/10 text-primary" : "text-stone-700 hover:bg-stone-50 hover:text-primary"
+                    }`}
+                    href={link.href}
+                    key={`${link.href}-${link.order}`}
+                    onClick={closeMobileMenu}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Drawer Footer with Service Times & Contact */}
+            <div className="mt-auto border-t border-stone-200 pt-5 space-y-2">
+              <div className="rounded-xl bg-stone-50 p-3.5 border border-stone-200/70 text-xs text-stone-600">
+                <p className="font-bold text-stone-900 flex items-center gap-1.5">
+                  <Clock3 className="size-3.5 text-primary" />
+                  {headerSettings.serviceSummary}
+                </p>
+                {location && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-stone-600">
+                    <MapPin className="size-3.5 text-primary" />
+                    <span>{location}</span>
+                  </p>
+                )}
+                {email && (
+                  <p className="mt-1 flex items-center gap-1.5 text-stone-600">
+                    <Mail className="size-3.5 text-primary" />
+                    <a className="hover:text-primary transition-colors truncate" href={`mailto:${email}`}>
+                      {email}
+                    </a>
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );

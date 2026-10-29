@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   BookOpen,
   CalendarDays,
+  ChevronRight,
   Clock3,
   Heart,
   Mail,
@@ -21,6 +22,8 @@ import {
 } from "lucide-react";
 import { FlipCard } from "@/components/ui/flip-card";
 import { ServiceUnavailable } from "@/components/feedback/service-unavailable";
+import { ArrangedAudienceStrip } from "@/components/site/arranged-audience-strip";
+import { ArrangedServicesFilter } from "@/components/site/arranged-services-filter";
 import {
   getPublicData,
   type ChurchEvent,
@@ -217,7 +220,7 @@ export default async function HomeView() {
     seenImages.add(src);
     galleryImages.push({ src, alt, label, href });
   }
-  addGalleryImage(homepage.sections.welcome.imageUrl || church.profile.imageUrl, "Church community", "Welcome", "/about/our-story");
+  addGalleryImage(homepage.sections.welcome.imageUrl || church.profile.imageUrl, homepage.sections.welcome.imageAlt || "Church community", homepage.sections.welcome.heading || "Welcome", "/about/our-story");
   for (const ministry of publishedMinistries) {
     addGalleryImage(ministry.imageUrl, `${ministry.name} ministry`, ministry.name, `/ministries/${ministry.slug}`);
   }
@@ -233,11 +236,12 @@ export default async function HomeView() {
   const gallery = galleryImages.slice(0, homepage.sections.gallery.limit ?? 6);
 
   const location = [church.contact.city, church.contact.country].filter(Boolean).join(", ");
+  const factsSettings = homepage.sections.facts;
   const fastFacts = [
-    { label: "Worship Gatherings", value: String(publicServices.length), href: "/services" },
-    { label: "Ministries to Connect", value: String(publishedMinistries.length), href: "/ministries" },
-    { label: "Upcoming Events", value: String(allPublicEvents.length), href: "/events" },
-    { label: "Our Community", value: location || "A place to belong", href: "/contact" },
+    { label: factsSettings.worshipFactLabel || "Worship Gatherings", value: String(publicServices.length), href: "/services" },
+    { label: factsSettings.ministriesFactLabel || "Ministries to Connect", value: String(publishedMinistries.length), href: "/ministries" },
+    { label: factsSettings.eventsFactLabel || "Upcoming Events", value: String(allPublicEvents.length), href: "/events" },
+    { label: factsSettings.communityFactLabel || "Our Community", value: location || factsSettings.communityFactFallback || "A place to belong", href: "/contact" },
   ];
 
   const hero = homepage.hero;
@@ -274,7 +278,7 @@ export default async function HomeView() {
       />
       {/* ── 2. HERO SECTION (SRS Section 9 #2 & Section 11) ───────────────── */}
       {hero.visible && (
-        <section className="relative isolate flex min-h-[640px] items-center overflow-hidden bg-primary-dark text-white sm:min-h-[720px] lg:min-h-[780px]">
+        <section className="relative isolate flex min-h-[680px] items-center overflow-hidden bg-primary-dark text-white sm:min-h-[760px] lg:min-h-[820px]">
           <Image
             alt={hero.imageAlt || `${churchName} worship gathering`}
             className="object-cover"
@@ -298,7 +302,8 @@ export default async function HomeView() {
             </div>
           </div>
 
-          <div className={`${container} relative z-10 pb-24 pt-36 sm:pb-32 sm:pt-44 lg:pt-48`}>
+          {/* Account for fixed header (~90px) + announcement banner (~40px) */}
+          <div className={`${container} relative z-10 pb-32 pt-44 sm:pb-36 sm:pt-52 lg:pt-56`}>
             <div className="max-w-3xl">
               <p className="eyebrow flex items-center gap-3 text-secondary">
                 <span aria-hidden="true" className="h-px w-10 bg-secondary" />
@@ -364,11 +369,18 @@ export default async function HomeView() {
         </section>
       )}
 
+      {/* ── BK.RW-INSPIRED: Arranged Persona Gateways Strip ─────────── */}
+      <ArrangedAudienceStrip cards={homepage.audienceCards} />
+
+
       {/* ── SECTIONS (SRS Section 9 items 3 to 13) ────────────────────────── */}
       {sections.map(([key, config]) => {
         /* ── 3. WELCOME MESSAGE (SRS Section 9 #3 & Section 13) ─────────────── */
         /* ── 3. WELCOME MESSAGE (SRS Section 9 #3 & Section 13 - Inspired by Kigali Harvest) ── */
         if (key === "welcome") {
+          const welcomeValues = church.coreValues.filter((value) => value.visible).sort((left, right) => left.order - right.order).slice(0, 4);
+          const welcomeImages = galleryImages.slice(0, 4);
+          const collagePositions = ["", "sm:translate-y-4", "-translate-y-2 sm:translate-y-0", "translate-y-2 sm:translate-y-4"];
           return (
             <section className="relative overflow-hidden py-20 sm:py-28 bg-harvest-pattern" id={key} key={key}>
               <div className={`${container} grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16`}>
@@ -376,10 +388,10 @@ export default async function HomeView() {
                 <div className="lg:py-4">
                   <header>
                     <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
-                      WELCOME TO
+                      {config.eyebrow || "WELCOME TO"}
                     </p>
                     <h2 className="font-headline mt-3 text-4xl sm:text-5xl lg:text-6xl font-bold uppercase tracking-wide text-primary leading-[1.12]">
-                      {churchName}
+                      {config.heading || churchName}
                     </h2>
                   </header>
 
@@ -395,35 +407,15 @@ export default async function HomeView() {
                     </div>
                   )}
 
-                  {/* Church Pillars Cards */}
                   <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-3.5">
-                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <Heart className="size-4" />
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold text-text">Christ-Centered Faith</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <BookOpen className="size-4" />
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold text-text">Bible-Rooted Truth</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <Users className="size-4" />
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold text-text">Loving Fellowship</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <Sparkles className="size-4" />
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold text-text">Youth & Children Care</span>
-                    </div>
+                    {welcomeValues.map((value, index) => {
+                      const icons = [Heart, BookOpen, Users, Sparkles];
+                      const IconComponent = icons[index % icons.length];
+                      return <div className="flex items-center gap-3 rounded-xl border border-primary/10 bg-white/90 p-3.5 shadow-xs transition-transform hover:-translate-y-0.5" key={value.title}>
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><IconComponent aria-hidden="true" className="size-4" /></div>
+                        <span className="text-xs sm:text-sm font-bold text-text">{value.title}</span>
+                      </div>;
+                    })}
                   </div>
 
                   <div className="mt-9 flex flex-wrap items-center gap-4">
@@ -435,9 +427,9 @@ export default async function HomeView() {
                     </Link>
                     <Link
                       className="button button-outline min-h-12 px-6 font-bold uppercase tracking-wider text-xs border-2"
-                      href="/plan-your-visit"
+                      href={config.secondaryCtaHref || "/plan-your-visit"}
                     >
-                      Plan Your Visit
+                      {config.secondaryCtaLabel || "Plan Your Visit"}
                     </Link>
                   </div>
                 </div>
@@ -445,52 +437,15 @@ export default async function HomeView() {
                 {/* Right Column: 2x2 Photo Collage with floating quote pill */}
                 <div className="relative">
                   <div className="grid grid-cols-2 gap-3.5 sm:gap-4.5">
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md">
-                      <Image
-                        alt="Congregation gathered in worship"
-                        className="object-cover transition-transform duration-700 hover:scale-105"
-                        fill
-                        sizes="(max-width: 1024px) 50vw, 25vw"
-                        src={config.imageUrl || church.profile.imageUrl || "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=800&q=80"}
-                        unoptimized
-                      />
-                    </div>
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md sm:translate-y-4">
-                      <Image
-                        alt="Warm church community fellowship"
-                        className="object-cover transition-transform duration-700 hover:scale-105"
-                        fill
-                        sizes="(max-width: 1024px) 50vw, 25vw"
-                        src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80"
-                        unoptimized
-                      />
-                    </div>
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md -translate-y-2 sm:translate-y-0">
-                      <Image
-                        alt="Children and family ministry"
-                        className="object-cover transition-transform duration-700 hover:scale-105"
-                        fill
-                        sizes="(max-width: 1024px) 50vw, 25vw"
-                        src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=800&q=80"
-                        unoptimized
-                      />
-                    </div>
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-stone-200 shadow-md translate-y-2 sm:translate-y-4">
-                      <Image
-                        alt="Church choir and music worship"
-                        className="object-cover transition-transform duration-700 hover:scale-105"
-                        fill
-                        sizes="(max-width: 1024px) 50vw, 25vw"
-                        src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=800&q=80"
-                        unoptimized
-                      />
-                    </div>
+                    {welcomeImages.map((image, index) => <div className={`relative overflow-hidden rounded-2xl bg-stone-200 shadow-md ${welcomeImages.length === 1 ? "col-span-2 aspect-video" : `aspect-[4/5] ${collagePositions[index]}`}`} key={image.src}>
+                      <Image alt={image.alt} className="object-cover transition-transform duration-700 hover:scale-105" fill sizes="(max-width: 1024px) 50vw, 25vw" src={image.src} unoptimized />
+                    </div>)}
                   </div>
 
                   {/* Floating Gold Quote Pill */}
                   <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:-bottom-5 sm:right-6 rounded-2xl bg-secondary px-6 py-3.5 shadow-xl border-2 border-white">
                     <p className="font-display text-sm sm:text-base font-bold text-stone-950 italic whitespace-nowrap">
-                      “Come as you are — there’s a place for you.”
+                      “{config.quote || "Come as you are — there’s a place for you."}”
                     </p>
                   </div>
                 </div>
@@ -502,23 +457,23 @@ export default async function HomeView() {
         /* ── FACTS / AT A GLANCE (Inspired by Kigali Harvest FAST FACTS) ──── */
         if (key === "facts") {
           return (
-            <section className="relative border-y border-border/80 bg-white py-14" id={key} key={key}>
+            <section className="relative border-b border-border/60 bg-white py-14" id={key} key={key}>
               <div className={container}>
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 pb-6 border-b border-border/60">
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 pb-6 border-b border-border/40">
                   <div>
                     <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
-                      MORE ABOUT US
+                      {factsSettings.eyebrow || "MORE ABOUT US"}
                     </p>
                     <h2 className="font-headline mt-2 text-3xl sm:text-4xl text-primary font-bold uppercase tracking-wide">
-                      FAST FACTS
+                      {factsSettings.heading || "FAST FACTS"}
                     </h2>
                   </div>
                   <p className="text-sm text-muted max-w-md">
-                    Key pillars of our community life, gathering times, and active ministries serving Kigali and beyond.
+                    {factsSettings.description}
                   </p>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-stone-100">
                   {fastFacts.map((fact, index) => {
                     const icons = [Clock3, Users, CalendarDays, MapPin];
                     const IconComponent = icons[index % icons.length];
@@ -526,24 +481,20 @@ export default async function HomeView() {
                       <Link
                         key={fact.label}
                         href={fact.href}
-                        className="group relative flex flex-col justify-between rounded-2xl border border-primary/10 bg-surface-strong p-6 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
+                        className="group flex flex-col gap-1 p-6 transition-colors hover:bg-stone-50/80 lg:p-8"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold uppercase tracking-wider text-muted group-hover:text-primary transition-colors">
+                          <span className="text-[0.7rem] font-bold uppercase tracking-wider text-muted group-hover:text-primary transition-colors">
                             {fact.label}
                           </span>
-                          <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                            <IconComponent className="size-4" />
-                          </div>
+                          <ChevronRight className="size-4 text-stone-300 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
                         </div>
-                        <div className="mt-6">
-                          <p className="font-headline text-3xl sm:text-4xl font-bold text-primary tracking-tight">
-                            {fact.value}
-                          </p>
-                          <span className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-primary group-hover:translate-x-1 transition-transform">
-                            Explore <ArrowUpRight className="size-3.5" />
-                          </span>
-                        </div>
+                        <p className="font-headline text-4xl sm:text-5xl font-bold text-primary tracking-tight mt-3">
+                          {fact.value}
+                        </p>
+                        <span className="mt-1 inline-flex items-center gap-1 text-[0.72rem] font-bold text-muted group-hover:text-primary transition-colors">
+                          <IconComponent className="size-3.5" /> {factsSettings.factLinkLabel || "Learn more"}
+                        </span>
                       </Link>
                     );
                   })}
@@ -560,102 +511,76 @@ export default async function HomeView() {
               <div className={container}>
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <SectionHeading
-                    eyebrow="Gather With Us"
+                    eyebrow={config.eyebrow || "Gather With Us"}
                     title={config.heading || "Regular Church Services"}
                     description={config.description || "We would love to have you join us for worship, teaching, and genuine fellowship this week."}
                   />
-                  <LinkArrow href="/services">See all service details</LinkArrow>
+                  <LinkArrow href={config.primaryCtaHref || "/services"}>{config.primaryCtaLabel || "See all service details"}</LinkArrow>
                 </div>
 
-                <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {publicServices.map((service) => (
-                    <FlipCard
-                      key={service.id}
-                      height="320px"
-                      front={
-                        <article className="flex h-full flex-col justify-between rounded-xl border border-stone-200/80 bg-white p-7 shadow-sm">
-                          <div>
-                            <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                              <Clock3 aria-hidden="true" className="size-6" />
-                            </div>
-                            <span className="mt-4 inline-block rounded-full bg-secondary/30 px-3 py-1 text-xs font-bold text-amber-950 uppercase tracking-wider">
-                              {service.serviceType || "Worship Gathering"}
-                            </span>
-                            <h3 className="mt-3 font-display text-2xl font-bold text-text">{service.title}</h3>
-                            <p className="mt-2 text-sm font-bold text-primary">
-                              {formatServiceDate(service)} <span aria-hidden="true">&middot;</span> {formatServiceTime(service)}
-                            </p>
-                          </div>
+                {/* Arranged Interactive Categorized Services Grid */}
+                <ArrangedServicesFilter services={publicServices} />
 
-                          <div className="border-t border-stone-100 pt-4">
-                            {service.location && (
-                              <p className="flex items-center gap-2 text-xs font-medium text-muted">
-                                <MapPin aria-hidden="true" className="size-4 shrink-0 text-primary" />
-                                {service.location}
-                              </p>
-                            )}
-                            <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-primary">
-                              Hover / tap for details &rarr;
-                            </p>
-                          </div>
-                        </article>
-                      }
-                      back={
-                        <div className="flex h-full flex-col justify-between rounded-xl bg-primary-dark p-7 text-white shadow-xl">
-                          <div>
-                            <span className="eyebrow text-secondary uppercase text-[10px] tracking-widest">
-                              {formatServiceDate(service)} &middot; {formatServiceTime(service)}
-                            </span>
-                            <h3 className="mt-2 font-display text-xl font-bold text-white">{service.title}</h3>
-                            {service.description && (
-                              <p className="mt-3 text-xs leading-relaxed text-white/80 line-clamp-4">
-                                {service.description}
-                              </p>
-                            )}
-                            {service.instructions && (
-                              <p className="mt-2 text-[11px] italic text-amber-300">
-                                {service.instructions}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="border-t border-white/20 pt-4">
-                            <Link
-                              className="inline-flex items-center gap-2 rounded bg-secondary px-4 py-2 text-xs font-bold uppercase tracking-wider text-stone-950 hover:bg-secondary/90 transition"
-                              href="/plan-your-visit"
-                            >
-                              Plan Your Visit <ArrowUpRight className="size-3.5" />
-                            </Link>
-                          </div>
-                        </div>
-                      }
-                    />
-                  ))}
-                </div>
-
-                {/* Service Primary CTA Bar */}
-                <div className="mt-12 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-secondary/40 bg-white p-6 shadow-sm sm:p-8">
-                  <div className="max-w-xl">
-                    <h3 className="font-display text-xl font-bold text-text">First time visiting our church?</h3>
-                    <p className="mt-1 text-sm text-muted">
-                      Find out where to park, what to expect during worship, and how our children’s ministry cares for your family.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
+                <div className="mt-12 rounded-3xl border border-secondary/40 bg-white p-6 shadow-sm sm:p-9">
+                  <div className="flex flex-wrap items-end justify-between gap-5">
+                    <div>
+                      <p className="eyebrow text-primary">YOUR FIRST VISIT</p>
+                      <h3 className="mt-2 font-display text-2xl font-bold text-text sm:text-3xl">
+                        A few details to help you plan
+                      </h3>
+                      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+                        Check the published gathering time and location, and get in touch if you have questions before you come.
+                      </p>
+                    </div>
                     <Link className="button button-primary min-h-11 px-6 font-bold" href="/plan-your-visit">
                       Plan Your Visit <ArrowRight aria-hidden="true" className="size-4" />
                     </Link>
-                    {church.contact.directionsUrl && (
-                      <a
-                        className="button button-outline min-h-11 px-5"
-                        href={church.contact.directionsUrl}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        <MapPin aria-hidden="true" className="size-4 text-primary" />
-                        Get Directions
-                      </a>
-                    )}
+                  </div>
+
+                  <div className="mt-7 grid gap-4 md:grid-cols-3">
+                    <article className="rounded-2xl bg-surface-strong p-5">
+                      <Clock3 aria-hidden="true" className="size-5 text-primary" />
+                      <h4 className="mt-3 font-display font-bold text-text">When we gather</h4>
+                      {publicServices[0] ? (
+                        <>
+                          <p className="mt-1 text-sm font-semibold text-primary">
+                            {formatServiceDate(publicServices[0])} · {formatServiceTime(publicServices[0])}
+                          </p>
+                          <p className="mt-1 text-sm text-muted">{publicServices[0].title}</p>
+                        </>
+                      ) : (
+                        <p className="mt-1 text-sm text-muted">Contact us to confirm the next gathering time.</p>
+                      )}
+                    </article>
+
+                    <article className="rounded-2xl bg-surface-strong p-5">
+                      <MapPin aria-hidden="true" className="size-5 text-primary" />
+                      <h4 className="mt-3 font-display font-bold text-text">Where to find us</h4>
+                      <p className="mt-1 text-sm text-muted">
+                        {[church.contact.address, location].filter(Boolean).join(", ") || "Contact us to confirm the location."}
+                      </p>
+                      {church.contact.directionsUrl && (
+                        <a
+                          className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                          href={church.contact.directionsUrl}
+                          rel="noreferrer"
+                          target="_blank"
+                        >
+                          Get directions <ArrowUpRight aria-hidden="true" className="size-4" />
+                        </a>
+                      )}
+                    </article>
+
+                    <article className="rounded-2xl bg-surface-strong p-5">
+                      <Mail aria-hidden="true" className="size-5 text-primary" />
+                      <h4 className="mt-3 font-display font-bold text-text">Questions before you come?</h4>
+                      <p className="mt-1 text-sm text-muted">
+                        Reach out to the church and we’ll help you find the information you need.
+                      </p>
+                      <Link className="mt-3 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary hover:underline" href="/contact">
+                        Contact us <ArrowUpRight aria-hidden="true" className="size-4" />
+                      </Link>
+                    </article>
                   </div>
                 </div>
               </div>
@@ -668,6 +593,7 @@ export default async function HomeView() {
           const values = church.coreValues.length > 0
             ? church.coreValues.filter((value) => value.visible).sort((a, b) => a.order - b.order).slice(0, 4)
             : defaultChurchInformation.coreValues.slice(0, 4);
+          const aboutCards = homepage.aboutCards.filter((card) => card.visible).sort((left, right) => left.order - right.order);
 
           return (
             <section className="bg-primary-dark py-20 text-white sm:py-24" id={key} key={key}>
@@ -675,7 +601,7 @@ export default async function HomeView() {
                 <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
                   <div>
                     <SectionHeading
-                      eyebrow="Who We Are"
+                      eyebrow={config.eyebrow || "Who We Are"}
                       title={config.heading || "About Our Church"}
                       description={config.description || "Rooted in biblical truth, passionate about authentic worship, and dedicated to transforming lives in our community."}
                       light
@@ -720,48 +646,22 @@ export default async function HomeView() {
                   </div>
                 </div>
 
-                {/* Sub-pages navigation cards (Beliefs, Leadership, Story) */}
                 <div className="grid gap-5 border-t border-white/15 pt-12 sm:grid-cols-3">
-                  <Link
-                    className="group rounded-xl border border-white/15 bg-white/5 p-6 transition-colors hover:border-secondary hover:bg-white/10"
-                    href="/about/our-story"
-                  >
-                    <BookOpen aria-hidden="true" className="size-6 text-secondary" />
-                    <h4 className="mt-4 font-display text-lg font-bold text-white group-hover:text-secondary">Our Story & Heritage</h4>
-                    <p className="mt-2 text-xs leading-relaxed text-white/70">
-                      Learn how God planted our church and the journey of faith that shapes who we are today.
-                    </p>
-                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-secondary">
-                      Read our story &rarr;
-                    </span>
-                  </Link>
-
-                  <Link
-                    className="group rounded-xl border border-white/15 bg-white/5 p-6 transition-colors hover:border-secondary hover:bg-white/10"
-                    href="/about/beliefs"
-                  >
-                    <Heart aria-hidden="true" className="size-6 text-secondary" />
-                    <h4 className="mt-4 font-display text-lg font-bold text-white group-hover:text-secondary">Statement of Faith</h4>
-                    <p className="mt-2 text-xs leading-relaxed text-white/70">
-                      Explore our biblical beliefs regarding God, Scripture, salvation, and the Christian walk.
-                    </p>
-                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-secondary">
-                      Explore our beliefs &rarr;
-                    </span>
-                  </Link>
-
-                  <Link
-                    className="group rounded-xl border border-white/15 bg-white/5 p-6 transition-colors hover:border-secondary hover:bg-white/10"
-                    href="/about/leadership"
-                  >
-                    <Users aria-hidden="true" className="size-6 text-secondary" />
-                    <h4 className="mt-4 font-display text-lg font-bold text-white group-hover:text-secondary">Church Leadership</h4>
-                    <p className="mt-2 text-xs leading-relaxed text-white/70">
-                      Meet the pastoral and ministry leaders devoted to serving our congregation with grace.
-                    </p>
-                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-secondary">
-                      Meet our team &rarr;
-                    </span>
+                  {aboutCards.map((card, index) => {
+                    const icons = [BookOpen, Heart, Users, Sparkles];
+                    const IconComponent = icons[index % icons.length];
+                    return <Link className="group rounded-xl border border-white/15 bg-white/5 p-6 transition-colors hover:border-secondary hover:bg-white/10" href={card.href} key={card.id}>
+                      <IconComponent aria-hidden="true" className="size-6 text-secondary" />
+                      {card.eyebrow && <span className="mt-3 block text-[10px] font-bold uppercase tracking-wider text-secondary">{card.eyebrow}</span>}
+                      <h4 className="mt-2 font-display text-lg font-bold text-white group-hover:text-secondary">{card.title}</h4>
+                      <p className="mt-2 text-xs leading-relaxed text-white/70">{card.description}</p>
+                      <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-secondary">{card.cta} <ArrowRight aria-hidden="true" className="size-3.5" /></span>
+                    </Link>;
+                  })}
+                </div>
+                <div className="flex justify-center">
+                  <Link className="button button-secondary min-h-11 px-5 text-xs font-bold uppercase tracking-wider" href={config.primaryCtaHref || "/about/beliefs"}>
+                    {config.primaryCtaLabel || "Read our beliefs"}<ArrowRight aria-hidden="true" className="size-4" />
                   </Link>
                 </div>
               </div>
@@ -776,67 +676,68 @@ export default async function HomeView() {
               <div className={container}>
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <SectionHeading
-                    eyebrow="Find Your Place"
+                    eyebrow={config.eyebrow || "Find Your Place"}
                     title={config.heading || "Church Ministries"}
                     description={config.description || "Every individual has unique gifts. Discover a ministry where you can grow, belong, and make a meaningful difference."}
                   />
-                  <LinkArrow href="/ministries">Explore all ministries</LinkArrow>
+                  <LinkArrow href={config.primaryCtaHref || "/ministries"}>{config.primaryCtaLabel || "Explore all ministries"}</LinkArrow>
                 </div>
 
                 <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {chosenMinistries.map((ministry) => (
-                    <FlipCard
+                    <article
                       key={ministry.id}
-                      height="380px"
-                      front={
-                        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
-                          <div className="relative aspect-[16/10] overflow-hidden bg-stone-200">
-                            {ministry.imageUrl ? (
-                              <Image
-                                alt={`${ministry.name} ministry`}
-                                className="object-cover transition-transform duration-500 hover:scale-105"
-                                fill
-                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                src={ministry.imageUrl}
-                                unoptimized
-                              />
-                            ) : (
-                              <div aria-hidden="true" className="grid h-full place-items-center bg-secondary/20 font-display text-4xl text-primary font-bold">
-                                {ministry.name.slice(0, 1)}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex flex-1 flex-col justify-between p-6">
-                            <div>
-                              <p className="eyebrow text-primary text-[10px] uppercase font-bold tracking-wider">Ministry</p>
-                              <h3 className="mt-1 font-display text-2xl font-bold">{ministry.name}</h3>
-                              <p className="mt-3 line-clamp-3 text-xs leading-relaxed text-muted">{ministry.description}</p>
+                      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    >
+                      <div>
+                        <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
+                          {ministry.imageUrl ? (
+                            <Image
+                              alt={`${ministry.name} ministry`}
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                              fill
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                              src={ministry.imageUrl}
+                              unoptimized
+                            />
+                          ) : (
+                            <div aria-hidden="true" className="grid h-full place-items-center bg-stone-100 font-display text-4xl text-primary font-bold">
+                              {ministry.name.slice(0, 1)}
                             </div>
-                            <span className="text-xs font-semibold text-primary">Hover or tap to learn more &rarr;</span>
-                          </div>
+                          )}
+                          <span className="absolute top-3 left-3 rounded-full bg-stone-950/75 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white backdrop-blur-sm">
+                            Ministry
+                          </span>
                         </div>
-                      }
-                      back={
-                        <div className="flex h-full flex-col justify-between rounded-xl bg-primary-dark p-7 text-white shadow-xl">
-                          <div>
-                            <p className="eyebrow text-secondary uppercase text-[10px] tracking-wider">Ministry Details</p>
-                            <h3 className="mt-2 font-display text-2xl font-bold text-white">{ministry.name}</h3>
-                            <p className="mt-4 text-xs leading-relaxed text-white/80 line-clamp-5">{ministry.description}</p>
-                            {ministry.meetingSchedule && (
-                              <p className="mt-4 text-xs font-semibold text-secondary">
-                                Schedule: {ministry.meetingSchedule}
-                              </p>
-                            )}
-                          </div>
-                          <Link
-                            className="mt-6 inline-flex items-center gap-2 rounded bg-secondary px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-stone-950 hover:bg-secondary/90"
-                            href={`/ministries/${ministry.slug}`}
-                          >
-                            Explore Ministry <ArrowUpRight className="size-4" />
-                          </Link>
+
+                        <div className="p-6">
+                          <h3 className="font-display text-2xl font-bold text-stone-900 group-hover:text-primary transition-colors">
+                            <Link href={`/ministries/${ministry.slug}`}>{ministry.name}</Link>
+                          </h3>
+
+                          {ministry.meetingSchedule && (
+                            <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-secondary">
+                              <Clock3 className="size-3.5 text-secondary shrink-0" />
+                              <span>{ministry.meetingSchedule}</span>
+                            </p>
+                          )}
+
+                          <p className="mt-3 line-clamp-3 text-xs sm:text-sm leading-relaxed text-muted">
+                            {ministry.description}
+                          </p>
                         </div>
-                      }
-                    />
+                      </div>
+
+                      <div className="border-t border-stone-100 p-6 pt-4">
+                        <Link
+                          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary group-hover:text-primary-hover hover:underline"
+                          href={`/ministries/${ministry.slug}`}
+                        >
+                          <span>Explore Ministry</span>
+                          <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                        </Link>
+                      </div>
+                    </article>
                   ))}
                 </div>
               </div>
@@ -851,80 +752,101 @@ export default async function HomeView() {
               <div className={container}>
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <SectionHeading
-                    eyebrow="Community Life"
+                    eyebrow={config.eyebrow || "Community Life"}
                     title={config.heading || "Upcoming Church Events"}
                     description={config.description || "Stay connected with upcoming conferences, worship gatherings, prayer vigils, and outreach activities."}
                   />
-                  <LinkArrow href="/events">View all events calendar</LinkArrow>
+                  <LinkArrow href={config.primaryCtaHref || "/events"}>{config.primaryCtaLabel || "View all events calendar"}</LinkArrow>
                 </div>
 
                 <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {publicEvents.map((event) => (
-                    <FlipCard
-                      key={event.id}
-                      height="380px"
-                      front={
-                        <article className="flex h-full flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
-                          {event.flyerUrl && (
-                            <div className="relative aspect-[16/10] shrink-0 bg-stone-200">
+                  {publicEvents.map((event) => {
+                    const eventDate = new Date(event.date);
+                    const isValidDate = !isNaN(eventDate.getTime());
+                    const monthStr = isValidDate ? eventDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : "EVENT";
+                    const dayStr = isValidDate ? eventDate.getDate() : "·";
+
+                    return (
+                      <article
+                        key={event.id}
+                        className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                      >
+                        <div>
+                          {event.flyerUrl ? (
+                            <div className="relative aspect-[16/10] overflow-hidden bg-stone-100">
                               <Image
                                 alt={`${event.name} event flyer`}
-                                className="object-cover"
+                                className="object-cover transition-transform duration-500 group-hover:scale-105"
                                 fill
                                 sizes="(max-width: 768px) 100vw, 33vw"
                                 src={event.flyerUrl}
                                 unoptimized
                               />
+                              <div className="absolute top-3 left-3 flex flex-col items-center rounded-xl bg-white/95 px-3 py-1.5 shadow-md backdrop-blur-xs text-center min-w-[50px]">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-secondary">
+                                  {monthStr}
+                                </span>
+                                <span className="text-lg font-black leading-none text-stone-900">
+                                  {dayStr}
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="relative p-6 pb-0 flex items-center gap-3">
+                              <div className="flex flex-col items-center rounded-xl bg-primary px-3.5 py-2 text-center text-white min-w-[55px] shadow-sm">
+                                <span className="text-[10px] font-extrabold uppercase tracking-wider text-secondary">
+                                  {monthStr}
+                                </span>
+                                <span className="text-xl font-black leading-none">
+                                  {dayStr}
+                                </span>
+                              </div>
+                              <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+                                Upcoming Gathering
+                              </span>
                             </div>
                           )}
-                          <div className="flex flex-1 flex-col justify-between p-6">
-                            <div>
-                              <p className="eyebrow flex items-center gap-1.5 text-primary text-xs font-bold">
-                                <CalendarDays aria-hidden="true" className="size-4" />
-                                {event.date}{event.time ? ` · ${event.time}` : ""}
-                              </p>
-                              <h3 className="mt-2 font-display text-2xl font-bold">{event.name}</h3>
+
+                          <div className="p-6">
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-stone-500">
+                              {event.time && (
+                                <span className="flex items-center gap-1 font-semibold text-primary">
+                                  <Clock3 className="size-3.5" />
+                                  <span>{event.time}</span>
+                                </span>
+                              )}
                               {event.location && (
-                                <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
-                                  <MapPin aria-hidden="true" className="size-3.5 text-primary shrink-0" />
-                                  {event.location}
-                                </p>
+                                <span className="flex items-center gap-1 truncate text-stone-600">
+                                  <MapPin className="size-3.5 text-secondary shrink-0" />
+                                  <span className="truncate">{event.location}</span>
+                                </span>
                               )}
                             </div>
-                            <span className="text-xs font-semibold text-primary">Hover or tap for info &rarr;</span>
-                          </div>
-                        </article>
-                      }
-                      back={
-                        <div className="flex h-full flex-col justify-between rounded-xl bg-primary-dark p-7 text-white shadow-xl">
-                          <div>
-                            <p className="eyebrow flex items-center gap-1.5 text-secondary text-xs">
-                              <CalendarDays className="size-4" />
-                              {event.date}{event.time ? ` · ${event.time}` : ""}
-                            </p>
-                            <h3 className="mt-2 font-display text-2xl font-bold text-white">{event.name}</h3>
-                            {event.location && (
-                              <p className="mt-2 flex items-center gap-1.5 text-xs text-white/70">
-                                <MapPin className="size-3.5 shrink-0 text-secondary" />
-                                {event.location}
-                              </p>
-                            )}
+
+                            <h3 className="mt-3 font-display text-xl sm:text-2xl font-bold text-stone-900 group-hover:text-primary transition-colors line-clamp-2">
+                              <Link href={`/events/${event.id}`}>{event.name}</Link>
+                            </h3>
+
                             {event.description && (
-                              <p className="mt-3 text-xs leading-relaxed text-white/80 line-clamp-4">
+                              <p className="mt-2.5 text-xs sm:text-sm leading-relaxed text-muted line-clamp-3">
                                 {event.description}
                               </p>
                             )}
                           </div>
+                        </div>
+
+                        <div className="border-t border-stone-100 p-6 pt-4">
                           <Link
-                            className="mt-6 inline-flex items-center gap-2 rounded bg-secondary px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-stone-950 hover:bg-secondary/90"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary group-hover:text-primary-hover hover:underline"
                             href={`/events/${event.id}`}
                           >
-                            Event Details <ArrowUpRight className="size-4" />
+                            <span>Event Details</span>
+                            <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                           </Link>
                         </div>
-                      }
-                    />
-                  ))}
+                      </article>
+                    );
+                  })}
                   {publicEvents.length === 0 && (
                     <p className="rounded-xl border border-border bg-white p-6 text-sm leading-6 text-muted md:col-span-2 lg:col-span-3">
                       No upcoming events are listed right now. Visit the <Link className="font-semibold text-primary hover:underline" href="/events">events page</Link> for updates.
@@ -943,11 +865,11 @@ export default async function HomeView() {
               <div className={container}>
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <SectionHeading
-                    eyebrow="God's Word"
+                    eyebrow={config.eyebrow || "God's Word"}
                     title={config.heading || "Latest Sermons & Teachings"}
                     description={config.description || "Watch or listen to Bible messages shared by the congregation."}
                   />
-                  <LinkArrow href="/sermons">Browse sermon library</LinkArrow>
+                  <LinkArrow href={config.primaryCtaHref || "/sermons"}>{config.primaryCtaLabel || "Browse sermon library"}</LinkArrow>
                 </div>
 
                 <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -1043,42 +965,49 @@ export default async function HomeView() {
               <div className={container}>
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <SectionHeading
-                    eyebrow="Church Notices"
+                    eyebrow={config.eyebrow || "Church Notices"}
                     title={config.heading || "Latest Announcements"}
                     description={config.description || "Important news, upcoming schedule changes, and ministry updates for our church congregation."}
                   />
-                  <LinkArrow href="/announcements">All announcements</LinkArrow>
+                  <LinkArrow href={config.primaryCtaHref || "/announcements"}>{config.primaryCtaLabel || "All announcements"}</LinkArrow>
                 </div>
 
-                <div className="mt-10 divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white shadow-sm">
-                  {publicAnnouncements.map((item) => (
-                    <article className="grid gap-4 p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8" key={item.id}>
-                      <div>
-                        <span className="inline-block rounded-full bg-amber-100 px-3 py-0.5 text-[11px] font-bold text-amber-900 uppercase tracking-wider">
-                          {text(item.details.category).replaceAll("_", " ") || "Church Update"}
-                        </span>
-                        <h3 className="mt-2 font-display text-2xl font-bold">
-                          <Link className="hover:text-primary transition-colors" href={`/announcements/${item.slug}`}>
-                            {item.title}
-                          </Link>
-                        </h3>
-                        {item.description && (
-                          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted">
-                            {item.description}
-                          </p>
-                        )}
-                      </div>
-                      <Link
-                        aria-label={`Read ${item.title}`}
-                        className="inline-flex size-11 items-center justify-center rounded-full border border-stone-300 text-stone-700 transition hover:bg-stone-100 hover:text-primary"
-                        href={`/announcements/${item.slug}`}
+                <div className="mt-10 space-y-3">
+                  {publicAnnouncements.map((item, i) => {
+                    const borderColors = ["border-l-primary", "border-l-secondary", "border-l-information"];
+                    const borderColor = borderColors[i % borderColors.length];
+                    return (
+                      <article
+                        key={item.id}
+                        className={`group grid gap-4 rounded-2xl border border-stone-100 border-l-4 ${borderColor} bg-white p-6 shadow-xs transition-all hover:shadow-sm sm:grid-cols-[1fr_auto] sm:items-center sm:p-7`}
                       >
-                        <ArrowUpRight aria-hidden="true" className="size-5" />
-                      </Link>
-                    </article>
-                  ))}
+                        <div>
+                          <span className="inline-block rounded-full bg-amber-100 px-3 py-0.5 text-[11px] font-bold text-amber-900 uppercase tracking-wider">
+                            {text(item.details.category).replaceAll("_", " ") || "Church Update"}
+                          </span>
+                          <h3 className="mt-2 font-display text-xl font-bold transition-colors group-hover:text-primary sm:text-2xl">
+                            <Link className="hover:text-primary" href={`/announcements/${item.slug}`}>
+                              {item.title}
+                            </Link>
+                          </h3>
+                          {item.description && (
+                            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+                        <Link
+                          aria-label={`Read ${item.title}`}
+                          className="inline-flex size-11 items-center justify-center rounded-full border border-stone-200 text-stone-600 transition hover:bg-primary hover:border-primary hover:text-white"
+                          href={`/announcements/${item.slug}`}
+                        >
+                          <ArrowUpRight aria-hidden="true" className="size-5" />
+                        </Link>
+                      </article>
+                    );
+                  })}
                   {publicAnnouncements.length === 0 && (
-                    <p className="p-6 text-sm leading-6 text-muted">
+                    <p className="rounded-xl border border-border bg-white p-6 text-sm leading-6 text-muted">
                       There are no new announcements right now. Check the <Link className="font-semibold text-primary hover:underline" href="/announcements">announcements page</Link> for updates.
                     </p>
                   )}
@@ -1095,7 +1024,7 @@ export default async function HomeView() {
             <section className="py-20 sm:py-24" id={key} key={key}>
               <div className={container}>
                 <SectionHeading
-                  eyebrow="Community Stories"
+                  eyebrow={config.eyebrow || "Community Stories"}
                   title={config.heading || "Faith Lived & Shared"}
                   description={config.description || "Real testimonies of God's love and restoration from members of our faith family."}
                 />
@@ -1135,11 +1064,11 @@ export default async function HomeView() {
               <div className={container}>
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <SectionHeading
-                    eyebrow="Church Life"
+                    eyebrow={config.eyebrow || "Church Life"}
                     title={config.heading || "Moments We Share"}
                     description={config.description || "A glimpse into worship, fellowship, outreach, and life together in our church family."}
                   />
-                  <LinkArrow href="/ministries">Find a place to connect</LinkArrow>
+                  <LinkArrow href={config.primaryCtaHref || "/ministries"}>{config.primaryCtaLabel || "Find a place to connect"}</LinkArrow>
                 </div>
                 <div className="mt-12 grid auto-rows-[180px] grid-cols-2 gap-4 sm:auto-rows-[220px] sm:grid-cols-3 lg:grid-cols-4">
                   {gallery.map((item, index) => (
@@ -1173,33 +1102,36 @@ export default async function HomeView() {
             <section className="py-20 sm:py-24" id={key} key={key}>
               <div className={`${container} space-y-12`}>
                 {/* 11. Dedicated Prayer Request CTA Banner (SRS Section 36 & 44) */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-dark via-[#1e2f47] to-primary p-8 text-white shadow-xl sm:p-12 lg:p-16">
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-dark via-[#1a2d4a] to-[hsl(220_60%_22%)] p-8 text-white shadow-2xl sm:p-12 lg:p-16">
+                  {/* Decorative circles */}
+                  <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-white/5 blur-2xl" />
+                  <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-10 size-80 rounded-full bg-secondary/10 blur-3xl" />
                   <div className="relative z-10 max-w-2xl">
                     <p className="eyebrow text-secondary uppercase tracking-widest text-xs font-bold">
-                      Pastoral Care & Intercession
+                      {config.eyebrow || "Pastoral Care & Intercession"}
                     </p>
                     <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                      Need Prayer? We Are Here For You.
+                      {config.prayerHeading || "Need Prayer? We Are Here For You."}
                     </h2>
                     <p className="mt-4 text-base leading-relaxed text-white/85 sm:text-lg">
-                      “Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.” (Philippians 4:6)
+                      “{config.prayerQuote || "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. (Philippians 4:6)"}”
                     </p>
                     <p className="mt-2 text-sm text-white/70">
-                      Our pastoral prayer team prays over every request received. All submissions are held in strict confidence and handled with heartfelt care.
+                      {config.prayerAssurance || "Our pastoral prayer team prays over every request received. All submissions are held in strict confidence and handled with heartfelt care."}
                     </p>
 
                     <div className="mt-8 flex flex-wrap items-center gap-4">
                       <Link
                         className="button button-secondary min-h-12 px-6 font-bold uppercase tracking-wider text-xs"
-                        href="/prayer-request"
+                        href={config.primaryCtaHref || "/prayer-request"}
                       >
-                        Submit a Prayer Request <ArrowRight aria-hidden="true" className="size-4" />
+                        {config.primaryCtaLabel || "Submit a Prayer Request"} <ArrowRight aria-hidden="true" className="size-4" />
                       </Link>
                       <Link
                         className="button border-2 border-white/40 bg-white/10 min-h-12 px-6 font-bold uppercase tracking-wider text-xs text-white hover:bg-white/20"
-                        href="/contact"
+                        href={config.secondaryCtaHref || "/contact"}
                       >
-                        Contact Pastoral Care
+                        {config.secondaryCtaLabel || "Contact Pastoral Care"}
                       </Link>
                     </div>
                   </div>
@@ -1209,19 +1141,19 @@ export default async function HomeView() {
                 <div className="grid overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-lg lg:grid-cols-[1.1fr_1fr]">
                   {/* Left Info Column */}
                   <div className="p-8 sm:p-12 lg:p-14">
-                    <p className="eyebrow text-primary uppercase tracking-widest text-xs font-bold">Visit Our Church</p>
+                    <p className="eyebrow text-primary uppercase tracking-widest text-xs font-bold">{config.visitLabel || "Visit Our Church"}</p>
                     <h3 className="mt-3 font-display text-3xl font-bold text-text sm:text-4xl">
-                      Join Us for Sabbath Worship
+                      {config.heading || "Join Us for Sabbath Worship"}
                     </h3>
                     <p className="mt-3 text-sm leading-relaxed text-muted">
-                      We welcome you to worship, study the Bible, and share fellowship with our community.
+                      {config.description || "We welcome you to worship, study the Bible, and share fellowship with our community."}
                     </p>
 
                     <div className="mt-8 space-y-5 text-sm">
                       <div className="flex items-start gap-3.5">
                         <MapPin aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
                         <div>
-                          <strong className="block text-stone-900">Physical Address</strong>
+                            <strong className="block text-stone-900">{config.addressLabel || "Physical Address"}</strong>
                           <span className="text-muted">{[church.contact.address, location].filter(Boolean).join(", ") || "Contact the congregation to confirm the location"}</span>
                         </div>
                       </div>
@@ -1229,7 +1161,7 @@ export default async function HomeView() {
                       <div className="flex items-start gap-3.5">
                         <Clock3 aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
                         <div>
-                          <strong className="block text-stone-900">Service Times</strong>
+                          <strong className="block text-stone-900">{config.serviceTimesLabel || "Service Times"}</strong>
                           {publicServices.length ? publicServices.slice(0, 3).map((service) => (
                             <span className="block text-muted" key={service.id}>
                               {formatServiceDate(service)}: {formatServiceTime(service)}
@@ -1242,7 +1174,7 @@ export default async function HomeView() {
                         <div className="flex items-center gap-3.5">
                           <Phone aria-hidden="true" className="size-5 shrink-0 text-primary" />
                           <div>
-                            <strong className="block text-stone-900">Church Office Phone</strong>
+                            <strong className="block text-stone-900">{config.phoneLabel || "Church Office Phone"}</strong>
                             <a className="text-primary hover:underline" href={`tel:${church.contact.phone}`}>{church.contact.phone}</a>
                           </div>
                         </div>
@@ -1252,7 +1184,7 @@ export default async function HomeView() {
                         <div className="flex items-center gap-3.5">
                           <Mail aria-hidden="true" className="size-5 shrink-0 text-primary" />
                           <div>
-                            <strong className="block text-stone-900">Email Address</strong>
+                            <strong className="block text-stone-900">{config.emailLabel || "Email Address"}</strong>
                             <a className="text-primary hover:underline" href={`mailto:${church.contact.email}`}>{church.contact.email}</a>
                           </div>
                         </div>
@@ -1268,17 +1200,17 @@ export default async function HomeView() {
                           target="_blank"
                         >
                           <MapPin aria-hidden="true" className="size-4" />
-                          Get Directions <ArrowUpRight className="size-3.5" />
+                          {config.directionsLabel || "Get Directions"} <ArrowUpRight className="size-3.5" />
                         </a>
                       )}
-                      <Link className="button button-outline min-h-11 px-5 text-xs font-bold uppercase tracking-wider" href="/plan-your-visit">
-                        Visitor Guide
+                      <Link className="button button-outline min-h-11 px-5 text-xs font-bold uppercase tracking-wider" href={config.visitorGuideHref || "/plan-your-visit"}>
+                        {config.visitorGuideLabel || "Visitor Guide"}
                       </Link>
                     </div>
 
                     {/* 13. Social Media Links (SRS Section 55) */}
                     <div className="mt-8 border-t border-stone-100 pt-6">
-                      <p className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3">Follow & Connect Online:</p>
+                      <p className="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3">{config.socialLinksLabel || "Follow & Connect Online:"}</p>
                       <div className="flex flex-wrap items-center gap-2">
                         {church.socialLinks.filter((s) => s.visible).length > 0 ? (
                           church.socialLinks.filter((s) => s.visible).map((item) => (
@@ -1319,7 +1251,7 @@ export default async function HomeView() {
                             rel="noreferrer"
                             target="_blank"
                           >
-                            Open in Google Maps <ArrowUpRight className="size-3.5" />
+                            {config.mapButtonLabel || "Open in Google Maps"} <ArrowUpRight className="size-3.5" />
                           </a>
                         )}
                       </div>

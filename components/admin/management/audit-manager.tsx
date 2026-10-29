@@ -42,7 +42,8 @@ export function AuditLogManager() {
   }
 
   useEffect(() => {
-    void fetchLogs();
+    const timer = window.setTimeout(() => { void fetchLogs(); }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const eventTypes = useMemo(() => {

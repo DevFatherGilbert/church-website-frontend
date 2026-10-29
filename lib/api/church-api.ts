@@ -87,6 +87,42 @@ export async function authUpload<T>(path: string, body: FormData): Promise<T> {
   );
 }
 
+export async function authUploadWithProgress<T>(
+  path: string,
+  body: FormData,
+  onProgress: (percent: number) => void,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", `${apiBase}${path}`);
+    request.withCredentials = true;
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)));
+    };
+    request.onerror = () => reject(new Error("We couldn’t reach the upload service. Check your connection and try again."));
+    request.onabort = () => reject(new Error("The upload was cancelled."));
+    request.onload = () => {
+      let payload: ApiEnvelope<T>;
+      try {
+        payload = JSON.parse(request.responseText) as ApiEnvelope<T>;
+      } catch {
+        reject(new Error(`The upload service returned an unreadable response (HTTP ${request.status}).`));
+        return;
+      }
+      if (request.status < 200 || request.status >= 300 || payload.success === false) {
+        reject(new Error(payload.error ?? payload.message ?? `The upload could not be completed (HTTP ${request.status}).`));
+        return;
+      }
+      try {
+        resolve(responseData(payload, "The upload could not be completed."));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    request.send(body);
+  });
+}
+
 export async function authGet<T>(path: string): Promise<T> {
   let response: Response;
   try {
@@ -267,5 +303,19 @@ export type ManagedUser = {
   avatar?: string | null;
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type MediaAsset = {
+  id: string;
+  publicId: string;
+  secureUrl: string;
+  resourceType: "image" | "video" | "raw" | string;
+  format?: string | null;
+  width?: number | null;
+  height?: number | null;
+  bytes: string | number;
+  altText: string;
+  folder: string;
+  createdAt?: string;
 };
 

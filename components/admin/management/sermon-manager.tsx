@@ -20,12 +20,12 @@ import {
   Sparkles,
   Tag,
   Trash2,
-  Upload,
   User,
   Users,
   Video,
   X,
 } from "lucide-react";
+import { ImageUploadDropzone } from "@/components/admin/management/image-upload-dropzone";
 import {
   authGet,
   authMutation,
@@ -298,7 +298,7 @@ export function SermonManager() {
     try {
       const form = new FormData();
       form.set("file", file);
-      const res = await authUpload<{ url: string }>("/media/upload", form);
+      const res = await authUpload<{ url: string }>("/media/upload?purpose=sermons", form);
       if (!res?.url) throw new Error("Upload did not return a valid URL.");
       setFormThumbnailUrl(res.url);
       setNotice("Thumbnail uploaded successfully.");
@@ -329,7 +329,7 @@ export function SermonManager() {
     try {
       const form = new FormData();
       form.set("file", file);
-      const res = await authUpload<{ url: string }>("/media/upload", form);
+      const res = await authUpload<{ url: string }>("/media/upload?purpose=sermons", form);
       if (!res?.url) throw new Error("Audio upload did not return a valid URL.");
       setFormAudioUrl(res.url);
       setNotice("Audio file uploaded successfully.");
@@ -466,11 +466,20 @@ export function SermonManager() {
   // Upload Speaker Photo
   const handleSpeakerPhotoUpload = async (file?: File) => {
     if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      setError("Please choose a JPEG, PNG, WebP, or GIF image.");
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      setError("Speaker photo must be 15 MB or smaller.");
+      return;
+    }
+    setError("");
     setSpeakerUploading(true);
     try {
       const form = new FormData();
       form.set("file", file);
-      const res = await authUpload<{ url: string }>("/media/upload", form);
+      const res = await authUpload<{ url: string }>("/media/upload?purpose=leadership", form);
       if (res?.url) {
         setSpeakerPhotoUrl(res.url);
       }
@@ -1378,18 +1387,17 @@ export function SermonManager() {
                       </div>
                     )}
                     <div className="flex-1 space-y-2">
-                      <div className="flex gap-2">
-                        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-xs">
-                          <Upload className="size-3.5" />
-                          {imageUploading ? "Uploading image…" : "Choose Image File"}
-                          <input
-                            accept="image/jpeg,image/png,image/webp"
-                            className="hidden"
-                            disabled={imageUploading}
-                            onChange={(e) => handleThumbnailUpload(e.target.files?.[0])}
-                            type="file"
-                          />
-                        </label>
+                      <div className="flex flex-wrap items-start gap-2">
+                        <ImageUploadDropzone
+                          className="min-w-44 flex-1"
+                          compact
+                          disabled={imageUploading}
+                          helperText="Recommended 16:9 · JPEG, PNG, WebP, or GIF · up to 15 MB"
+                          label="Choose or drop a thumbnail image"
+                          onFile={(file) => void handleThumbnailUpload(file)}
+                          onSelectAsset={(asset) => setFormThumbnailUrl(asset.secureUrl)}
+                          uploading={imageUploading}
+                        />
                         {formThumbnailUrl && (
                           <button
                             className="text-xs font-semibold text-red-600 hover:text-red-800"
@@ -1675,17 +1683,14 @@ export function SermonManager() {
                     </div>
                   )}
                   <div className="flex-1 space-y-1">
-                    <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50">
-                      <Upload className="size-3" />
-                      {speakerUploading ? "Uploading…" : "Upload photo"}
-                      <input
-                        accept="image/*"
-                        className="hidden"
-                        disabled={speakerUploading}
-                        onChange={(e) => handleSpeakerPhotoUpload(e.target.files?.[0])}
-                        type="file"
-                      />
-                    </label>
+                    <ImageUploadDropzone
+                      compact
+                      disabled={speakerUploading}
+                      label="Upload or drop a speaker photo"
+                      onFile={(file) => void handleSpeakerPhotoUpload(file)}
+                      onSelectAsset={(asset) => setSpeakerPhotoUrl(asset.secureUrl)}
+                      uploading={speakerUploading}
+                    />
                     <input
                       className="h-8 w-full rounded-lg border border-slate-300 bg-slate-50 px-2 text-xs"
                       onChange={(e) => setSpeakerPhotoUrl(e.target.value)}

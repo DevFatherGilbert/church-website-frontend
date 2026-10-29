@@ -5,7 +5,7 @@ import { sortServices, toChurchService } from "@/lib/content/services";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
 export const metadata: Metadata = {
-  title: "Plan your visit",
+  title: "Plan Your Visit",
   description: "Find the church’s current published gathering times and location before you visit.",
   alternates: { canonical: "/plan-your-visit" },
 };

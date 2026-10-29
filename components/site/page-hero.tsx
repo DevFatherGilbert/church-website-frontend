@@ -14,15 +14,15 @@ export function PageHero({
   breadcrumbs?: { label: string; href: string }[];
 }) {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#0a1526] via-[#0f213f] to-[#0d1d36] px-5 pb-14 pt-32 text-primary-foreground sm:pb-18 sm:pt-40 lg:pb-20 lg:pt-44">
+    <section className="relative overflow-hidden bg-gradient-to-b from-primary-dark via-[hsl(var(--brand-primary))] to-primary-dark px-5 pb-14 pt-32 text-primary-foreground sm:pb-18 sm:pt-40 lg:pb-20 lg:pt-44">
       {/* Ambient background glows */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-amber-500/10 blur-3xl"
+        className="pointer-events-none absolute -right-20 -top-20 h-96 w-96 rounded-full bg-secondary/15 blur-3xl"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 left-10 h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
+        className="pointer-events-none absolute -bottom-24 left-10 h-72 w-72 rounded-full bg-primary-hover/20 blur-3xl"
       />
 
       <div className="page-container relative z-10">
@@ -38,7 +38,7 @@ export function PageHero({
                   )}
                   <Link
                     href={item.href}
-                    className="transition-colors hover:text-amber-400"
+                    className="transition-colors hover:text-secondary"
                   >
                     {item.label}
                   </Link>
@@ -56,7 +56,7 @@ export function PageHero({
         <h1 className="mt-5 max-w-4xl font-display text-[clamp(2.5rem,6vw,4.25rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-white">
           {title}
           {emphasis && (
-            <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-secondary via-amber-200 to-secondary bg-clip-text text-transparent">
               {" "}
               {emphasis}
             </span>
@@ -71,7 +71,7 @@ export function PageHero({
       {/* Subtle bottom separator accent line */}
       <div
         aria-hidden="true"
-        className="absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
+        className="absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-secondary/40 to-transparent"
       />
     </section>
   );

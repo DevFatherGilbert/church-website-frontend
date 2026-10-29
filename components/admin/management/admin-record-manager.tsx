@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { Eye, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { authGet, authMutation, authUpload } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
+import { ImageUploadDropzone } from "@/components/admin/management/image-upload-dropzone";
 
 type Section = "sermons" | "events" | "resources" | "leadership" | "settings" | "services" | "testimonials";
 type Field = {
@@ -279,7 +280,8 @@ export function AdminRecordManager({ section }: { section: Section }) {
     try {
       const form = new FormData();
       form.set("file", file);
-      const uploaded = await authUpload<{ url: string }>(section === "leadership" || section === "testimonials" ? "/media/upload?purpose=image" : "/media/upload", form);
+      const purpose = section === "events" ? "events" : section === "leadership" ? "leadership" : "resources";
+      const uploaded = await authUpload<{ url: string }>(`/media/upload?purpose=${purpose}`, form);
       if (!uploaded?.url) throw new Error("The upload service did not return an image URL.");
       setImageUrl(uploaded.url);
     } catch (cause) {
@@ -626,12 +628,13 @@ export function AdminRecordManager({ section }: { section: Section }) {
                           {imageUrl && (
                             <div aria-label="Current profile image" className="aspect-[4/3] max-w-sm rounded-xl border border-border bg-surface-strong bg-cover bg-center" role="img" style={{ backgroundImage: `url("${imageUrl}")` }} />
                           )}
-                          <input
-                            accept="image/jpeg,image/png,image/webp,image/gif"
-                            className="block min-h-11 w-full rounded-xl border border-border bg-surface px-3 py-2 text-xs text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-surface-strong file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-foreground hover:file:bg-surface-strong/80"
+                          <ImageUploadDropzone
+                            className="max-w-sm"
                             disabled={imageUploading}
-                            onChange={(event) => void uploadEventImage(event.target.files?.[0])}
-                            type="file"
+                            label="Drag and drop an image or click to browse"
+                            onFile={(file) => void uploadEventImage(file)}
+                            onSelectAsset={(asset) => setImageUrl(asset.secureUrl)}
+                            uploading={imageUploading}
                           />
                           <input name={field.name} type="hidden" value={imageUrl} />
                           <p className="text-[11px] text-muted">

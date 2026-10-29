@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { ArrowUpRight, Clock3, Mail, MapPin, Phone } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Clock3, LogIn, Mail, MapPin, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { SubmissionForm } from "@/components/forms/submission-form";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
@@ -130,6 +131,23 @@ export default async function ContactPage({
               />
             </div>
           )}
+
+          {/* Church Staff & Administrative Portal Access */}
+          <div className="surface-card rounded-2xl p-5 border border-primary/10 bg-surface-strong/40">
+            <h3 className="eyebrow text-primary text-xs font-bold uppercase tracking-wider">
+              STAFF & MINISTRY LEADERS
+            </h3>
+            <p className="mt-1.5 text-xs text-muted leading-relaxed">
+              Authorized pastoral staff and ministry leaders can access administrative tools, manage announcements, and update schedules here.
+            </p>
+            <Link
+              className="mt-3.5 inline-flex items-center gap-1.5 rounded-xl border border-primary/20 bg-surface px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-primary hover:border-primary hover:bg-primary/5 transition-colors"
+              href="/admin/login"
+            >
+              <LogIn className="size-3.5" aria-hidden="true" />
+              <span>Staff Portal Login →</span>
+            </Link>
+          </div>
         </aside>
 
         {/* Right column — Unified Submission Form */}

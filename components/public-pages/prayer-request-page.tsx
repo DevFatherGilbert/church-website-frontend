@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CheckCircle2, Heart, Lock, Shield, Sparkles } from "lucide-react";
+import { Lock } from "lucide-react";
 import { SubmissionForm } from "../forms/submission-form";
 import { PageHero } from "../site/page-hero";
 

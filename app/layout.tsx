@@ -1,24 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
-import { Inter, Manrope } from "next/font/google";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 import { ChurchBrandProvider } from "@/components/brand/church-brand-provider";
 import "./globals.css";
 
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#00387B",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   await connection();
@@ -60,12 +52,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   return (
     <html data-scroll-behavior="smooth" lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap" rel="stylesheet" />
-      </head>
-      <body className={`${manrope.variable} ${inter.variable} antialiased font-sans`}>
+      <body className="antialiased font-sans">
         <ChurchBrandProvider initialBrand={initialBrand}>
           {children}
         </ChurchBrandProvider>

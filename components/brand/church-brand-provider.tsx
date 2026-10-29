@@ -61,10 +61,6 @@ export function ChurchBrandProvider({
   }, []);
 
   useEffect(() => {
-    if (!initialBrand?.churchName || initialBrand.churchName === "Church") {
-      void refresh();
-    }
-
     const handleUpdate = () => {
       void refresh();
     };
@@ -73,7 +69,7 @@ export function ChurchBrandProvider({
     return () => {
       window.removeEventListener("church-settings-updated", handleUpdate);
     };
-  }, [initialBrand?.churchName, refresh]);
+  }, [refresh]);
 
   return (
     <ChurchBrandContext.Provider value={{ ...brand, refresh }}>

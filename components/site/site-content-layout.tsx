@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Clock3, Heart, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import type { SitePage } from "@/lib/content/site-pages";
 

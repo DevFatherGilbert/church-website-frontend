@@ -3,10 +3,25 @@ import { connection } from "next/server";
 import { SiteFooter } from "./site-footer";
 import { HeaderView } from "./Header";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
+import { getPublicData, type PublicContent } from "@/lib/api/church-api";
 
 export async function SiteChrome({ children }: { children: ReactNode }) {
   await connection();
-  const { churchName, church } = await getPublicWebsiteSettings();
+  const [{ churchName, church, homepage }, announcementsData] = await Promise.all([
+    getPublicWebsiteSettings(),
+    getPublicData<{ items: PublicContent[] }>("/content/announcements?limit=5").catch(() => null),
+  ]);
+
+  const dbAnnouncements = announcementsData?.items ?? [];
+  const urgentAnnouncement =
+    dbAnnouncements.find(
+      (item) =>
+        item.details.category === "NOTICES" ||
+        item.title.toLowerCase().includes("urgent") ||
+        (item.description && item.description.toLowerCase().includes("urgent")),
+    ) ??
+    dbAnnouncements[0] ??
+    null;
 
   return (
     <div id="top">
@@ -22,7 +37,23 @@ export async function SiteChrome({ children }: { children: ReactNode }) {
         logoUrl={church.profile.logoUrl || "/logo-c.png"}
         logoAlt={church.profile.logoAlt || churchName || "Church logo"}
         phone={church.contact.phone}
+        email={church.contact.email}
+        location={[church.contact.city, church.contact.country].filter(Boolean).join(", ") || "Kigali, Rwanda"}
+        siteHeader={homepage.siteHeader}
+        urgentAnnouncement={
+          urgentAnnouncement
+            ? {
+                id: urgentAnnouncement.id,
+                title: urgentAnnouncement.title,
+                description: urgentAnnouncement.description,
+                slug: urgentAnnouncement.slug,
+                category: String(urgentAnnouncement.details.category || "NOTICES"),
+                href: `/announcements/${urgentAnnouncement.slug}`,
+              }
+            : null
+        }
       />
+      {/* Main content — hero page handles its own top padding; inner pages need the offset */}
       <div id="main-content">{children}</div>
       <SiteFooter />
     </div>

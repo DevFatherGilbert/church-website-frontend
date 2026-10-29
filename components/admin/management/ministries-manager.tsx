@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Archive, ArrowUpRight, Eye, ImagePlus, LoaderCircle, Pencil, Plus, Search, Trash2, UploadCloud, X } from "lucide-react";
+import { Archive, ArrowUpRight, Eye, ImagePlus, LoaderCircle, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { authGet, authMutation, authUpload, type Ministry } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
+import { ImageUploadDropzone } from "@/components/admin/management/image-upload-dropzone";
 
 type MinistryStatus = "draft" | "published" | "archived";
 type MinistryForm = {
@@ -73,7 +74,6 @@ export function MinistriesManager() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [slugTouched, setSlugTouched] = useState(false);
   const [localImagePreview, setLocalImagePreview] = useState("");
-  const fileInput = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     const result = await authGet<{ items: Ministry[]; total: number }>("/admin/ministries");
@@ -140,7 +140,7 @@ export function MinistriesManager() {
     try {
       const body = new FormData();
       body.set("file", file);
-      const uploaded = await authUpload<{ url: string }>("/media/upload?purpose=image", body);
+      const uploaded = await authUpload<{ url: string }>("/media/upload?purpose=ministries", body);
       if (!uploaded?.url) throw new Error("The backend did not return an image URL.");
       update("imageUrl", uploaded.url);
       setLocalImagePreview("");
@@ -151,17 +151,7 @@ export function MinistriesManager() {
       setLocalImagePreview("");
     } finally {
       setUploading(false);
-      if (fileInput.current) fileInput.current.value = "";
     }
-  }
-
-  function onFileChange(event: ChangeEvent<HTMLInputElement>) {
-    void uploadImage(event.target.files?.[0]);
-  }
-
-  function onDrop(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault();
-    void uploadImage(event.dataTransfer.files?.[0]);
   }
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -588,28 +578,14 @@ export function MinistriesManager() {
                   <h3 className="font-display text-base font-bold text-foreground">Featured image</h3>
                   <p className="mt-0.5 text-xs text-muted">Image files are uploaded to the backend media service and stored there.</p>
                   <div className="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                    <div
-                      aria-label="Drop an image file to upload it"
-                      className="flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface p-5 text-center transition hover:border-primary/50 hover:bg-primary/5"
-                      onClick={() => fileInput.current?.click()}
-                      onDragOver={(event) => event.preventDefault()}
-                      onDrop={onDrop}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          fileInput.current?.click();
-                        }
-                      }}
-                    >
-                      <input accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" onChange={onFileChange} ref={fileInput} type="file" />
-                      <div className="mb-3 flex size-11 items-center justify-center rounded-full bg-surface-strong text-primary shadow-xs">
-                        {uploading ? <LoaderCircle aria-hidden="true" className="size-5 animate-spin" /> : <UploadCloud aria-hidden="true" className="size-5" />}
-                      </div>
-                      <span className="text-xs font-bold text-foreground">{uploading ? "Uploading to backend…" : "Choose an image or drag it here"}</span>
-                      <span className="mt-1 text-[11px] text-muted">JPEG, PNG, WebP, or GIF · up to 15 MB</span>
-                    </div>
+                    <ImageUploadDropzone
+                      className="min-h-44"
+                      disabled={uploading}
+                      label="Choose an image or drag it here"
+                      onFile={(file) => void uploadImage(file)}
+                      onSelectAsset={(asset) => { update("imageUrl", asset.secureUrl); setLocalImagePreview(""); }}
+                      uploading={uploading}
+                    />
                     <div className="relative min-h-44 overflow-hidden rounded-xl border border-border bg-surface-strong">
                       {imageSource ? (
                         <>
@@ -754,4 +730,3 @@ export function MinistriesManager() {
     </div>
   );
 }
-

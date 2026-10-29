@@ -43,7 +43,10 @@ export function PlanYourVisitPage({
   return (
     <main className="bg-background">
       <PageHero
-        breadcrumbs={[{ label: "Home", href: "/" }]}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Plan Your Visit", href: "/plan-your-visit" },
+        ]}
         description="Visiting a new church should feel welcoming, not intimidating. Let us know you are coming and we will save you a seat, show you around, and ensure your family has a wonderful Sabbath."
         emphasis="save you a seat."
         eyebrow="YOUR FIRST VISIT"
