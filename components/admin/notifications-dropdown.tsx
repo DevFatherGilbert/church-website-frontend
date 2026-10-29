@@ -58,14 +58,14 @@ export function NotificationsDropdown() {
       >
         <Bell className="size-4.5" aria-hidden="true" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 flex min-w-5 h-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-white shadow-sm animate-pulse">
+          <span className="absolute -top-1 -right-1 flex min-w-5 h-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-white shadow-sm">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-surface shadow-xl z-50 overflow-hidden animate-in fade-in-50 slide-in-from-top-2 duration-150">
+        <div className="admin-card absolute right-0 z-50 mt-2 w-80 overflow-hidden sm:w-96">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-3 bg-surface-subtle">
             <div className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export function NotificationsDropdown() {
               <span
                 title={connected ? "Real-time connection active" : "Reconnecting to live server…"}
                 className={`inline-block size-2 rounded-full ${
-                  connected ? "bg-green-500" : "bg-amber-500 animate-pulse"
+                  connected ? "bg-green-500" : "bg-amber-500"
                 }`}
               />
               {notifications.length > 0 && (
@@ -133,7 +133,7 @@ export function NotificationsDropdown() {
                       markAsRead(item.id);
                       setOpen(false);
                     }}
-                    className={`block p-4 transition hover:bg-surface-subtle ${
+                    className={`block p-4 transition hover:bg-surface-subtle focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${
                       !item.read ? "bg-primary/5" : ""
                     }`}
                   >
@@ -179,4 +179,3 @@ export function NotificationsDropdown() {
     </div>
   );
 }
-

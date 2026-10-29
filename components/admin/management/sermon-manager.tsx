@@ -35,6 +35,7 @@ import {
 } from "@/lib/api/church-api";
 import { formatSermonDate, parseVideoUrl } from "@/lib/media/video-utils";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
+import { StatCardView, type StatCardData } from "@/components/admin/stat-card-view";
 
 const STANDARD_CATEGORIES = [
   "Faith",
@@ -578,6 +579,14 @@ export function SermonManager() {
     };
   }, [sermons]);
 
+  const statCards: StatCardData[] = [
+    { title: "Total Sermons", value: error ? null : stats.total, loading, description: error ? "Unavailable" : undefined, icon: Mic },
+    { title: "Published", value: error ? null : stats.published, loading, description: error ? "Unavailable" : undefined, icon: Check },
+    { title: "Drafts", value: error ? null : stats.drafts, loading, description: error ? "Unavailable" : undefined, icon: Pencil },
+    { title: "With Audio", value: error ? null : stats.withAudio, loading, description: error ? "Unavailable" : undefined, icon: Headphones },
+    { title: "With Video", value: error ? null : stats.withVideo, loading, description: error ? "Unavailable" : undefined, icon: Video },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -632,27 +641,8 @@ export function SermonManager() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-xs">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted">Total Sermons</p>
-          <p className="mt-1 font-display text-2xl font-bold text-foreground">{stats.total}</p>
-        </div>
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-xs">
-          <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Published</p>
-          <p className="mt-1 font-display text-2xl font-bold text-emerald-900">{stats.published}</p>
-        </div>
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 shadow-xs">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-800">Drafts</p>
-          <p className="mt-1 font-display text-2xl font-bold text-amber-900">{stats.drafts}</p>
-        </div>
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 shadow-xs">
-          <p className="text-xs font-bold uppercase tracking-wider text-primary">With Audio</p>
-          <p className="mt-1 font-display text-2xl font-bold text-primary">{stats.withAudio}</p>
-        </div>
-        <div className="rounded-2xl border border-purple-200 bg-purple-50/60 p-4 shadow-xs col-span-2 sm:col-span-1">
-          <p className="text-xs font-bold uppercase tracking-wider text-purple-800">With Video</p>
-          <p className="mt-1 font-display text-2xl font-bold text-purple-900">{stats.withVideo}</p>
-        </div>
+      <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
+        {statCards.map((stat) => <StatCardView key={stat.title} stat={stat} />)}
       </div>
 
       {/* Tabs Switcher */}
@@ -685,7 +675,7 @@ export function SermonManager() {
 
       {/* SERMONS TAB */}
       {activeTab === "sermons" && (
-        <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-xs" aria-label="Sermons table">
+        <section className="admin-card overflow-hidden" aria-label="Sermons table">
           {/* Filter Bar */}
           <div className="grid gap-3 border-b border-border p-4 sm:grid-cols-2 lg:grid-cols-4 lg:p-5">
             <div className="relative">
@@ -989,7 +979,7 @@ export function SermonManager() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {speakers.map((spk) => (
               <article
-                className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition hover:shadow-md hover:border-primary/30"
+                className="admin-card flex flex-col justify-between p-5"
                 key={spk.id}
               >
                 <div>
@@ -1048,7 +1038,7 @@ export function SermonManager() {
             ))}
 
             {!speakers.length && (
-              <div className="col-span-full rounded-2xl border border-dashed border-slate-300 p-10 text-center bg-slate-50/50">
+              <div className="admin-card admin-card-empty col-span-full p-10 text-center">
                 <Users className="mx-auto size-8 text-slate-400" />
                 <h4 className="mt-2 font-display font-bold text-slate-800">No speakers defined</h4>
                 <p className="text-xs text-slate-500 mt-1">
@@ -1788,30 +1778,30 @@ export function SermonManager() {
               </button>
             </div>
 
-            <div className="p-6 sm:p-10 space-y-8 bg-slate-50/50">
+            <div className="space-y-8 bg-surface-strong/40 p-6 sm:p-10">
               {/* Hero Banner inside preview */}
-              <div className="rounded-2xl bg-gradient-to-br from-primary via-slate-900 to-primary-hover p-6 sm:p-8 text-white shadow-lg">
-                <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent">
+              <div className="admin-card p-6 sm:p-8">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
                   <span>{previewSermon.category}</span>
                   <span>•</span>
                   <span>{formatSermonDate(previewSermon.date)}</span>
                   {previewSermon.series && (
                     <>
                       <span>•</span>
-                      <span className="text-accent">Series: {previewSermon.series}</span>
+                      <span>Series: {previewSermon.series}</span>
                     </>
                   )}
                 </div>
                 <h1 className="mt-3 text-2xl sm:text-4xl font-display font-bold tracking-tight" id="preview-title">
                   {previewSermon.title}
                 </h1>
-                <p className="mt-3 text-sm text-slate-300 flex items-center gap-2">
-                  <User className="size-4 text-accent" />
-                  Preached by <strong className="text-white">{previewSermon.speaker}</strong>
+                <p className="mt-3 flex items-center gap-2 text-sm text-muted">
+                  <User className="size-4 text-primary" />
+                  Preached by <strong className="text-foreground">{previewSermon.speaker}</strong>
                   {previewSermon.scripture && (
                     <>
                       <span>·</span>
-                      <span className="text-slate-200">Scripture: {previewSermon.scripture}</span>
+                      <span className="text-foreground">Scripture: {previewSermon.scripture}</span>
                     </>
                   )}
                 </p>
@@ -1841,7 +1831,7 @@ export function SermonManager() {
 
                   {/* Audio Player Card */}
                   {previewSermon.audioUrl && (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                    <div className="admin-card p-5">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <div className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
@@ -1872,7 +1862,7 @@ export function SermonManager() {
                   )}
 
                   {/* Message Description & Notes */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-3">
+                  <div className="admin-card space-y-3 p-6">
                     <h4 className="font-display font-bold text-slate-900 text-sm">Message Overview & Notes</h4>
                     <p className="text-sm leading-relaxed text-slate-600 whitespace-pre-line">
                       {previewSermon.description || "No study notes have been attached to this sermon yet."}
@@ -1883,7 +1873,7 @@ export function SermonManager() {
                 {/* Sidebar details */}
                 <aside className="space-y-4">
                   {/* Speaker Info Card */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+                  <div className="admin-card p-5">
                     <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
                       About the Speaker
                     </p>
@@ -1912,7 +1902,7 @@ export function SermonManager() {
                   </div>
 
                   {/* Metadata Card */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs divide-y divide-slate-100 text-xs">
+                  <div className="admin-card divide-y divide-border p-5 text-xs">
                     <div className="py-2.5 flex justify-between">
                       <span className="text-slate-400 font-medium">Scripture</span>
                       <span className="font-semibold text-slate-800">{previewSermon.scripture || "—"}</span>

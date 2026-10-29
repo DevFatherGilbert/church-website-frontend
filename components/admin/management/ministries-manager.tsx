@@ -239,7 +239,7 @@ export function MinistriesManager() {
         </p>
       )}
 
-      <section className="overflow-hidden rounded-2xl border border-border bg-surface shadow-xs" aria-label="Ministry management">
+      <section className="admin-card overflow-hidden" aria-label="Ministry management">
         <div className="flex flex-col gap-4 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
             <h2 className="font-display text-base font-bold text-foreground">All ministries</h2>
@@ -445,7 +445,7 @@ export function MinistriesManager() {
                     Back to editor
                   </button>
                 </div>
-                <div className="overflow-hidden rounded-2xl border border-border shadow-md">
+                <div className="admin-card overflow-hidden">
                   <div className="relative aspect-[16/7] bg-surface-strong">
                     {imageSource && (
                       <Image alt={`${form.name || "Ministry"} featured image preview`} className="object-cover" fill sizes="(max-width: 768px) 100vw, 768px" src={imageSource} unoptimized />

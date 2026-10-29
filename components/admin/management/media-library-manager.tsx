@@ -173,7 +173,7 @@ export function MediaLibraryManager() {
     {error && <p className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">{error}</p>}
     {notice && <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{notice}</p>}
 
-    <section className="mt-6 rounded-2xl border border-border bg-surface p-5 shadow-xs sm:p-7" aria-labelledby="upload-media-title">
+    <section className="admin-card mt-6 p-5 sm:p-7" aria-labelledby="upload-media-title">
       <h2 className="font-display text-lg font-bold text-foreground" id="upload-media-title">Upload a file</h2>
       <p className="mt-1 text-sm text-muted">Images: JPEG, PNG, WebP, or GIF up to 15 MB. Audio, video, and PDF files up to 50 MB.</p>
       <form className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={(event) => void uploadFile(event)}>
@@ -203,13 +203,13 @@ export function MediaLibraryManager() {
         <label className="sr-only" htmlFor="media-type-filter">Filter by file type</label><select className="min-h-11 rounded-xl border border-border bg-surface px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" id="media-type-filter" onChange={(event) => setFilter(event.target.value as Filter)} value={filter}><option value="all">All file types</option><option value="image">Images</option><option value="video">Audio &amp; video</option><option value="raw">PDF files</option></select>
       </div>
 
-      {loading ? <p className="mt-5 rounded-2xl border border-border bg-surface p-8 text-sm text-muted" role="status">Loading media…</p>
+      {loading ? <p className="admin-card mt-5 p-8 text-sm text-muted" role="status">Loading media…</p>
         : visibleAssets.length ? <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {visibleAssets.map((asset) => {
             const isImage = asset.resourceType === "image";
             const Icon = asset.resourceType === "video" ? FileVideo2 : asset.resourceType === "raw" ? FileText : FileAudio2;
             const dirtyAlt = (altDrafts[asset.id] ?? asset.altText) !== asset.altText;
-            return <article className="min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs" key={asset.id}>
+            return <article className="admin-card min-w-0 overflow-hidden" key={asset.id}>
               <button aria-label={`Preview ${fileLabel(asset)}`} className="relative block aspect-video w-full bg-surface-strong text-primary" onClick={() => setPreview(asset)} type="button">
                 {isImage ? <img alt={asset.altText || fileLabel(asset)} className="size-full object-cover" loading="lazy" src={asset.secureUrl} /> : <span className="grid size-full place-items-center"><Icon aria-hidden="true" className="size-12" /></span>}
                 <span className="absolute bottom-2 right-2 rounded-full bg-slate-950/75 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">Preview</span>
@@ -227,7 +227,7 @@ export function MediaLibraryManager() {
             </article>;
           })}
         </div>
-          : <div className="mt-5 rounded-2xl border border-dashed border-border bg-surface p-10 text-center sm:p-12"><FileImage aria-hidden="true" className="mx-auto size-9 text-muted" /><h3 className="mt-3 font-display text-lg font-bold text-foreground">{assets.length ? "No files match your search" : "No media uploaded"}</h3><p className="mt-1 text-sm text-muted">{assets.length ? "Try another name or file type." : "Uploaded files will appear here."}</p></div>}
+          : <div className="admin-card admin-card-empty mt-5 p-10 text-center sm:p-12"><FileImage aria-hidden="true" className="mx-auto size-9 text-muted" /><h3 className="mt-3 font-display text-lg font-bold text-foreground">{assets.length ? "No files match your search" : "No media uploaded"}</h3><p className="mt-1 text-sm text-muted">{assets.length ? "Try another name or file type." : "Uploaded files will appear here."}</p></div>}
     </section>
 
     {preview && <dialog aria-labelledby="media-preview-title" className="m-auto max-h-[92dvh] w-[min(94vw,60rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/70" onClose={() => setPreview(null)} ref={previewRef}>

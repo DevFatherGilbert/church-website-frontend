@@ -299,7 +299,7 @@ export function AnnouncementManager() {
         </p>
       )}
 
-      <section aria-label="Announcement management" className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
+      <section aria-label="Announcement management" className="admin-card mt-6 overflow-hidden">
         <div className="grid gap-3 border-b border-border p-4 sm:grid-cols-2 lg:grid-cols-[minmax(14rem,1fr)_14rem_14rem] sm:p-5">
           <div className="relative">
             <span className="sr-only">Search announcement titles</span>
@@ -410,7 +410,7 @@ export function AnnouncementManager() {
                       onClick={() => void changeState(item, action)}
                       type="button"
                     >
-                      <Icon aria-hidden="true" className={`size-3.5 ${processingId === item.id ? "animate-pulse" : ""}`} />
+                      <Icon aria-hidden="true" className="size-3.5" />
                       {processingId === item.id ? `${label}…` : label}
                     </button>
                   ))}

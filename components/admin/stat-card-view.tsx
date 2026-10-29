@@ -1,40 +1,39 @@
-import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type StatCardData = {
   title: string;
-  value: string;
-  change: string;
-  direction: "up" | "down" | "steady";
-  comparisonLabel: string;
+  value: number | null;
+  loading: boolean;
+  description?: string;
   icon: LucideIcon;
-  tone: "indigo" | "primary";
 };
-
-const tones = {
-  indigo: { icon: "bg-primary/10 text-primary", positive: "text-emerald-700" },
-  primary: { icon: "bg-primary/10 text-primary", positive: "text-emerald-700" },
-} as const;
 
 export function StatCardView({ stat }: { stat: StatCardData }) {
   const Icon = stat.icon;
-  const TrendIcon = stat.direction === "up" ? ArrowUpRight : stat.direction === "down" ? ArrowDownRight : ArrowRight;
-  const trendColor = stat.direction === "up" ? tones[stat.tone].positive : stat.direction === "down" ? "text-amber-700" : "text-muted";
+  const formattedValue = stat.value === null ? "—" : new Intl.NumberFormat("en").format(stat.value);
 
-  return <article className="rounded-2xl border border-border bg-surface p-5 shadow-xs sm:p-6 transition-all hover:shadow-md">
-    <div className="flex items-start justify-between gap-4">
-      <div className="min-w-0">
-        <p className="text-xs font-bold uppercase tracking-wider text-muted">{stat.title}</p>
-        <p className="mt-2 font-display text-3xl font-extrabold tracking-tight text-foreground">{stat.value}</p>
+  return (
+    <article aria-busy={stat.loading} className="admin-card admin-stat-card">
+      <div className="flex items-center justify-between gap-3">
+        <p className="min-w-0 text-sm font-semibold leading-5 text-muted">{stat.title}</p>
+        <span className="admin-stat-icon" aria-hidden="true">
+          <Icon className="size-[1.125rem]" />
+        </span>
       </div>
-      <span className={`grid size-12 shrink-0 place-items-center rounded-2xl ${tones[stat.tone].icon}`}>
-        <Icon aria-hidden="true" className="size-5" />
-      </span>
-    </div>
-    <div className="mt-4 flex items-center gap-1.5 text-xs">
-      <TrendIcon aria-hidden="true" className={`size-4 ${trendColor}`} />
-      <span className={`font-semibold ${trendColor}`}>{stat.change}</span>
-      <span className="text-muted">{stat.comparisonLabel}</span>
-    </div>
-  </article>;
+      <div className="mt-4">
+        <p className="admin-stat-number truncate font-display text-[2rem] font-bold leading-none tracking-tight text-foreground">
+          {stat.loading ? (
+            <span aria-label="Loading" className="admin-stat-skeleton" role="status">
+              <span className="sr-only">Loading</span>
+            </span>
+          ) : (
+            <span aria-label={stat.value === null ? "Unavailable" : undefined}>{formattedValue}</span>
+          )}
+        </p>
+        {stat.description && (
+          <p className="mt-2 text-xs leading-5 text-muted">{stat.description}</p>
+        )}
+      </div>
+    </article>
+  );
 }

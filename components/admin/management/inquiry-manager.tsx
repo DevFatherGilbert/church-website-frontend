@@ -46,35 +46,18 @@ function formatDate(value: string) {
 
 const STATUS_CONFIG: Record<
   InquiryStatus,
-  { label: string; dot: string; badge: string; tabColor: string }
+  { label: string }
 > = {
-  new: {
-    label: "New",
-    dot: "bg-blue-500",
-    badge: "bg-blue-50 text-blue-700 border-blue-200",
-    tabColor: "text-blue-700 bg-blue-50 border-blue-200",
-  },
-  in_progress: {
-    label: "In Progress",
-    dot: "bg-amber-500",
-    badge: "bg-amber-50 text-amber-700 border-amber-200",
-    tabColor: "text-amber-700 bg-amber-50 border-amber-200",
-  },
-  resolved: {
-    label: "Resolved",
-    dot: "bg-green-500",
-    badge: "bg-green-50 text-green-700 border-green-200",
-    tabColor: "text-green-700 bg-green-50 border-green-200",
-  },
+  new: { label: "New" },
+  in_progress: { label: "In Progress" },
+  resolved: { label: "Resolved" },
 };
 
 function StatusBadge({ status }: { status: InquiryStatus }) {
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.new;
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cfg.badge}`}
-    >
-      <span className={`size-1.5 rounded-full ${cfg.dot}`} />
+    <span className={`admin-badge admin-inquiry-status admin-inquiry-status-${status} px-2.5 py-0.5 text-xs font-semibold`}>
+      <span className="size-1.5 rounded-full bg-current" aria-hidden="true" />
       {cfg.label}
     </span>
   );
@@ -385,7 +368,7 @@ export function InquiryManager({
             >
               <span
                 className={`size-1.5 rounded-full ${
-                  connected ? "bg-green-500" : "bg-amber-500 animate-pulse"
+                  connected ? "bg-green-500" : "bg-amber-500"
                 }`}
               />
               {connected ? "Live Real-Time" : "Connecting…"}
@@ -454,29 +437,21 @@ export function InquiryManager({
               label: "All Messages",
               count: total,
               key: "" as const,
-              badgeClass: "text-foreground bg-surface border-border",
-              activeClass: "border-primary ring-2 ring-primary/20",
             },
             {
               label: "New",
               count: newCount,
               key: "new" as const,
-              badgeClass: "text-blue-700 bg-blue-50 border-blue-200",
-              activeClass: "border-blue-500 ring-2 ring-blue-500/20",
             },
             {
               label: "In Progress",
               count: inProgressCount,
               key: "in_progress" as const,
-              badgeClass: "text-amber-700 bg-amber-50 border-amber-200",
-              activeClass: "border-amber-500 ring-2 ring-amber-500/20",
             },
             {
               label: "Resolved",
               count: resolvedCount,
               key: "resolved" as const,
-              badgeClass: "text-green-700 bg-green-50 border-green-200",
-              activeClass: "border-green-500 ring-2 ring-green-500/20",
             },
           ] as const
         ).map((tab) => {
@@ -487,17 +462,16 @@ export function InquiryManager({
               type="button"
               onClick={() => setFilterStatus(tab.key)}
               aria-pressed={isActive}
-              className={`flex flex-col rounded-2xl border p-4 text-left transition-all hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                tab.badgeClass
-              } ${isActive ? tab.activeClass : "opacity-85 hover:opacity-100"}`}
+              data-status={tab.key || "all"}
+              className="admin-card admin-card-interactive admin-status-card flex min-h-24 flex-col p-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold tracking-tight">{tab.count}</span>
-                {isActive && (
-                  <span className="size-2 rounded-full bg-primary" />
-                )}
+                <span className="admin-status-value admin-stat-number text-2xl font-bold tracking-tight">
+                  {error || (loading && items.length === 0) ? "—" : tab.count}
+                </span>
+                <span className="size-2 rounded-full bg-[hsl(var(--admin-status-color))]" aria-hidden="true" />
               </div>
-              <span className="mt-1 text-xs font-semibold">{tab.label}</span>
+              <span className="admin-status-label mt-1 text-xs font-semibold">{tab.label}</span>
             </button>
           );
         })}
@@ -505,7 +479,7 @@ export function InquiryManager({
 
       {/* Inquiries List & Search */}
       <section
-        className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
+        className="admin-card overflow-hidden"
         aria-label={`${title} Inbox`}
       >
         {/* Controls bar */}

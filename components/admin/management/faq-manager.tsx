@@ -265,7 +265,7 @@ export function FaqManager() {
         </p>
       )}
 
-      <section aria-label="FAQ list" className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
+      <section aria-label="FAQ list" className="admin-card mt-6 overflow-hidden">
         <div className="grid gap-3 border-b border-border p-4 sm:grid-cols-2 lg:grid-cols-[1fr_15rem_12rem_auto] lg:items-center lg:p-5">
           <div className="relative">
             <span className="sr-only">Search questions and answers</span>

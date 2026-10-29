@@ -284,7 +284,7 @@ export function ServiceScheduleManager() {
         </p>
       )}
 
-      <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
+      <section className="admin-card mt-6 overflow-hidden">
         <div className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-sm font-medium text-muted">
             {records.length} service{records.length === 1 ? "" : "s"} in the database

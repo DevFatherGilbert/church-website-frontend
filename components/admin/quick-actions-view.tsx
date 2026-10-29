@@ -23,7 +23,7 @@ export function QuickActionsView() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {actions.map(({ label, description, href, icon: Icon }) => (
           <Link
-            className="group flex min-h-28 items-center gap-4 rounded-xl border border-border bg-surface p-4 shadow-xs transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
+            className="admin-card admin-card-interactive group flex min-h-28 items-center gap-4 p-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/15"
             href={href}
             key={href}
           >

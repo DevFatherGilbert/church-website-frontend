@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, HandHeart, Inbox, Megaphone, Mic2, UsersRound, CheckCircle2, FileEdit } from "lucide-react";
 import { authGet } from "@/lib/api/church-api";
+import { useRealtime } from "@/lib/realtime/notifications-context";
 import { QuickActionsView } from "./quick-actions-view";
 import { RecentActivityTableView, type RecentActivityItem } from "./recent-activity-table-view";
 import { StatCardView, type StatCardData } from "./stat-card-view";
@@ -19,7 +20,15 @@ type DatedRecord = {
   details?: { status?: string };
 };
 
-type DashboardAnnouncementList = { items: DatedRecord[] };
+type DashboardAvailability = {
+  sermons: boolean;
+  events: boolean;
+  announcements: boolean;
+  prayerRequests: boolean;
+  ministries: boolean;
+  contactInquiries: boolean;
+  visitorInquiries: boolean;
+};
 
 type DashboardData = {
   sermons: DatedRecord[];
@@ -28,7 +37,8 @@ type DashboardData = {
   prayerRequests: DatedRecord[];
   ministries: DatedRecord[];
   inquiries: DatedRecord[];
-  available: boolean[];
+  visitorInquiries: DatedRecord[];
+  available: DashboardAvailability;
   loading: boolean;
 };
 
@@ -39,7 +49,16 @@ const initialData: DashboardData = {
   prayerRequests: [],
   ministries: [],
   inquiries: [],
-  available: [false, false, false, false, false, false],
+  visitorInquiries: [],
+  available: {
+    sermons: false,
+    events: false,
+    announcements: false,
+    prayerRequests: false,
+    ministries: false,
+    contactInquiries: false,
+    visitorInquiries: false,
+  },
   loading: true,
 };
 
@@ -54,31 +73,9 @@ function extractItems<T>(value: unknown): T[] {
   return [];
 }
 
-function countInRange(records: DatedRecord[], start: number, end: number) {
-  if (!Array.isArray(records)) return 0;
-  return records.filter((record) => {
-    const value = record?.publishedAt ?? record?.createdAt ?? record?.updatedAt;
-    if (!value) return false;
-    const time = new Date(value).getTime();
-    return Number.isFinite(time) && time >= start && time < end;
-  }).length;
-}
-
-function getPeriodChange(records: DatedRecord[]) {
-  if (!Array.isArray(records)) {
-    return { change: "0", direction: "steady" as const };
-  }
-  const now = Date.now();
-  const currentStart = now - 30 * 24 * 60 * 60 * 1000;
-  const previousStart = now - 60 * 24 * 60 * 60 * 1000;
-  const current = countInRange(records, currentStart, now + 1);
-  const previous = countInRange(records, previousStart, currentStart);
-  const difference = current - previous;
-
-  return {
-    change: difference > 0 ? `+${difference}` : difference < 0 ? `−${Math.abs(difference)}` : "0",
-    direction: difference > 0 ? "up" as const : difference < 0 ? "down" as const : "steady" as const,
-  };
+function isPublished(record: DatedRecord) {
+  const status = record.details?.status ?? record.status;
+  return status === undefined || status.toLowerCase() === "published";
 }
 
 function formatActivityDate(value: string) {
@@ -116,11 +113,12 @@ function toActivityItems(data: DashboardData): RecentActivityItem[] {
     if (!rawDate) continue;
     const formatted = formatActivityDate(rawDate);
     if (!formatted.dateTime) continue;
+    const sermonStatus = sermon.status?.toLowerCase();
     items.push({
       id: `sermon-${sermon.id}`,
       title: sermon.title || "Untitled sermon",
       category: "Sermon",
-      status: sermon.status === "draft" ? "Draft" : "Published",
+      status: sermonStatus === "draft" ? "Draft" : sermonStatus === "archived" ? "Archived" : "Published",
       ...formatted,
     });
   }
@@ -131,7 +129,10 @@ function toActivityItems(data: DashboardData): RecentActivityItem[] {
     const rawDate = getActivityTime(event);
     if (!rawDate) continue;
     const formatted = formatActivityDate(rawDate);
-    const status = event.status === "draft" ? "Draft" : event.date && event.date >= today ? "Scheduled" : "Published";
+    const eventStatus = event.status?.toLowerCase();
+    const status = eventStatus === "draft" ? "Draft"
+      : eventStatus === "archived" ? "Archived"
+        : event.date && event.date >= today ? "Scheduled" : "Published";
     if (!formatted.dateTime) continue;
     items.push({
       id: `event-${event.id}`,
@@ -155,7 +156,7 @@ function toActivityItems(data: DashboardData): RecentActivityItem[] {
         : announcementStatus === "UNPUBLISHED" ? "Unpublished"
           : announcementStatus === "EXPIRED" ? "Expired"
             : announcementStatus === "ARCHIVED" ? "Archived"
-              : announcementStatus === "DRAFT" || announcement.status === "draft" ? "Draft"
+              : announcementStatus === "DRAFT" || announcement.status?.toLowerCase() === "draft" ? "Draft"
                 : "Published";
     items.push({
       id: `announcement-${announcement.id}`,
@@ -174,6 +175,7 @@ function toActivityItems(data: DashboardData): RecentActivityItem[] {
 export function DashboardView() {
   const [data, setData] = useState(initialData);
   const [currentTime, setCurrentTime] = useState(0);
+  const { connected, onInquiryCreated, onStatusChanged } = useRealtime();
 
   useEffect(() => {
     const timer = window.setTimeout(() => setCurrentTime(new Date().getTime()), 0);
@@ -187,6 +189,7 @@ export function DashboardView() {
         prayersResult,
         ministriesResult,
         inquiriesResult,
+        visitorsResult,
       ] = await Promise.allSettled([
         authGet<DatedRecord[]>("/admin/sermons").catch(() => authGet<DatedRecord[]>("/sermons")),
         authGet<DatedRecord[]>("/events"),
@@ -194,18 +197,10 @@ export function DashboardView() {
         authGet<DatedRecord[]>("/inquiries/prayer"),
         authGet<unknown>("/admin/ministries").catch(() => authGet<unknown>("/ministries")),
         authGet<DatedRecord[]>("/inquiries/contact"),
+        authGet<DatedRecord[]>("/inquiries/visitor"),
       ]);
 
       if (cancelled) return;
-
-      const available = [
-        sermonsResult.status === "fulfilled",
-        eventsResult.status === "fulfilled",
-        announcementsResult.status === "fulfilled",
-        prayersResult.status === "fulfilled",
-        ministriesResult.status === "fulfilled",
-        inquiriesResult.status === "fulfilled",
-      ];
 
       setData({
         sermons: sermonsResult.status === "fulfilled" ? extractItems<DatedRecord>(sermonsResult.value) : [],
@@ -214,21 +209,32 @@ export function DashboardView() {
         prayerRequests: prayersResult.status === "fulfilled" ? extractItems<DatedRecord>(prayersResult.value) : [],
         ministries: ministriesResult.status === "fulfilled" ? extractItems<DatedRecord>(ministriesResult.value) : [],
         inquiries: inquiriesResult.status === "fulfilled" ? extractItems<DatedRecord>(inquiriesResult.value) : [],
-        available,
+        visitorInquiries: visitorsResult.status === "fulfilled" ? extractItems<DatedRecord>(visitorsResult.value) : [],
+        available: {
+          sermons: sermonsResult.status === "fulfilled",
+          events: eventsResult.status === "fulfilled",
+          announcements: announcementsResult.status === "fulfilled",
+          prayerRequests: prayersResult.status === "fulfilled",
+          ministries: ministriesResult.status === "fulfilled",
+          contactInquiries: inquiriesResult.status === "fulfilled",
+          visitorInquiries: visitorsResult.status === "fulfilled",
+        },
         loading: false,
       });
     }
 
     void loadDashboard();
+    const unsubscribeCreated = onInquiryCreated(() => void loadDashboard());
+    const unsubscribeStatusChanged = onStatusChanged(() => void loadDashboard());
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
+      unsubscribeCreated();
+      unsubscribeStatusChanged();
     };
-  }, []);
+  }, [onInquiryCreated, onStatusChanged]);
 
   const recentItems = useMemo(() => toActivityItems(data), [data]);
-  const now = currentTime;
-  const currentPeriodStart = now - 30 * 24 * 60 * 60 * 1000;
   const today = currentTime ? getKigaliDateKey(new Date(currentTime)) : "";
 
   const sermons = Array.isArray(data.sermons) ? data.sermons : [];
@@ -237,69 +243,73 @@ export function DashboardView() {
   const prayerRequests = Array.isArray(data.prayerRequests) ? data.prayerRequests : [];
   const ministries = Array.isArray(data.ministries) ? data.ministries : [];
   const inquiries = Array.isArray(data.inquiries) ? data.inquiries : [];
+  const visitorInquiries = Array.isArray(data.visitorInquiries) ? data.visitorInquiries : [];
 
-  const upcomingEvents = events.filter((event) => Boolean(event.date) && event.date! >= today);
-  const recentPrayerRequests = prayerRequests.filter((request) => {
-    const createdAt = request.createdAt ? new Date(request.createdAt).getTime() : 0;
-    return createdAt >= currentPeriodStart && createdAt <= now;
-  });
-  const recentInquiries = inquiries.filter((inquiry) => {
-    const createdAt = inquiry.createdAt ? new Date(inquiry.createdAt).getTime() : 0;
-    return createdAt >= currentPeriodStart && createdAt <= now;
-  });
+  const publishedCount = data.available.sermons && data.available.events && data.available.announcements
+    ? [...sermons, ...events, ...announcements].filter(isPublished).length
+    : null;
+  const draftCount = data.available.sermons && data.available.events && data.available.announcements
+    ? [...sermons, ...events, ...announcements].filter((record) =>
+        record.details?.status?.toLowerCase() === "draft" || record.status?.toLowerCase() === "draft",
+      ).length
+    : null;
 
-  // Calculate Draft vs Published Breakdown (SRS Section 57)
-  const publishedCount =
-    sermons.filter((s) => s.status !== "draft").length +
-    events.filter((e) => e.status !== "draft").length +
-    announcements.filter((a) => a.details?.status === "PUBLISHED" || a.status === "published").length;
-
-  const draftCount =
-    sermons.filter((s) => s.status === "draft").length +
-    events.filter((e) => e.status === "draft").length +
-    announcements.filter((a) => a.details?.status === "DRAFT" || a.status === "draft").length;
-
-  const statDefinitions: Omit<StatCardData, "value" | "change" | "direction" | "comparisonLabel">[] = [
-    { title: "Published Sermons", icon: Mic2, tone: "indigo" },
-    { title: "Upcoming Events", icon: CalendarDays, tone: "indigo" },
-    { title: "Active Ministries", icon: UsersRound, tone: "indigo" },
-    { title: "Announcements", icon: Megaphone, tone: "indigo" },
-    { title: "New Inquiries", icon: Inbox, tone: "indigo" },
-    { title: "Prayer Requests", icon: HandHeart, tone: "indigo" },
+  const stats: StatCardData[] = [
+    {
+      title: "Published Sermons",
+      value: data.available.sermons ? sermons.filter(isPublished).length : null,
+      loading: data.loading,
+      description: !data.loading && !data.available.sermons ? "Unavailable" : undefined,
+      icon: Mic2,
+    },
+    {
+      title: "Upcoming Events",
+      value: data.available.events && today
+        ? events.filter((event) => isPublished(event) && Boolean(event.date) && event.date! >= today).length
+        : null,
+      loading: data.loading || !today,
+      description: !data.loading && !data.available.events ? "Unavailable" : undefined,
+      icon: CalendarDays,
+    },
+    {
+      title: "Active Ministries",
+      value: data.available.ministries ? ministries.filter(isPublished).length : null,
+      loading: data.loading,
+      description: !data.loading && !data.available.ministries ? "Unavailable" : undefined,
+      icon: UsersRound,
+    },
+    {
+      title: "Published Announcements",
+      value: data.available.announcements ? announcements.filter(isPublished).length : null,
+      loading: data.loading,
+      description: !data.loading && !data.available.announcements ? "Unavailable" : undefined,
+      icon: Megaphone,
+    },
+    {
+      title: "New Inquiries",
+      value: data.available.contactInquiries && data.available.visitorInquiries
+        ? [...inquiries, ...visitorInquiries].filter((inquiry) => inquiry.status === "new").length
+        : null,
+      loading: data.loading,
+      description: !data.loading && !(data.available.contactInquiries && data.available.visitorInquiries) ? "Unavailable" : undefined,
+      icon: Inbox,
+    },
+    {
+      title: "New Prayer Requests",
+      value: data.available.prayerRequests
+        ? prayerRequests.filter((request) => request.status === "new").length
+        : null,
+      loading: data.loading,
+      description: !data.loading && !data.available.prayerRequests ? "Unavailable" : undefined,
+      icon: HandHeart,
+    },
   ];
-  const metricSources = [
-    sermons,
-    events,
-    ministries,
-    announcements,
-    inquiries,
-    prayerRequests,
-  ];
-  const metricCounts = [
-    sermons.length,
-    upcomingEvents.length,
-    ministries.length,
-    announcements.length,
-    recentInquiries.length || inquiries.length,
-    recentPrayerRequests.length || prayerRequests.length,
-  ];
-  const stats: StatCardData[] = statDefinitions.map((definition, index) => {
-    const change = getPeriodChange(metricSources[index]);
-    const available = data.available[index];
-    return {
-      ...definition,
-      value: data.loading ? "—" : available ? String(metricCounts[index]) : "—",
-      change: data.loading ? "Loading" : available ? change.change : "Unavailable",
-      direction: data.loading || !available ? "steady" : change.direction,
-      comparisonLabel: data.loading ? "" : "vs. prior 30 days",
-    };
-  });
 
   const formattedDate = new Intl.DateTimeFormat("en-RW", {
     dateStyle: "full",
     timeZone: "Africa/Kigali",
   }).format(new Date());
-  const loadedSources = data.available.filter(Boolean).length;
+  const loadedSources = Object.values(data.available).filter(Boolean).length;
 
   return <div>
     <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -309,37 +319,37 @@ export function DashboardView() {
         <p className="mt-2 text-sm text-muted">A snapshot of content and activity across your church website (SRS Section 57).</p>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${data.loading ? "bg-surface-strong text-muted" : loadedSources >= 4 ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"}`}>
-          {data.loading ? "Loading data" : loadedSources >= 4 ? "Live data" : `${loadedSources}/6 sources available`}
+        <span className={`admin-state-pill ${data.loading ? "admin-state-pill-neutral" : connected ? "admin-state-pill-success" : loadedSources === 7 ? "admin-state-pill-neutral" : "admin-state-pill-warning"}`}>
+          {data.loading ? "Loading data" : connected ? "Live updates" : loadedSources === 7 ? "Data loaded" : `${loadedSources}/7 sources available`}
         </span>
         <time className="text-sm font-medium text-muted">{formattedDate}</time>
       </div>
     </div>
 
     {/* Publication Status Summary Banner (SRS Section 57: Published & Draft content) */}
-    <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-surface p-4 shadow-xs sm:px-6">
+    <div className="admin-card mb-6 flex flex-wrap items-center gap-4 p-4 sm:px-6">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted">
-        Content Status Overview:
+        Content status
       </div>
-      <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 border border-emerald-200">
+      <div className="admin-state-pill admin-state-pill-success">
         <CheckCircle2 className="size-3.5" />
-        <span>{publishedCount} Published Records</span>
+        <span>{publishedCount === null ? "—" : publishedCount} published</span>
       </div>
-      <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 border border-amber-200">
+      <div className="admin-state-pill admin-state-pill-warning">
         <FileEdit className="size-3.5" />
-        <span>{draftCount} Draft Items</span>
+        <span>{draftCount === null ? "—" : draftCount} drafts</span>
       </div>
       <div className="ml-auto text-xs text-muted">
-        Automatic sync with database
+        Content records
       </div>
     </div>
 
-    <section aria-label="Church website statistics" className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <section aria-label="Church website statistics" className="mb-8 grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {stats.map((stat) => <StatCardView key={stat.title} stat={stat} />)}
     </section>
 
     <div className="mb-8"><QuickActionsView /></div>
     <RecentActivityTableView items={recentItems} />
-    {!data.loading && loadedSources < 4 && <p className="mt-4 text-xs leading-5 text-muted">Some dashboard figures could not be loaded. Refresh the page to try again.</p>}
+    {!data.loading && loadedSources < 7 && <p className="mt-4 text-xs leading-5 text-muted">Some dashboard figures could not be loaded. Refresh the page to try again.</p>}
   </div>;
 }

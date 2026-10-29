@@ -34,7 +34,7 @@ function StatusBadge({ status }: { status: ActivityStatus }) {
 }
 
 export function RecentActivityTableView({ items }: { items: ActivityItem[] }) {
-  return <section aria-labelledby="recent-activity-title" className="overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
+  return <section aria-labelledby="recent-activity-title" className="admin-card overflow-hidden">
     <div className="flex flex-col gap-1 border-b border-border px-5 py-5 sm:px-6">
       <h2 className="font-display text-lg font-bold text-foreground" id="recent-activity-title">Recent activity</h2>
       <p className="text-sm text-muted font-normal">A quick look at the latest website content.</p>
@@ -61,7 +61,7 @@ export function RecentActivityTableView({ items }: { items: ActivityItem[] }) {
       </table>
     </div>
 
-    {items.length === 0 ? <p className="px-6 py-10 text-center text-sm text-muted">No recent published content is available yet.</p> : <div className="divide-y divide-border md:hidden">
+    {items.length === 0 ? <p className="px-6 py-10 text-center text-sm text-muted">No recent content is available yet.</p> : <div className="divide-y divide-border md:hidden">
       {items.map((item) => <article className="space-y-3 px-5 py-4" key={item.id}>
         <div className="flex items-start justify-between gap-3">
           <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>

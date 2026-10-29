@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { authGet, authMutation, type ManagedUser } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
+import { StatCardView, type StatCardData } from "@/components/admin/stat-card-view";
 
 type CurrentProfile = {
   id?: string;
@@ -41,6 +42,7 @@ export function UserRoleManager() {
   const [notice, setNotice] = useState("");
 
   const loadData = useCallback(async () => {
+    setError("");
     try {
       const [usersResponse, meResponse] = await Promise.all([
         authGet<{ items?: ManagedUser[] } | ManagedUser[]>("/admin/users"),
@@ -93,6 +95,13 @@ export function UserRoleManager() {
     const active = users.filter((u) => u.status === "active").length;
     return { total, admins, members, active };
   }, [users]);
+
+  const statCards: StatCardData[] = [
+    { title: "Total Users", value: error ? null : stats.total, loading, description: error ? "Unavailable" : undefined, icon: Users },
+    { title: "Administrators", value: error ? null : stats.admins, loading, description: error ? "Unavailable" : undefined, icon: Crown },
+    { title: "Standard Members", value: error ? null : stats.members, loading, description: error ? "Unavailable" : undefined, icon: UserCheck },
+    { title: "Active Accounts", value: error ? null : stats.active, loading, description: error ? "Unavailable" : undefined, icon: ShieldCheck },
+  ];
 
   async function handleToggleRole(targetUser: ManagedUser) {
     const isPromoting = targetUser.role !== "admin";
@@ -262,68 +271,14 @@ export function UserRoleManager() {
       )}
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-              Total Users
-            </span>
-            <span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
-              <Users className="size-4" />
-            </span>
-          </div>
-          <p className="mt-3 font-display text-2xl font-bold text-foreground">
-            {stats.total}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-              Administrators
-            </span>
-            <span className="grid size-9 place-items-center rounded-xl bg-amber-500/10 text-amber-600">
-              <Crown className="size-4" />
-            </span>
-          </div>
-          <p className="mt-3 font-display text-2xl font-bold text-foreground">
-            {stats.admins}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-              Standard Members
-            </span>
-            <span className="grid size-9 place-items-center rounded-xl bg-blue-500/10 text-blue-600">
-              <UserCheck className="size-4" />
-            </span>
-          </div>
-          <p className="mt-3 font-display text-2xl font-bold text-foreground">
-            {stats.members}
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-surface p-5 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted">
-              Active Accounts
-            </span>
-            <span className="grid size-9 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600">
-              <ShieldCheck className="size-4" />
-            </span>
-          </div>
-          <p className="mt-3 font-display text-2xl font-bold text-foreground">
-            {stats.active}
-          </p>
-        </div>
+      <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((stat) => <StatCardView key={stat.title} stat={stat} />)}
       </div>
 
       {/* Main Container */}
       <section
         aria-label="Users and access management"
-        className="overflow-hidden rounded-2xl border border-border bg-surface shadow-xs"
+        className="admin-card overflow-hidden"
       >
         {/* Search & Filters */}
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">

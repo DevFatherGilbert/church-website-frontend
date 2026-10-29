@@ -389,7 +389,7 @@ export function AdminRecordManager({ section }: { section: Section }) {
         </p>
       )}
 
-      <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs" aria-label={`${config.title} management`}>
+      <section className="admin-card mt-6 overflow-hidden" aria-label={`${config.title} management`}>
         <div className="flex flex-col gap-4 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
             <h2 className="font-display text-base font-bold text-foreground">All {config.title.toLowerCase()}</h2>

@@ -18,10 +18,10 @@ export function RealtimeToastBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-5 right-5 z-50 max-w-sm rounded-2xl border border-primary/20 bg-surface p-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-300"
+      className="admin-card fixed bottom-5 right-5 z-50 w-[min(24rem,calc(100vw-2.5rem))] p-4"
     >
       <div className="flex items-start gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+        <div className="admin-stat-icon">
           <MessageSquare className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -65,4 +65,3 @@ export function RealtimeToastBanner() {
     </div>
   );
 }
-
