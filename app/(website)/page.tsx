@@ -176,13 +176,6 @@ export default async function HomeView() {
     .filter(([, section]) => section.visible)
     .sort((a, b) => a[1].order - b[1].order);
 
-  const firstSectionKey = sections[0]?.[0];
-  const heroWaveFill = firstSectionKey === "about"
-    ? "hsl(var(--brand-primary-dark))"
-    : firstSectionKey && ["services", "events", "sermons", "gallery"].includes(firstSectionKey)
-      ? "hsl(var(--surface-alt))"
-      : "hsl(var(--background))";
-
   /* Ministries: use DB records or fallback to SRS defaults */
   const publishedMinistries = ministries ?? [];
   const ministrySelection = homepage.sections.ministries.featuredMinistryIds ?? [];
@@ -278,7 +271,7 @@ export default async function HomeView() {
       />
       {/* ── 2. HERO SECTION (SRS Section 9 #2 & Section 11) ───────────────── */}
       {hero.visible && (
-        <section className="relative isolate flex min-h-[680px] items-center overflow-hidden bg-primary-dark text-white sm:min-h-[760px] lg:min-h-[820px]">
+        <section className="relative isolate flex min-h-[680px] items-center overflow-hidden bg-primary-dark text-white sm:min-h-[760px] lg:min-h-[840px]">
           <Image
             alt={hero.imageAlt || `${churchName} worship gathering`}
             className="object-cover"
@@ -288,49 +281,37 @@ export default async function HomeView() {
             src={hero.imageUrl || heroFallback}
           />
           <div aria-hidden="true" className="home-hero-overlay absolute inset-0" />
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-primary-dark/30 to-primary-dark/40" />
-
-          {/* Faith Symbols — desktop only */}
-          <Image aria-hidden="true" alt="" className="scripture-emblem hidden lg:block" height={268} src="/bible-cutout.png" width={375} />
-          <div aria-hidden="true" className="faith-symbol-orbit hidden lg:block">
-            <div className="faith-symbol-path">
-              <svg className="faith-symbol" fill="none" viewBox="0 0 80 96">
-                <circle className="faith-symbol-halo" cx="40" cy="48" r="36" />
-                <path d="M34 14h12v21h19v12H46v35H34V47H15V35h19V14Z" fill="#ffe7a3" stroke="#fff9e8" strokeLinejoin="round" strokeWidth="2" />
-                <path d="M40 20v57M20 41h40" opacity=".5" stroke="#fffdf5" strokeLinecap="round" strokeWidth="2" />
-              </svg>
-            </div>
-          </div>
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-transparent to-primary-dark/40" />
 
           {/* Account for fixed header (~90px) + announcement banner (~40px) */}
-          <div className={`${container} relative z-10 pb-32 pt-44 sm:pb-36 sm:pt-52 lg:pt-56`}>
+          <div className={`${container} relative z-10 pb-20 pt-44 sm:pb-28 sm:pt-52 lg:pt-56`}>
             <div className="max-w-3xl">
-              <p className="eyebrow flex items-center gap-3 text-secondary">
-                <span aria-hidden="true" className="h-px w-10 bg-secondary" />
-                {churchName || "A Community of Faith"}
-              </p>
+              <div className="glass-pill-gold inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-secondary shadow-sm">
+                <span className="size-2 rounded-full bg-secondary animate-pulse" />
+                <span>{churchName || "A Community of Faith"}</span>
+              </div>
 
-              {/* Proposed Headline from SRS Section 11 */}
-              <h1 className="mt-6 whitespace-pre-line font-display text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
+              {/* Master Headline */}
+              <h1 className="mt-6 whitespace-pre-line font-display text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
                 {hero.heading || `Welcome to\n${churchName}`}
               </h1>
 
-              {/* Proposed Supporting Message from SRS Section 11 */}
-              <p className="mt-6 max-w-2xl text-base leading-7 text-white/90 sm:text-lg sm:leading-8">
+              {/* Supporting Subtitle */}
+              <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg sm:leading-8 font-normal">
                 {hero.description || churchDescription || "A welcoming community committed to faith, worship, fellowship, service and sharing the message of Christ."}
               </p>
 
-              {/* Primary CTA: Plan Your Visit & Secondary CTA: Watch Sermons (SRS Section 11) */}
+              {/* Call to Actions */}
               <div className="mt-9 flex flex-wrap items-center gap-4">
                 <Link
-                  className="button button-secondary min-h-13 px-7 text-sm font-bold uppercase tracking-wider"
+                  className="button button-secondary min-h-13 px-8 text-xs font-bold uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02]"
                   href={hero.primaryCtaHref || "/plan-your-visit"}
                 >
                   {hero.primaryCtaLabel || "Plan Your Visit"}<ArrowRight aria-hidden="true" className="size-4" />
                 </Link>
 
                 <Link
-                  className="button min-h-13 border-2 border-white/60 bg-white/10 px-6 text-sm font-bold uppercase tracking-wider text-white backdrop-blur-sm transition hover:bg-white/20"
+                  className="button glass-pill min-h-13 px-7 text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-white/20 hover:scale-[1.02]"
                   href={hero.secondaryCtaHref || "/sermons"}
                 >
                   <Play aria-hidden="true" className="size-4 fill-white text-white" />
@@ -338,34 +319,30 @@ export default async function HomeView() {
                 </Link>
               </div>
 
-              {/* Quick service times preview in hero */}
-              <div className="mt-10 flex flex-wrap items-center gap-6 border-t border-white/20 pt-6 text-xs text-white/80">
-                <span className="flex items-center gap-2">
-                  <Clock3 aria-hidden="true" className="size-4 text-secondary" />
-                  <span>Sabbath worship: <strong>{publicServices[0] ? `${formatServiceDate(publicServices[0])} · ${formatServiceTime(publicServices[0])}` : "Contact us for details"}</strong></span>
+              {/* Frosted Glass Gathering Preview Bar */}
+              <div className="glass-pill mt-12 flex flex-wrap items-center gap-6 rounded-2xl p-4 sm:p-5 text-xs text-white/90 shadow-lg">
+                <span className="flex items-center gap-2.5 font-medium">
+                  <Clock3 aria-hidden="true" className="size-4 text-secondary shrink-0" />
+                  <span>Sabbath Worship: <strong className="text-white font-bold">{publicServices[0] ? `${formatServiceDate(publicServices[0])} · ${formatServiceTime(publicServices[0])}` : "Saturdays 9:00 AM"}</strong></span>
                 </span>
-                <span className="flex items-center gap-2">
-                  <MapPin aria-hidden="true" className="size-4 text-secondary" />
-                  <span>{[church.contact.address, location].filter(Boolean).join(", ") || "Contact us to confirm the location"}</span>
+                <span className="hidden sm:inline text-white/30">•</span>
+                <span className="flex items-center gap-2.5 font-medium">
+                  <MapPin aria-hidden="true" className="size-4 text-secondary shrink-0" />
+                  <span className="truncate max-w-xs">{[church.contact.address, location].filter(Boolean).join(", ") || "Sanctuary, Kigali"}</span>
                 </span>
               </div>
             </div>
 
             <a
               aria-label="Explore the homepage"
-              className="absolute bottom-8 right-10 hidden items-center gap-3 text-xs font-semibold uppercase tracking-[.16em] text-white/75 transition-colors hover:text-white lg:inline-flex"
+              className="absolute bottom-8 right-10 hidden items-center gap-3 text-xs font-semibold uppercase tracking-[.18em] text-white/70 transition-colors hover:text-secondary lg:inline-flex"
               href="#welcome"
             >
               Explore <ArrowDown aria-hidden="true" className="size-4" />
             </a>
           </div>
 
-          <div aria-hidden="true" className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-secondary via-secondary/60 to-transparent" />
-          <div aria-hidden="true" className="hero-return-divider absolute bottom-0 left-0 z-[5] h-40 w-full overflow-hidden leading-none sm:h-44 lg:h-52">
-            <svg className="absolute inset-0 block h-full w-full" preserveAspectRatio="none" viewBox="0 0 1440 240" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 145C145 184 294 186 453 153C628 117 765 94 920 119C1104 149 1266 191 1440 136V240H0V145Z" fill={heroWaveFill} />
-            </svg>
-          </div>
+          <div aria-hidden="true" className="absolute bottom-0 left-0 h-[2px] w-full bg-gradient-to-r from-transparent via-secondary/50 to-transparent" />
         </section>
       )}
 

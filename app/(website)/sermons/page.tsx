@@ -5,18 +5,23 @@ import { Headphones, Video, BookOpen } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { SermonLibrary } from "@/components/site/sermon-library";
 import { getPublicData, type Sermon } from "@/lib/api/church-api";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export const metadata: Metadata = {
-  title: "Sermons & Christian Teaching | Church Messages",
-  description:
-    "Listen to and watch biblical sermons, explore teaching by Scripture and topics, and download audio messages for your spiritual journey.",
-  alternates: { canonical: "/sermons" },
-  openGraph: {
-    title: "Sermons & Bible Teaching",
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Sermons & Christian Teaching | ${name}`,
     description:
-      "Explore gospel-centered sermons, audio recordings, video messages, and Scripture study notes.",
-  },
-};
+      "Listen to and watch biblical sermons, explore teaching by Scripture and topics, and download audio messages for your spiritual journey.",
+    alternates: { canonical: "/sermons" },
+    openGraph: {
+      title: `Sermons & Bible Teaching | ${name}`,
+      description:
+        "Explore gospel-centered sermons, audio recordings, video messages, and Scripture study notes.",
+    },
+  };
+}
 
 export const revalidate = 60;
 

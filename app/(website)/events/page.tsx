@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type ChurchEvent } from "@/lib/api/church-api";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
 const EVENT_TYPE_PHOTOS = [
   {
@@ -36,15 +37,19 @@ function displayTime(value: string) {
   return `${hours % 12 || 12}:${String(minutes).padStart(2, "0")} ${hours < 12 ? "AM" : "PM"}`;
 }
 
-export const metadata: Metadata = {
-  title: "Upcoming Events",
-  description: "Discover upcoming worship gatherings, conferences, retreats, youth programmes and community activities at our church.",
-  alternates: { canonical: "/events" },
-  openGraph: {
-    title: "Upcoming Events at Our Church",
-    description: "Keep up with the latest events, meetings, and community gatherings.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Our Church";
+  return {
+    title: `Upcoming Events | ${name}`,
+    description: `Discover upcoming worship gatherings, conferences, retreats, youth programmes and community activities at ${name}.`,
+    alternates: { canonical: "/events" },
+    openGraph: {
+      title: `Upcoming Events at ${name}`,
+      description: "Keep up with the latest events, meetings, and community gatherings.",
+    },
+  };
+}
 
 export const revalidate = 60;
 

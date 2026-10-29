@@ -1,9 +1,20 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Clock3, LogIn, Mail, MapPin, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { SubmissionForm } from "@/components/forms/submission-form";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Contact & Location | ${name}`,
+    description: `Connect with our pastoral staff and ministry leaders at ${name}. Find church service times, directions, phone number, and location map.`,
+    alternates: { canonical: "/contact" },
+  };
+}
 
 export default async function ContactPage({
   searchParams,

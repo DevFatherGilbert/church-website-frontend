@@ -5,11 +5,15 @@ import { ArrowRight, Calendar, Heart, MapPin, Sparkles, Users } from "lucide-rea
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export const metadata: Metadata = {
-  title: "Our Story & Heritage | Church History & Journey of Faith",
-  description: "Discover how God planted our congregation, the journey of faith through the years, and our heart for the community.",
-  alternates: { canonical: "/about/our-story" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Our Story & Heritage | ${name}`,
+    description: `Discover how God planted ${name}, our journey through the years, and our continuous heart for people and the Gospel.`,
+    alternates: { canonical: "/about/our-story" },
+  };
+}
 
 export const revalidate = 300;
 

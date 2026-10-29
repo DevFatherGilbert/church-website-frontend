@@ -2,12 +2,17 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/site/page-hero";
 import { AnnouncementList } from "@/components/public-pages/announcement-list";
 import { getPublicData, type PublicContent } from "@/lib/api/church-api";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export const metadata: Metadata = {
-  title: "Announcements",
-  description: "Church announcements, community news, ministry updates and notices from the church.",
-  alternates: { canonical: "/announcements" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Announcements & News | ${name}`,
+    description: `Church announcements, community news, ministry updates and notices from ${name}.`,
+    alternates: { canonical: "/announcements" },
+  };
+}
 
 export const revalidate = 60;
 

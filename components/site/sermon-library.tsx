@@ -1,19 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
   BookOpen,
-  Calendar,
-  Clock,
   Download,
   Filter,
   Headphones,
   Mic,
   RotateCcw,
   Search,
-  Sparkles,
-  Tag,
   User,
   Video,
 } from "lucide-react";
@@ -46,11 +43,6 @@ export function SermonLibrary({ sermons }: { sermons: Sermon[] }) {
   const seriesList = useMemo(
     () =>
       [...new Set(sermons.map((s) => s.series).filter((v): v is string => Boolean(v)))].sort(),
-    [sermons],
-  );
-  const services = useMemo(
-    () =>
-      [...new Set(sermons.map((s) => s.service).filter((v): v is string => Boolean(v)))].sort(),
     [sermons],
   );
 
@@ -279,10 +271,13 @@ export function SermonLibrary({ sermons }: { sermons: Sermon[] }) {
                   {/* Card Thumbnail / Header */}
                   <Link className="relative block aspect-video overflow-hidden bg-primary-dark" href={detailHref}>
                     {sermon.thumbnailUrl ? (
-                      <img
+                      <Image
                         alt={sermon.title}
-                        className="size-full object-cover transition duration-500 group-hover:scale-105"
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         src={sermon.thumbnailUrl}
+                        unoptimized
                       />
                     ) : (
                       <div className="flex size-full flex-col items-center justify-center bg-gradient-to-br from-[#0a1526] via-primary to-[#0a1526] p-6 text-center text-white">

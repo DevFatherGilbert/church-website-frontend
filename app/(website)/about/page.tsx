@@ -5,11 +5,26 @@ import { ArrowRight, ArrowUpRight, BookOpen, Heart, Shield, Sparkles, Users } fr
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export const metadata: Metadata = {
-  title: "About Our Church | Faith, Heritage & Community",
-  description: "Discover our church history, biblical beliefs, leadership team, and our mission to share Christ's hope.",
-  alternates: { canonical: "/about" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { churchName, churchDescription } = await getPublicWebsiteSettings().catch(() => ({
+    churchName: "Church",
+    churchDescription: "",
+  }));
+  const name = churchName || "Church";
+  const title = `About ${name} | Faith, Heritage & Community`;
+  const description =
+    churchDescription ||
+    "Discover our church history, biblical beliefs, leadership team, and our mission to share Christ's hope.";
+  return {
+    title,
+    description,
+    alternates: { canonical: "/about" },
+    openGraph: {
+      title,
+      description,
+    },
+  };
+}
 
 export const revalidate = 300;
 

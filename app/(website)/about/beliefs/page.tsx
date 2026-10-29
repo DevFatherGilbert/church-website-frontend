@@ -5,11 +5,15 @@ import { ArrowRight, BookOpen, Clock, Heart, Shield, Sparkles, Sun, Users } from
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export const metadata: Metadata = {
-  title: "What We Believe | Statement of Faith & Biblical Doctrines",
-  description: "Discover our core biblical beliefs regarding the Holy Scriptures, Jesus Christ, salvation by grace, Sabbath rest, and Christian living.",
-  alternates: { canonical: "/about/beliefs" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Statement of Faith & Beliefs | ${name}`,
+    description: `Discover the core biblical doctrines of ${name} regarding the Holy Scriptures, Jesus Christ, salvation by grace, and Sabbath rest.`,
+    alternates: { canonical: "/about/beliefs" },
+  };
+}
 
 export const revalidate = 300;
 

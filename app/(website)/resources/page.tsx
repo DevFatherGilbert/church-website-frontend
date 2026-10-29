@@ -3,12 +3,17 @@ import Image from "next/image";
 import { ArrowUpRight, BookOpen, Download, FileText, Sparkles } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type PublicContent } from "@/lib/api/church-api";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export const metadata: Metadata = {
-  title: "Christian Resources, Bible Studies & Guides | Digital Library",
-  description: "Browse downloadable Bible study materials, Sabbath School lessons, prayer devotionals, and church documents.",
-  alternates: { canonical: "/resources" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Christian Resources & Bible Studies | ${name}`,
+    description: `Browse downloadable Bible study materials, Sabbath School lessons, prayer devotionals, and church documents from ${name}.`,
+    alternates: { canonical: "/resources" },
+  };
+}
 
 export const revalidate = 60;
 

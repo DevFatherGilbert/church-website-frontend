@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -213,11 +214,14 @@ export default async function SermonDetailPage({ params }: Props) {
 
             {/* Thumbnail Display if no video */}
             {!sermon.videoUrl && sermon.thumbnailUrl && (
-              <div className="overflow-hidden rounded-2xl border border-border max-w-2xl">
-                <img
+              <div className="relative aspect-video max-h-96 w-full max-w-2xl overflow-hidden rounded-2xl border border-border shadow-md">
+                <Image
                   alt={sermon.title}
-                  className="size-full object-cover max-h-96"
+                  className="object-cover"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 60vw"
                   src={sermon.thumbnailUrl}
+                  unoptimized
                 />
               </div>
             )}
@@ -293,11 +297,16 @@ export default async function SermonDetailPage({ params }: Props) {
               </p>
               <div className="flex items-center gap-4">
                 {speaker?.photoUrl ? (
-                  <img
-                    alt={sermon.speaker}
-                    className="size-16 rounded-full object-cover border border-border shrink-0"
-                    src={speaker.photoUrl}
-                  />
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-full border border-border">
+                    <Image
+                      alt={sermon.speaker}
+                      className="object-cover"
+                      fill
+                      sizes="64px"
+                      src={speaker.photoUrl}
+                      unoptimized
+                    />
+                  </div>
                 ) : (
                   <div className="grid size-16 shrink-0 place-items-center rounded-full bg-primary/10 text-primary border border-primary/20">
                     <User className="size-7" />

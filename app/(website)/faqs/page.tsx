@@ -2,11 +2,20 @@ import type { Metadata } from "next";
 import { FaqContentPage } from "@/components/site/faq-content-page";
 import { sitePages } from "@/lib/content/site-pages";
 import { getPublicData } from "@/lib/api/church-api";
-
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 import { defaultFaqs } from "@/lib/content/default-faqs";
 
 const path = "/faqs";
-export const metadata: Metadata = { title: "Frequently asked questions", description: sitePages[path].description, alternates: { canonical: path } };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Frequently Asked Questions | ${name}`,
+    description: `Find helpful answers to common questions about visiting, worship services, doctrine, and church community life at ${name}.`,
+    alternates: { canonical: path },
+  };
+}
 type PublicFaq = { id: string; question: string; answer: string; category: string | null; displayOrder: number };
 type FaqResponse = { items?: PublicFaq[] };
 export const revalidate = 300;

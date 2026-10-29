@@ -4,17 +4,22 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, CalendarDays, Clock3, Heart, MapPin, Sparkles, Users } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type PublicContent } from "@/lib/api/church-api";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 import { formatServiceDate, formatServiceTime, sortServices, toChurchService, type ChurchService } from "@/lib/content/services";
 
-export const metadata: Metadata = {
-  title: "Worship Services & Gathering Times | Sabbath Worship",
-  description: "Find current Sabbath worship gatherings, Bible studies, prayer meetings, and special services. Experience warm fellowship and uplifting worship.",
-  alternates: { canonical: "/services" },
-  openGraph: {
-    title: "Worship Services & Gathering Times",
-    description: "Join us for Sabbath worship, prayer, Bible study, and special gatherings.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Worship Services & Gathering Times | ${name}`,
+    description: "Find current Sabbath worship gatherings, Bible studies, prayer meetings, and special services. Experience warm fellowship and uplifting worship.",
+    alternates: { canonical: "/services" },
+    openGraph: {
+      title: `Worship Services & Gathering Times | ${name}`,
+      description: "Join us for Sabbath worship, prayer, Bible study, and special gatherings.",
+    },
+  };
+}
 
 export const revalidate = 60;
 

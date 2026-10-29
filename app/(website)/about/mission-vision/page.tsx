@@ -5,11 +5,15 @@ import { ArrowRight, BookOpen, Compass, Heart, Shield, Sparkles, Target, Users }
 import { PageHero } from "@/components/site/page-hero";
 import { defaultChurchInformation, getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
-export const metadata: Metadata = {
-  title: "Mission, Vision & Core Values | Purpose & Calling",
-  description: "Explore the Christ-centered mission, hopeful vision, and core spiritual values that guide our church family.",
-  alternates: { canonical: "/about/mission-vision" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Mission, Vision & Core Values | ${name}`,
+    description: `Explore the Christ-centered mission, hopeful vision, and core spiritual values that guide the ministry of ${name}.`,
+    alternates: { canonical: "/about/mission-vision" },
+  };
+}
 
 export const revalidate = 300;
 

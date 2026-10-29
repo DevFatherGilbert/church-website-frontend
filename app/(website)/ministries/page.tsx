@@ -3,13 +3,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type Ministry } from "@/lib/api/church-api";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 import { DEFAULT_MINISTRIES } from "@/lib/content/default-ministries";
 
-export const metadata: Metadata = {
-  title: "Ministries",
-  description: "Explore church ministries and find a place to connect, grow, and serve.",
-  alternates: { canonical: "/ministries" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Ministries | ${name}`,
+    description: `Explore church ministries at ${name} and find a place to connect, grow, and serve.`,
+    alternates: { canonical: "/ministries" },
+  };
+}
 
 export const revalidate = 60;
 

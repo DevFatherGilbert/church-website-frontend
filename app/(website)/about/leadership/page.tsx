@@ -2,13 +2,19 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type PublicContent } from "@/lib/api/church-api";
+import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 
 const path = "/about/leadership";
-export const metadata: Metadata = {
-  title: "Our Leadership",
-  description: "Meet the people who support worship, ministry and care across the church community.",
-  alternates: { canonical: path },
-};
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicWebsiteSettings().catch(() => null);
+  const name = settings?.churchName || "Church";
+  return {
+    title: `Pastoral & Ministry Leadership | ${name}`,
+    description: `Meet the pastors, elders, and ministry coordinators who shepherd and serve the faith family at ${name}.`,
+    alternates: { canonical: path },
+  };
+}
 
 export const revalidate = 300;
 
