@@ -5,6 +5,15 @@ const port = process.env.NEXT_PUBLIC_API_PORT?.trim();
 const apiPrefix = `/${(process.env.NEXT_PUBLIC_API_PREFIX ?? "api").replace(/^\/+|\/+$/g, "")}`;
 const apiBase = (directUrl || `${protocol}://${host}${port ? `:${port}` : ""}${apiPrefix}`).replace(/\/$/, "");
 
+export function getWsBaseUrl(): string {
+  try {
+    const url = new URL(apiBase);
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return directUrl ? directUrl.replace(/\/api.*$/, "") : "http://localhost:5005";
+  }
+}
+
 type ApiEnvelope<T> = {
   success?: boolean;
   message?: string;

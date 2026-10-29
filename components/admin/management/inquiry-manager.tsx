@@ -1,7 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Check,
+  Clock,
+  CornerDownRight,
+  Mail,
+  MessageSquare,
+  Phone,
+  RefreshCw,
+  Search,
+  Send,
+  X,
+} from "lucide-react";
 import { authGet, authMutation } from "@/lib/api/church-api";
+import { useRealtime, type RealtimeInquiryCreated } from "@/lib/realtime/notifications-context";
 
 type InquiryKind = "contact" | "visitor" | "prayer";
 type InquiryStatus = "new" | "in_progress" | "resolved";
@@ -22,27 +35,36 @@ function formatDate(value: string) {
   const d = new Date(value);
   return Number.isNaN(d.getTime())
     ? value
-    : new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(d);
+    : new Intl.DateTimeFormat("en", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(d);
 }
 
 const STATUS_CONFIG: Record<
   InquiryStatus,
-  { label: string; dot: string; badge: string }
+  { label: string; dot: string; badge: string; tabColor: string }
 > = {
   new: {
     label: "New",
     dot: "bg-blue-500",
     badge: "bg-blue-50 text-blue-700 border-blue-200",
+    tabColor: "text-blue-700 bg-blue-50 border-blue-200",
   },
   in_progress: {
-    label: "In progress",
+    label: "In Progress",
     dot: "bg-amber-500",
     badge: "bg-amber-50 text-amber-700 border-amber-200",
+    tabColor: "text-amber-700 bg-amber-50 border-amber-200",
   },
   resolved: {
     label: "Resolved",
     dot: "bg-green-500",
     badge: "bg-green-50 text-green-700 border-green-200",
+    tabColor: "text-green-700 bg-green-50 border-green-200",
   },
 };
 
@@ -67,7 +89,7 @@ function ReplyPanel({
   kind: InquiryKind;
   onSaved: (updated: Partial<Inquiry>) => void;
 }) {
-  const [open, setOpen] = useState(item.reply ? true : false);
+  const [open, setOpen] = useState(false);
   const [text, setText] = useState(item.reply ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -75,8 +97,10 @@ function ReplyPanel({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (open && !item.reply) textareaRef.current?.focus();
-  }, [open, item.reply]);
+    if (open) {
+      textareaRef.current?.focus();
+    }
+  }, [open]);
 
   async function saveReply() {
     if (!text.trim()) return;
@@ -91,68 +115,106 @@ function ReplyPanel({
       }>(`/inquiries/${kind}/${item.id}/reply`, "PATCH", { reply: text.trim() });
       onSaved({ reply: text.trim(), repliedAt: result.repliedAt, status: result.status });
       setSuccess(true);
+      setTimeout(() => {
+        setOpen(false);
+        setSuccess(false);
+      }, 1500);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not save reply.");
+      setError(cause instanceof Error ? cause.message : "Could not send reply.");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="mt-4 border-t border-slate-100 pt-4">
+    <div className="mt-4 border-t border-border pt-4">
       {!open ? (
         <button
           type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-primary hover:border-primary hover:text-white"
+          onClick={() => {
+            setText(item.reply ?? "");
+            setOpen(true);
+          }}
+          className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 text-xs font-semibold text-foreground transition hover:border-primary hover:bg-primary/5 hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
-          {item.reply ? "Edit reply" : "Reply"}
+          <CornerDownRight className="size-3.5" aria-hidden="true" />
+          {item.reply ? "Edit reply" : "Reply directly via email"}
         </button>
       ) : (
-        <div className="space-y-3">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
-            {item.reply ? "Edit your reply" : "Write a reply"}
+        <div className="space-y-3 rounded-2xl border border-border bg-surface-subtle p-4">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor={`reply-input-${item.id}`}
+              className="text-xs font-bold uppercase tracking-wider text-muted flex items-center gap-1.5"
+            >
+              <Mail className="size-3.5 text-primary" />
+              {item.reply ? "Update Email Reply" : `Reply to ${item.name} (${item.email})`}
+            </label>
             {item.repliedAt && (
-              <span className="ml-2 font-normal normal-case tracking-normal text-slate-400">
-                — last replied {formatDate(item.repliedAt)}
+              <span className="text-xs text-muted">
+                Last replied: {formatDate(item.repliedAt)}
               </span>
             )}
-          </label>
+          </div>
+          <p className="text-xs text-muted">
+            Saving this reply will automatically email {item.name} from the church email service.
+          </p>
           <textarea
+            id={`reply-input-${item.id}`}
             ref={textareaRef}
-            className="h-28 w-full resize-y rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm leading-relaxed text-slate-700 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
-            placeholder={`Write your reply to ${item.name}…`}
+            className="h-32 w-full resize-y rounded-xl border border-border bg-surface px-3.5 py-3 text-sm leading-relaxed text-foreground placeholder:text-muted/60 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+            placeholder={`Dear ${item.name},\n\nThank you for reaching out to us…`}
             value={text}
             onChange={(e) => setText(e.target.value)}
             maxLength={5000}
           />
           {error && (
-            <p className="text-xs text-red-600" role="alert">
+            <p className="text-xs text-red-600 font-medium" role="alert">
               {error}
             </p>
           )}
           {success && (
-            <p className="text-xs text-green-600" role="status">
-              Reply saved successfully.
+            <p className="text-xs text-green-700 font-medium flex items-center gap-1" role="status">
+              <Check className="size-3.5" />
+              Reply delivered to {item.email} and recorded.
             </p>
           )}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={saving || !text.trim()}
-              onClick={saveReply}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-60"
-            >
-              {saving ? "Saving…" : "Save reply"}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setOpen(false); setText(item.reply ?? ""); setError(""); setSuccess(false); }}
-              className="rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-            >
-              Cancel
-            </button>
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-[11px] text-muted">
+              {text.length}/5000 characters
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  setText(item.reply ?? "");
+                  setError("");
+                  setSuccess(false);
+                }}
+                className="rounded-xl border border-border px-3.5 py-2 text-xs font-semibold text-muted transition hover:bg-surface-strong hover:text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={saving || !text.trim()}
+                onClick={saveReply}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? (
+                  <>
+                    <RefreshCw className="size-3.5 animate-spin" />
+                    Sending…
+                  </>
+                ) : (
+                  <>
+                    <Send className="size-3.5" />
+                    Send Reply
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -169,38 +231,113 @@ export function InquiryManager({
   const [kind, setKind] = useState<InquiryKind>(isPrayer ? "prayer" : "contact");
   const [items, setItems] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"" | InquiryStatus>("");
   const [updatingId, setUpdatingId] = useState("");
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const { connected, onInquiryCreated, onStatusChanged, onReplyCreated } = useRealtime();
+
+  // Load inquiries from backend
+  const load = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true);
+    else setRefreshing(true);
     setError("");
     try {
-      setItems(await authGet<Inquiry[]>(`/inquiries/${kind}`));
+      const data = await authGet<Inquiry[]>(`/inquiries/${kind}`);
+      // Deterministic sort: newest first
+      const sorted = [...data].sort((a, b) => {
+        const timeDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return timeDiff !== 0 ? timeDiff : b.id.localeCompare(a.id);
+      });
+      setItems(sorted);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not load messages.");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [kind]);
 
   useEffect(() => {
-    const id = setTimeout(() => { void load(); }, 0);
+    const id = setTimeout(() => {
+      void load();
+    }, 0);
     return () => clearTimeout(id);
   }, [load]);
 
+  // Real-time WebSocket event listeners
+  useEffect(() => {
+    // 1. When an inquiry is submitted in real time
+    const unsubCreated = onInquiryCreated((createdData: RealtimeInquiryCreated) => {
+      if (createdData.type === kind) {
+        setItems((prev) => {
+          // Prevent duplicates
+          if (prev.some((item) => item.id === createdData.id)) return prev;
+          const newInquiry: Inquiry = {
+            id: createdData.id,
+            name: createdData.name,
+            email: createdData.email,
+            phone: createdData.phone ?? null,
+            message: createdData.message,
+            status: createdData.status ?? "new",
+            reply: null,
+            repliedAt: null,
+            createdAt: createdData.createdAt,
+          };
+          return [newInquiry, ...prev];
+        });
+      }
+    });
+
+    // 2. When a status changes in real time
+    const unsubStatus = onStatusChanged((statusData) => {
+      if (statusData.type === kind) {
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === statusData.id ? { ...item, status: statusData.status } : item,
+          ),
+        );
+      }
+    });
+
+    // 3. When an admin reply is saved in real time
+    const unsubReply = onReplyCreated((replyData) => {
+      if (replyData.type === kind) {
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === replyData.id
+              ? {
+                  ...item,
+                  reply: replyData.reply,
+                  repliedAt: replyData.repliedAt,
+                  status: replyData.status,
+                }
+              : item,
+          ),
+        );
+      }
+    });
+
+    return () => {
+      unsubCreated();
+      unsubStatus();
+      unsubReply();
+    };
+  }, [kind, onInquiryCreated, onStatusChanged, onReplyCreated]);
+
   async function changeStatus(item: Inquiry, status: InquiryStatus) {
+    if (item.status === status) return;
     setUpdatingId(item.id);
     setError("");
     try {
       await authMutation(`/inquiries/${kind}/${item.id}/status`, "PATCH", { status });
       setItems((cur) =>
-        cur.map((e) => (e.id === item.id ? { ...e, status } : e))
+        cur.map((e) => (e.id === item.id ? { ...e, status } : e)),
       );
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not update this message.");
+      setError(cause instanceof Error ? cause.message : "Could not update message status.");
     } finally {
       setUpdatingId("");
     }
@@ -210,179 +347,317 @@ export function InquiryManager({
     setItems((cur) => cur.map((e) => (e.id === id ? { ...e, ...patch } : e)));
   }
 
-  // Stats
+  // Live status counts
   const total = items.length;
   const newCount = items.filter((i) => i.status === "new").length;
   const inProgressCount = items.filter((i) => i.status === "in_progress").length;
   const resolvedCount = items.filter((i) => i.status === "resolved").length;
 
-  const filtered = items.filter((item) => {
-    const matchSearch = `${item.name} ${item.email} ${item.message}`
-      .toLowerCase()
-      .includes(search.trim().toLowerCase());
-    const matchStatus = filterStatus ? item.status === filterStatus : true;
-    return matchSearch && matchStatus;
-  });
+  // Filtered inquiries
+  const filtered = useMemo(() => {
+    return items.filter((item) => {
+      const matchSearch = `${item.name} ${item.email} ${item.phone ?? ""} ${item.message}`
+        .toLowerCase()
+        .includes(search.trim().toLowerCase());
+      const matchStatus = filterStatus ? item.status === filterStatus : true;
+      return matchSearch && matchStatus;
+    });
+  }, [items, search, filterStatus]);
 
-  const title = isPrayer ? "Prayer requests" : "Inquiries";
+  const title = isPrayer ? "Prayer Requests" : "Inquiries";
 
   return (
-    <div>
-      {/* Page header */}
-      <header className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end">
+    <div className="space-y-6">
+      {/* Header */}
+      <header className="flex flex-col justify-between gap-4 border-b border-border pb-6 sm:flex-row sm:items-end">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[.16em] text-primary">
-            Church · Admin workspace
-          </p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-900">
+          <div className="flex items-center gap-2">
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-primary">
+              Church · Admin Workspace
+            </p>
+            <span
+              title={connected ? "Real-time updates live" : "Connecting to real-time events…"}
+              className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                connected
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-amber-50 text-amber-700 border border-amber-200"
+              }`}
+            >
+              <span
+                className={`size-1.5 rounded-full ${
+                  connected ? "bg-green-500" : "bg-amber-500 animate-pulse"
+                }`}
+              />
+              {connected ? "Live Real-Time" : "Connecting…"}
+            </span>
+          </div>
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground">
             {title}
           </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-1.5 text-sm leading-6 text-muted">
             {isPrayer
-              ? "Read private prayer requests and track follow-up."
-              : "Review messages from people contacting or planning to visit the church."}
+              ? "Receive and reply to private prayer requests with live updates and email delivery."
+              : "Review incoming contact messages and visitor planning forms in real time."}
           </p>
         </div>
-        {!isPrayer && (
-          <label className="text-sm font-semibold text-slate-700">
-            Message type
-            <select
-              className="mt-2 h-11 min-w-44 rounded-xl border border-slate-300 bg-white px-3.5 text-sm font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition"
-              value={kind}
-              onChange={(e) => setKind(e.target.value as InquiryKind)}
-            >
-              <option value="contact">Contact messages</option>
-              <option value="visitor">Visitor messages</option>
-            </select>
-          </label>
-        )}
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void load(true)}
+            disabled={loading || refreshing}
+            title="Refresh inquiry list"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2.5 text-xs font-semibold text-foreground transition hover:bg-surface-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50"
+          >
+            <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+
+          {!isPrayer && (
+            <label className="text-xs font-semibold text-foreground">
+              <span className="sr-only">Message type</span>
+              <select
+                aria-label="Filter message category"
+                className="h-10 rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+                value={kind}
+                onChange={(e) => setKind(e.target.value as InquiryKind)}
+              >
+                <option value="contact">Contact Messages</option>
+                <option value="visitor">Visitor Messages</option>
+              </select>
+            </label>
+          )}
+        </div>
       </header>
 
       {error && (
-        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
-          {error}
-        </p>
-      )}
-
-      {/* Status overview cards */}
-      {!loading && total > 0 && (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {(
-            [
-              { label: "Total", count: total, key: "" as const, color: "text-slate-700 bg-white border-slate-200" },
-              { label: "New", count: newCount, key: "new" as const, color: "text-blue-700 bg-blue-50 border-blue-200" },
-              { label: "In progress", count: inProgressCount, key: "in_progress" as const, color: "text-amber-700 bg-amber-50 border-amber-200" },
-              { label: "Resolved", count: resolvedCount, key: "resolved" as const, color: "text-green-700 bg-green-50 border-green-200" },
-            ] as const
-          ).map((stat) => (
-            <button
-              key={stat.key}
-              type="button"
-              onClick={() => setFilterStatus(filterStatus === stat.key ? "" : stat.key)}
-              className={[
-                "flex flex-col rounded-2xl border p-4 text-left transition-all hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20",
-                stat.color,
-                filterStatus === stat.key ? "ring-2 ring-primary/40 shadow-sm" : "",
-              ].join(" ")}
-              aria-pressed={filterStatus === stat.key}
-            >
-              <span className="text-2xl font-bold">{stat.count}</span>
-              <span className="mt-1 text-xs font-semibold">{stat.label}</span>
-            </button>
-          ))}
+        <div
+          role="alert"
+          className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-center justify-between"
+        >
+          <span>{error}</span>
+          <button
+            type="button"
+            onClick={() => setError("")}
+            className="rounded-lg p-1 text-red-600 hover:bg-red-100"
+          >
+            <X className="size-4" />
+          </button>
         </div>
       )}
 
-      {/* Inbox */}
+      {/* Status-Based Filtering Tabs with Live Badges */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {(
+          [
+            {
+              label: "All Messages",
+              count: total,
+              key: "" as const,
+              badgeClass: "text-foreground bg-surface border-border",
+              activeClass: "border-primary ring-2 ring-primary/20",
+            },
+            {
+              label: "New",
+              count: newCount,
+              key: "new" as const,
+              badgeClass: "text-blue-700 bg-blue-50 border-blue-200",
+              activeClass: "border-blue-500 ring-2 ring-blue-500/20",
+            },
+            {
+              label: "In Progress",
+              count: inProgressCount,
+              key: "in_progress" as const,
+              badgeClass: "text-amber-700 bg-amber-50 border-amber-200",
+              activeClass: "border-amber-500 ring-2 ring-amber-500/20",
+            },
+            {
+              label: "Resolved",
+              count: resolvedCount,
+              key: "resolved" as const,
+              badgeClass: "text-green-700 bg-green-50 border-green-200",
+              activeClass: "border-green-500 ring-2 ring-green-500/20",
+            },
+          ] as const
+        ).map((tab) => {
+          const isActive = filterStatus === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setFilterStatus(tab.key)}
+              aria-pressed={isActive}
+              className={`flex flex-col rounded-2xl border p-4 text-left transition-all hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                tab.badgeClass
+              } ${isActive ? tab.activeClass : "opacity-85 hover:opacity-100"}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold tracking-tight">{tab.count}</span>
+                {isActive && (
+                  <span className="size-2 rounded-full bg-primary" />
+                )}
+              </div>
+              <span className="mt-1 text-xs font-semibold">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Inquiries List & Search */}
       <section
-        className="mt-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm"
-        aria-label={`${title} list`}
+        className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm"
+        aria-label={`${title} Inbox`}
       >
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        {/* Controls bar */}
+        <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 bg-surface-subtle">
           <div>
-            <h2 className="font-display text-lg font-bold text-slate-900">
-              {isPrayer ? "Prayer inbox" : kind === "contact" ? "Contact inbox" : "Visitor inbox"}
+            <h2 className="font-display text-base font-bold text-foreground">
+              {isPrayer
+                ? "Prayer Inbox"
+                : kind === "contact"
+                ? "General Inquiries Inbox"
+                : "Visitor Inquiries Inbox"}
             </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {filtered.length} of {total} message{total === 1 ? "" : "s"}
-              {filterStatus && ` · filtered by "${STATUS_CONFIG[filterStatus]?.label}"`}
+            <p className="mt-0.5 text-xs text-muted">
+              Showing {filtered.length} of {total} inquiry
+              {total === 1 ? "" : "s"}
+              {filterStatus && ` · filtered by ${STATUS_CONFIG[filterStatus]?.label}`}
             </p>
           </div>
-          <input
-            aria-label={`Search ${title}`}
-            className="h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition sm:max-w-sm"
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search messages…"
-            value={search}
-          />
+
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted" />
+            <input
+              type="search"
+              aria-label={`Search ${title}`}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search sender, email, text…"
+              className="h-10 w-full rounded-xl border border-border bg-surface pl-9.5 pr-8 text-xs text-foreground placeholder:text-muted/60 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                aria-label="Clear search query"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted hover:text-foreground"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
+        {/* Content list */}
         {loading ? (
-          <p className="p-8 text-sm text-slate-500">Loading messages…</p>
+          <div className="flex items-center justify-center p-12 text-sm text-muted">
+            <RefreshCw className="mr-2 size-4 animate-spin text-primary" />
+            Loading live messages…
+          </div>
         ) : filtered.length ? (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {filtered.map((item) => (
               <article
-                className="p-5 sm:p-6"
                 key={item.id}
+                className="p-5 sm:p-6 transition hover:bg-surface-subtle/50"
               >
-                {/* Top row: sender info + date + status */}
+                {/* Header line: Sender info + Status + Time */}
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-base font-bold text-slate-900">{item.name}</h3>
-                      <StatusBadge status={item.status as InquiryStatus} />
+                      <h3 className="font-display text-base font-bold text-foreground">
+                        {item.name}
+                      </h3>
+                      <StatusBadge status={item.status} />
                       {item.reply && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 border border-violet-200 px-2.5 py-0.5 text-xs font-semibold text-violet-700">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                          <Check className="size-3" />
                           Replied
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 break-all text-sm font-semibold text-primary">
-                      <a href={`mailto:${item.email}`} className="hover:underline">{item.email}</a>
+                    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted">
+                      <a
+                        href={`mailto:${item.email}`}
+                        className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+                      >
+                        <Mail className="size-3 text-muted" />
+                        {item.email}
+                      </a>
                       {item.phone && (
-                        <> · <a href={`tel:${item.phone}`} className="hover:underline">{item.phone}</a></>
+                        <a
+                          href={`tel:${item.phone}`}
+                          className="inline-flex items-center gap-1 text-muted hover:text-foreground hover:underline"
+                        >
+                          <Phone className="size-3" />
+                          {item.phone}
+                        </a>
                       )}
-                    </p>
+                    </div>
                   </div>
-                  <time className="shrink-0 text-xs font-medium text-slate-400" dateTime={item.createdAt}>
+
+                  <time
+                    className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-muted"
+                    dateTime={item.createdAt}
+                  >
+                    <Clock className="size-3 text-muted/70" />
                     {formatDate(item.createdAt)}
                   </time>
                 </div>
 
-                {/* Message body */}
-                <p className="mt-4 whitespace-pre-wrap rounded-r-xl border-l-2 border-amber-400 bg-amber-50/40 p-4 text-sm leading-relaxed text-slate-700">
+                {/* Visitor Message Quote */}
+                <div className="mt-4 rounded-xl border-l-3 border-amber-400 bg-amber-50/50 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                    Visitor Message
+                  </p>
                   {item.message}
-                </p>
+                </div>
 
-                {/* Existing reply preview */}
+                {/* Admin Reply Quote (if exists) */}
                 {item.reply && (
-                  <div className="mt-3 whitespace-pre-wrap rounded-r-xl border-l-2 border-violet-400 bg-violet-50/40 p-4 text-sm leading-relaxed text-slate-700">
-                    <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-violet-500">Admin reply</p>
+                  <div className="mt-3 rounded-xl border-l-3 border-primary bg-primary/5 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+                    <div className="mb-1 flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-primary">
+                      <span>Official Church Reply</span>
+                      {item.repliedAt && (
+                        <span className="font-normal normal-case text-muted">
+                          Delivered {formatDate(item.repliedAt)}
+                        </span>
+                      )}
+                    </div>
                     {item.reply}
                   </div>
                 )}
 
-                {/* Bottom row: status control + reply */}
-                <div className="mt-4 flex flex-wrap items-center gap-4">
-                  <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Status
+                {/* Status Switcher & Reply trigger */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor={`status-select-${item.id}`}
+                      className="text-xs font-bold uppercase tracking-wider text-muted"
+                    >
+                      Status:
+                    </label>
                     <select
-                      aria-label={`Status for ${item.name}`}
-                      className="h-9 rounded-lg border border-slate-300 bg-slate-50 px-3 text-xs font-semibold normal-case tracking-normal text-slate-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition"
+                      id={`status-select-${item.id}`}
+                      aria-label={`Update status for ${item.name}`}
                       disabled={updatingId === item.id}
-                      onChange={(e) => void changeStatus(item, e.target.value as InquiryStatus)}
                       value={item.status}
+                      onChange={(e) =>
+                        void changeStatus(item, e.target.value as InquiryStatus)
+                      }
+                      className="h-8.5 rounded-lg border border-border bg-surface px-2.5 text-xs font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-50"
                     >
                       <option value="new">New</option>
-                      <option value="in_progress">In progress</option>
+                      <option value="in_progress">In Progress</option>
                       <option value="resolved">Resolved</option>
                     </select>
-                  </label>
+                    {updatingId === item.id && (
+                      <RefreshCw className="size-3.5 animate-spin text-primary" />
+                    )}
+                  </div>
                 </div>
 
-                {/* Reply panel */}
+                {/* Reply composer component */}
                 <ReplyPanel
                   item={item}
                   kind={kind}
@@ -393,14 +668,27 @@ export function InquiryManager({
           </div>
         ) : (
           <div className="p-12 text-center">
-            <h3 className="font-display text-lg font-bold text-slate-900">
-              {search || filterStatus ? "No matching messages" : "No messages yet"}
+            <MessageSquare className="mx-auto size-10 text-muted/40 mb-3" />
+            <h3 className="font-display text-base font-bold text-foreground">
+              {search || filterStatus ? "No matching messages" : "No inquiries yet"}
             </h3>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-1 text-xs text-muted max-w-sm mx-auto">
               {search || filterStatus
-                ? "Try adjusting the search or filter."
-                : "Submitted messages will appear here."}
+                ? "Try clearing your search query or switching the status filter tab."
+                : "New visitor messages and prayer requests will arrive here automatically in real time."}
             </p>
+            {(search || filterStatus) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setFilterStatus("");
+                }}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface-strong transition"
+              >
+                Reset filters
+              </button>
+            )}
           </div>
         )}
       </section>
