@@ -47,11 +47,11 @@ function formatDate(value?: string | null) {
 }
 
 function statusStyle(status: AnnouncementStatus) {
-  if (status === "PUBLISHED") return "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
-  if (status === "SCHEDULED") return "bg-primary/10 text-primary";
-  if (status === "EXPIRED" || status === "ARCHIVED") return "bg-muted/10 text-muted";
-  if (status === "UNPUBLISHED") return "bg-orange-50 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300";
-  return "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
+  if (status === "PUBLISHED") return "admin-badge-published";
+  if (status === "SCHEDULED") return "admin-badge-scheduled";
+  if (status === "EXPIRED" || status === "ARCHIVED") return "admin-badge-archived";
+  if (status === "UNPUBLISHED") return "admin-badge-unpublished";
+  return "admin-badge-draft";
 }
 
 
@@ -289,12 +289,12 @@ export function AnnouncementManager() {
       </header>
 
       {error && !modalOpen && (
-        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300" role="alert">
+        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {notice && (
-        <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300" role="status">
+        <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
           {notice}
         </p>
       )}
@@ -374,7 +374,7 @@ export function AnnouncementManager() {
                 <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted lg:block">
                   <dt className="sr-only">Status</dt>
                   <dd>
-                    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${statusStyle(item.details.status)}`}>
+                    <span className={`admin-badge ${statusStyle(item.details.status)}`}>
                       {item.details.status[0] + item.details.status.slice(1).toLowerCase()}
                     </span>
                   </dd>
@@ -553,7 +553,7 @@ export function AnnouncementManager() {
                             uploading={uploading}
                           />
                           <button
-                            className="min-h-9 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300"
+                            className="min-h-9 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-100"
                             disabled={uploading}
                             onClick={() => {
                               setImageUrl("");
@@ -578,7 +578,7 @@ export function AnnouncementManager() {
                     />
                   )}
                   {imageUrl && !isCloudinaryImageUrl(imageUrl) && (
-                    <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
+                    <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
                       This image is not stored in Cloudinary. Replace it with a new upload before saving.
                     </p>
                   )}
@@ -586,7 +586,7 @@ export function AnnouncementManager() {
               </div>
 
               {error && (
-                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300" role="alert">
+                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
                   {error}
                 </p>
               )}

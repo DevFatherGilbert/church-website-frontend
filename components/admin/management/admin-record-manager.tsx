@@ -280,12 +280,13 @@ export function AdminRecordManager({ section }: { section: Section }) {
     try {
       const form = new FormData();
       form.set("file", file);
-      const purpose = section === "events" ? "events" : section === "leadership" ? "leadership" : "resources";
-      const uploaded = await authUpload<{ url: string }>(`/media/upload?purpose=${purpose}`, form);
-      if (!uploaded?.url) throw new Error("The upload service did not return an image URL.");
-      setImageUrl(uploaded.url);
+      const purpose = section === "events" ? "events" : section === "leadership" ? "leadership" : section === "testimonials" ? "testimonials" : "general";
+      const uploaded = await authUpload<{ url?: string; secureUrl?: string }>(`/media/upload?purpose=${purpose}`, form);
+      const url = uploaded?.secureUrl || uploaded?.url;
+      if (!url) throw new Error("The upload service did not return an image URL.");
+      setImageUrl(url);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not upload this event image.");
+      setError(cause instanceof Error ? cause.message : "Could not upload this image.");
     } finally {
       setImageUploading(false);
     }
@@ -378,12 +379,12 @@ export function AdminRecordManager({ section }: { section: Section }) {
       </header>
 
       {error && (
-        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300" role="alert">
+        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {notice && (
-        <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300" role="status">
+        <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
           {notice}
         </p>
       )}
@@ -465,12 +466,12 @@ export function AdminRecordManager({ section }: { section: Section }) {
                         </td>
                         <td className="px-6 py-4">
                           <span
-                            className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+                            className={`admin-badge ${
                               status === "published"
-                                ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                ? "admin-badge-published"
                                 : status === "archived"
-                                  ? "bg-muted/10 text-muted"
-                                  : "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                                  ? "admin-badge-archived"
+                                  : "admin-badge-draft"
                             }`}
                           >
                             {status.replaceAll("_", " ")}
@@ -544,7 +545,7 @@ export function AdminRecordManager({ section }: { section: Section }) {
                         <Pencil aria-hidden="true" className="size-3.5" /> Edit
                       </button>
                       <button
-                        className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300"
+                        className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-100"
                         onClick={() => void deleteRecord(record)}
                         type="button"
                       >
@@ -626,7 +627,17 @@ export function AdminRecordManager({ section }: { section: Section }) {
                       {field.type === "image" ? (
                         <div className="mt-2 space-y-3">
                           {imageUrl && (
-                            <div aria-label="Current profile image" className="aspect-[4/3] max-w-sm rounded-xl border border-border bg-surface-strong bg-cover bg-center" role="img" style={{ backgroundImage: `url("${imageUrl}")` }} />
+                            <div className="relative aspect-[4/3] max-w-sm overflow-hidden rounded-xl border border-border bg-surface-strong">
+                              <div aria-label="Current image preview" className="size-full bg-cover bg-center" role="img" style={{ backgroundImage: `url("${imageUrl}")` }} />
+                              <button
+                                aria-label="Remove image"
+                                className="absolute right-2 top-2 rounded-lg border border-red-200 bg-surface/95 px-2.5 py-1 text-xs font-semibold text-red-700 shadow-xs backdrop-blur-xs transition hover:bg-red-50"
+                                onClick={() => setImageUrl("")}
+                                type="button"
+                              >
+                                Remove
+                              </button>
+                            </div>
                           )}
                           <ImageUploadDropzone
                             className="max-w-sm"
@@ -678,7 +689,7 @@ export function AdminRecordManager({ section }: { section: Section }) {
                 })}
               </div>
               {error && (
-                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300" role="alert">
+                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
                   {error}
                 </p>
               )}

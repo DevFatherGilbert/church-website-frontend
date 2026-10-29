@@ -305,31 +305,31 @@ export function DashboardView() {
     <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
         <p className="text-xs font-bold uppercase tracking-wider text-primary">Church website management</p>
-        <h1 className="mt-1.5 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Dashboard overview</h1>
-        <p className="mt-2 text-sm text-slate-500">A snapshot of content and activity across your church website (SRS Section 57).</p>
+        <h1 className="mt-1.5 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Dashboard overview</h1>
+        <p className="mt-2 text-sm text-muted">A snapshot of content and activity across your church website (SRS Section 57).</p>
       </div>
       <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${data.loading ? "bg-slate-100 text-slate-600" : loadedSources >= 4 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${data.loading ? "bg-surface-strong text-muted" : loadedSources >= 4 ? "bg-emerald-50 text-emerald-800 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200"}`}>
           {data.loading ? "Loading data" : loadedSources >= 4 ? "Live data" : `${loadedSources}/6 sources available`}
         </span>
-        <time className="text-sm text-slate-500">{formattedDate}</time>
+        <time className="text-sm font-medium text-muted">{formattedDate}</time>
       </div>
     </div>
 
     {/* Publication Status Summary Banner (SRS Section 57: Published & Draft content) */}
-    <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:px-6">
-      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+    <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-border bg-surface p-4 shadow-xs sm:px-6">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted">
         Content Status Overview:
       </div>
-      <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+      <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 border border-emerald-200">
         <CheckCircle2 className="size-3.5" />
         <span>{publishedCount} Published Records</span>
       </div>
-      <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">
+      <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 border border-amber-200">
         <FileEdit className="size-3.5" />
         <span>{draftCount} Draft Items</span>
       </div>
-      <div className="ml-auto text-xs text-slate-400">
+      <div className="ml-auto text-xs text-muted">
         Automatic sync with database
       </div>
     </div>
@@ -340,6 +340,6 @@ export function DashboardView() {
 
     <div className="mb-8"><QuickActionsView /></div>
     <RecentActivityTableView items={recentItems} />
-    {!data.loading && loadedSources < 4 && <p className="mt-4 text-xs leading-5 text-slate-500">Some dashboard figures could not be loaded. Refresh the page to try again.</p>}
+    {!data.loading && loadedSources < 4 && <p className="mt-4 text-xs leading-5 text-muted">Some dashboard figures could not be loaded. Refresh the page to try again.</p>}
   </div>;
 }

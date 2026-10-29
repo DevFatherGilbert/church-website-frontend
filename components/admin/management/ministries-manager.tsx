@@ -229,12 +229,12 @@ export function MinistriesManager() {
       </header>
 
       {error && !modalOpen && (
-        <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300" role="alert">
+        <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {notice && (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300" role="status">
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
           {notice}
         </p>
       )}
@@ -297,12 +297,12 @@ export function MinistriesManager() {
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-base font-bold text-foreground">{record.name}</h3>
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+                      className={`admin-badge ${
                         record.status === "published"
-                          ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                          ? "admin-badge-published"
                           : record.status === "archived"
-                            ? "bg-muted/10 text-muted"
-                            : "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                            ? "admin-badge-archived"
+                            : "admin-badge-draft"
                       }`}
                     >
                       {statusLabel(record.status)}
@@ -426,7 +426,7 @@ export function MinistriesManager() {
               </button>
             </div>
             {error && (
-              <p className="mx-5 mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300 sm:mx-7" role="alert">
+              <p className="mx-5 mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 sm:mx-7" role="alert">
                 {error}
               </p>
             )}

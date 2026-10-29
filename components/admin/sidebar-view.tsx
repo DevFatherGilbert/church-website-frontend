@@ -68,8 +68,8 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
       onClick={onClose}
       type="button"
     />}
-    <aside id="admin-dashboard-sidebar" className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-slate-900 text-slate-300 transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0 ${isOpen ? "visible translate-x-0" : "invisible -translate-x-full lg:visible"}`}>
-      <div className="flex h-20 items-center justify-between border-b border-slate-800 px-6">
+    <aside id="admin-dashboard-sidebar" className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#001c46] text-slate-200 transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0 ${isOpen ? "visible translate-x-0" : "invisible -translate-x-full lg:visible"}`}>
+      <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
         <Link
           aria-label={`${churchName || "Church"} admin dashboard`}
           className="flex min-w-0 items-center gap-3 text-white transition-opacity hover:opacity-90"
@@ -87,22 +87,22 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
             <span className="block truncate font-display text-sm font-extrabold uppercase leading-tight tracking-wide text-white">
               {churchName || "Our Church"}
             </span>
-            <span className="mt-0.5 block text-[0.68rem] font-semibold uppercase tracking-wider text-slate-400">
+            <span className="mt-0.5 block text-[0.68rem] font-semibold uppercase tracking-wider text-amber-400">
               Admin Workspace
             </span>
           </span>
         </Link>
-        <button aria-label="Close navigation menu" className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" onClick={onClose} type="button"><X aria-hidden="true" className="size-5" /></button>
+        <button aria-label="Close navigation menu" className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden" onClick={onClose} type="button"><X aria-hidden="true" className="size-5" /></button>
       </div>
 
       <nav aria-label="Administration" className="flex-1 space-y-5 overflow-y-auto px-4 py-6">
         {navigationGroups.map((group) => <div className="space-y-1" key={group.label}>
-          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">{group.label}</p>
+          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{group.label}</p>
           {group.items.map(({ label, href, icon: Icon }) => {
             const active = pathname === href;
             return <Link
               aria-current={active ? "page" : undefined}
-              className={`flex min-h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-medium transition-colors ${active ? "bg-primary text-white shadow-sm font-bold" : "text-slate-300 hover:bg-slate-800/80 hover:text-white"}`}
+              className={`flex min-h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-medium transition-colors ${active ? "bg-primary text-white shadow-sm font-bold" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
               href={href}
               key={href}
               onClick={onClose}
@@ -114,12 +114,12 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
         </div>)}
       </nav>
 
-      <div className="border-t border-slate-800 p-5">
-        <div className="rounded-xl bg-slate-800/80 p-4">
-          <p className="text-sm font-semibold text-white">Need a hand?</p>
-          <p className="mt-1 text-xs leading-5 text-slate-400">Contact your church administrator if you need help managing the website.</p>
+      <div className="border-t border-white/10 p-5">
+        <div className="rounded-xl bg-white/5 border border-white/10 p-4">
+          <p className="text-sm font-semibold text-white">Need assistance?</p>
+          <p className="mt-1 text-xs leading-5 text-slate-300">Contact church administration if you need guidance managing content.</p>
         </div>
-        <p className="mt-4 px-1 text-[11px] text-slate-500">Church Admin</p>
+        <p className="mt-4 px-1 text-[11px] text-slate-400">Church Admin Workspace</p>
       </div>
     </aside>
   </>;

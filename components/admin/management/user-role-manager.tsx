@@ -243,7 +243,7 @@ export function UserRoleManager() {
 
       {error && (
         <div
-          className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300"
+          className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
           role="alert"
         >
           <AlertTriangle className="size-5 shrink-0 text-red-600" />
@@ -253,7 +253,7 @@ export function UserRoleManager() {
 
       {notice && (
         <div
-          className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300"
+          className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
           role="status"
         >
           <Check className="size-5 shrink-0 text-emerald-600" />
@@ -282,7 +282,7 @@ export function UserRoleManager() {
             <span className="text-xs font-semibold uppercase tracking-wider text-muted">
               Administrators
             </span>
-            <span className="grid size-9 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <span className="grid size-9 place-items-center rounded-xl bg-amber-500/10 text-amber-600">
               <Crown className="size-4" />
             </span>
           </div>
@@ -296,7 +296,7 @@ export function UserRoleManager() {
             <span className="text-xs font-semibold uppercase tracking-wider text-muted">
               Standard Members
             </span>
-            <span className="grid size-9 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+            <span className="grid size-9 place-items-center rounded-xl bg-blue-500/10 text-blue-600">
               <UserCheck className="size-4" />
             </span>
           </div>
@@ -310,7 +310,7 @@ export function UserRoleManager() {
             <span className="text-xs font-semibold uppercase tracking-wider text-muted">
               Active Accounts
             </span>
-            <span className="grid size-9 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <span className="grid size-9 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600">
               <ShieldCheck className="size-4" />
             </span>
           </div>
@@ -430,22 +430,22 @@ export function UserRoleManager() {
                         )}
 
                         {user.role === "admin" ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:text-amber-400">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold text-amber-700">
                             <Crown className="size-3" /> Administrator
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/15 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/15 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
                             Member
                           </span>
                         )}
 
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[11px] font-bold capitalize ${
+                          className={`admin-badge ${
                             user.status === "active"
-                              ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                              ? "admin-badge-published"
                               : user.status === "pending"
-                                ? "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-                                : "bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-300"
+                                ? "admin-badge-draft"
+                                : "admin-badge-danger"
                           }`}
                         >
                           {user.status}
@@ -474,7 +474,7 @@ export function UserRoleManager() {
                   <div className="flex flex-wrap items-center gap-2 sm:self-center">
                     {user.role === "admin" ? (
                       <button
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border px-3.5 text-xs font-bold text-muted transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:opacity-40 dark:hover:border-red-900/60 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border px-3.5 text-xs font-bold text-muted transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
                         disabled={isSelf || isUpdating}
                         onClick={() => void handleToggleRole(user)}
                         title={
@@ -515,7 +515,7 @@ export function UserRoleManager() {
                       </button>
                     ) : (
                       <button
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100 disabled:opacity-40 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-3 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100 disabled:opacity-40"
                         disabled={isUpdating}
                         onClick={() => void handleToggleStatus(user)}
                         title="Activate account"
@@ -526,7 +526,7 @@ export function UserRoleManager() {
                     )}
 
                     <button
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border px-3 text-xs font-bold text-muted transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:opacity-40 dark:hover:border-red-900/60 dark:hover:bg-red-950/30 dark:hover:text-red-300"
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-border px-3 text-xs font-bold text-muted transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 disabled:opacity-40"
                       disabled={isSelf || isUpdating}
                       onClick={() => void handleDeleteUser(user)}
                       title={

@@ -200,3 +200,56 @@ a { text-underline-offset: .2em; }
 
 /* Header transition improvements */
 .bg-white\/98 { background-color: rgb(255 255 255 / 0.98); }
+
+/* Standardized Admin Workspace Design Tokens & Utilities */
+.admin-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.25rem;
+}
+
+.admin-badge-published {
+  background-color: rgb(236 253 245);
+  color: rgb(6 95 70);
+  border: 1px solid rgb(167 243 208);
+}
+
+.admin-badge-draft {
+  background-color: rgb(254 243 199);
+  color: rgb(146 64 14);
+  border: 1px solid rgb(253 230 138);
+}
+
+.admin-badge-scheduled {
+  background-color: rgb(239 246 255);
+  color: rgb(29 78 216);
+  border: 1px solid rgb(191 219 254);
+}
+
+.admin-badge-archived,
+.admin-badge-unpublished {
+  background-color: rgb(241 245 249);
+  color: rgb(71 85 105);
+  border: 1px solid rgb(226 232 240);
+}
+
+.admin-badge-danger {
+  background-color: rgb(254 242 242);
+  color: rgb(153 27 27);
+  border: 1px solid rgb(254 202 202);
+}
+

@@ -44,10 +44,10 @@ function dateLabel(value?: string) {
 
 function statusStyle(status: FaqStatus) {
   return status === "PUBLISHED"
-    ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+    ? "admin-badge-published"
     : status === "UNPUBLISHED"
-      ? "bg-muted/10 text-muted"
-      : "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
+      ? "admin-badge-unpublished"
+      : "admin-badge-draft";
 }
 
 export function FaqManager() {
@@ -255,12 +255,12 @@ export function FaqManager() {
       </header>
 
       {error && (
-        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300" role="alert">
+        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
           {error}
         </p>
       )}
       {notice && (
-        <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-300" role="status">
+        <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
           {notice}
         </p>
       )}
@@ -314,7 +314,7 @@ export function FaqManager() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${statusStyle(faq.status)}`}>
+                        <span className={`admin-badge ${statusStyle(faq.status)}`}>
                           {faq.status.toLocaleLowerCase()}
                         </span>
                         {faq.category && (
@@ -521,7 +521,7 @@ export function FaqManager() {
               </p>
 
               {error && (
-                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300" role="alert">
+                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
                   {error}
                 </p>
               )}

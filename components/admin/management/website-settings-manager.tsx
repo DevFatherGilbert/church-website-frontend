@@ -404,7 +404,15 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type) || file.size > 15 * 1024 * 1024) { setError("Choose a JPEG, PNG, WebP, or GIF image up to 15 MB."); return; }
     setUploading(true); setError("");
-    try { const form = new FormData(); form.set("file", file); const purpose = field.startsWith("profile.") ? "branding" : "homepage"; const result = await authUpload<{ secureUrl: string }>(`/media/upload?purpose=${purpose}`, form); if (!result.secureUrl) throw new Error("The backend did not return an image URL."); setDetails(field, result.secureUrl); }
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const purpose = field.startsWith("profile.") ? "branding" : "homepage";
+      const result = await authUpload<{ secureUrl?: string; url?: string }>(`/media/upload?purpose=${purpose}`, form);
+      const url = result?.secureUrl || result?.url;
+      if (!url) throw new Error("The backend did not return an image URL.");
+      setDetails(field, url);
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Image upload failed."); } finally { setUploading(false); }
   }
   async function save(event: FormEvent<HTMLFormElement>, publish: boolean, unpublish = false) {

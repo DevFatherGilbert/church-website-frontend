@@ -164,62 +164,62 @@ export function MediaLibraryManager() {
   }
 
   return <div className="mx-auto max-w-6xl">
-    <header className="border-b border-slate-200 pb-5">
-      <p className="text-xs font-bold uppercase tracking-[.16em] text-primary">Church · Admin workspace</p>
-      <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-900">Media library</h1>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Upload, preview, search, and reuse Cloudinary images, audio, video, and PDF files. Media used on the website is protected from deletion.</p>
+    <header className="border-b border-border pb-5">
+      <p className="text-xs font-bold uppercase tracking-wider text-primary">Church · Admin workspace</p>
+      <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground">Media library</h1>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">Upload, preview, search, and reuse Cloudinary images, audio, video, and PDF files. Media used on the website is protected from deletion.</p>
     </header>
 
     {error && <p className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">{error}</p>}
-    {notice && <p className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">{notice}</p>}
+    {notice && <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">{notice}</p>}
 
-    <section className="mt-6 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-7" aria-labelledby="upload-media-title">
-      <h2 className="font-display text-lg font-bold text-slate-900" id="upload-media-title">Upload a file</h2>
-      <p className="mt-1 text-sm text-slate-500">Images: JPEG, PNG, WebP, or GIF up to 15 MB. Audio, video, and PDF files up to 50 MB.</p>
+    <section className="mt-6 rounded-2xl border border-border bg-surface p-5 shadow-xs sm:p-7" aria-labelledby="upload-media-title">
+      <h2 className="font-display text-lg font-bold text-foreground" id="upload-media-title">Upload a file</h2>
+      <p className="mt-1 text-sm text-muted">Images: JPEG, PNG, WebP, or GIF up to 15 MB. Audio, video, and PDF files up to 50 MB.</p>
       <form className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={(event) => void uploadFile(event)}>
         <label
-          className={`block flex-1 rounded-xl border-2 border-dashed p-4 text-sm transition ${dragging ? "border-primary bg-primary/10" : "border-slate-300 bg-slate-50"}`}
+          className={`block flex-1 rounded-xl border-2 border-dashed p-4 text-sm transition ${dragging ? "border-primary bg-primary/10" : "border-border bg-surface-strong/40"}`}
           onDragEnter={(event) => { event.preventDefault(); if (!uploading) setDragging(true); }}
           onDragLeave={(event) => { event.preventDefault(); setDragging(false); }}
           onDragOver={(event) => event.preventDefault()}
           onDrop={dropFile}
         >
-          <span className="font-semibold text-slate-700">{dragging ? "Drop a file to select it" : "Choose a file or drag it here"}</span>
-          <input accept="image/jpeg,image/png,image/webp,image/gif,audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/aac,audio/m4a,audio/x-m4a,video/mp4,video/webm,application/pdf" className="mt-2 block min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-semibold" disabled={uploading} onChange={(event) => { selectFile(event.target.files?.[0]); event.currentTarget.value = ""; }} ref={inputRef} type="file" />
+          <span className="font-semibold text-foreground">{dragging ? "Drop a file to select it" : "Choose a file or drag it here"}</span>
+          <input accept="image/jpeg,image/png,image/webp,image/gif,audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/aac,audio/m4a,audio/x-m4a,video/mp4,video/webm,application/pdf" className="mt-2 block min-h-11 w-full rounded-xl border border-border bg-surface px-3.5 py-2 text-sm file:mr-3 file:border-0 file:bg-surface-strong file:px-3 file:py-1.5 file:text-sm file:font-semibold" disabled={uploading} onChange={(event) => { selectFile(event.target.files?.[0]); event.currentTarget.value = ""; }} ref={inputRef} type="file" />
         </label>
-        <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50" disabled={!selectedFile || uploading} type="submit"><Upload aria-hidden="true" className="mr-2 size-4" />{uploading ? `Uploading ${uploadProgress}%` : "Upload to library"}</button>
+        <button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-xs transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50" disabled={!selectedFile || uploading} type="submit"><Upload aria-hidden="true" className="mr-2 size-4" />{uploading ? `Uploading ${uploadProgress}%` : "Upload to library"}</button>
       </form>
-      {uploading && <div aria-label={`Upload progress ${uploadProgress}%`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={uploadProgress} className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar"><div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${uploadProgress}%` }} /></div>}
-      {selectedFile && <p className="mt-3 text-xs text-slate-500">Selected: {selectedFile.name} · {formatBytes(selectedFile.size)}</p>}
+      {uploading && <div aria-label={`Upload progress ${uploadProgress}%`} aria-valuemax={100} aria-valuemin={0} aria-valuenow={uploadProgress} className="mt-4 h-2 overflow-hidden rounded-full bg-surface-strong" role="progressbar"><div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${uploadProgress}%` }} /></div>}
+      {selectedFile && <p className="mt-3 text-xs text-muted">Selected: {selectedFile.name} · {formatBytes(selectedFile.size)}</p>}
     </section>
 
     <section className="mt-8" aria-labelledby="recent-media-title">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div><h2 className="font-display text-xl font-bold text-slate-900" id="recent-media-title">Recent files</h2><p className="mt-1 text-sm text-slate-500">Showing up to 100 recent files in the church media folders.</p></div>
-        <button className="min-h-10 rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:bg-white" onClick={() => void loadAssets()} type="button">Refresh</button>
+        <div><h2 className="font-display text-xl font-bold text-foreground" id="recent-media-title">Recent files</h2><p className="mt-1 text-sm text-muted">Showing up to 100 recent files in the church media folders.</p></div>
+        <button className="min-h-10 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-foreground transition hover:bg-surface-strong" onClick={() => void loadAssets()} type="button">Refresh</button>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <label className="relative block"><span className="sr-only">Search media</span><Search aria-hidden="true" className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><input className="min-h-11 w-full rounded-xl border border-slate-300 bg-white pl-10 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15" onChange={(event) => setSearch(event.target.value)} placeholder="Search name, folder, format, or alt text" value={search} /></label>
-        <label className="sr-only" htmlFor="media-type-filter">Filter by file type</label><select className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm" id="media-type-filter" onChange={(event) => setFilter(event.target.value as Filter)} value={filter}><option value="all">All file types</option><option value="image">Images</option><option value="video">Audio &amp; video</option><option value="raw">PDF files</option></select>
+        <label className="relative block"><span className="sr-only">Search media</span><Search aria-hidden="true" className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" /><input className="min-h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" onChange={(event) => setSearch(event.target.value)} placeholder="Search name, folder, format, or alt text" value={search} /></label>
+        <label className="sr-only" htmlFor="media-type-filter">Filter by file type</label><select className="min-h-11 rounded-xl border border-border bg-surface px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" id="media-type-filter" onChange={(event) => setFilter(event.target.value as Filter)} value={filter}><option value="all">All file types</option><option value="image">Images</option><option value="video">Audio &amp; video</option><option value="raw">PDF files</option></select>
       </div>
 
-      {loading ? <p className="mt-5 rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500" role="status">Loading media…</p>
+      {loading ? <p className="mt-5 rounded-2xl border border-border bg-surface p-8 text-sm text-muted" role="status">Loading media…</p>
         : visibleAssets.length ? <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {visibleAssets.map((asset) => {
             const isImage = asset.resourceType === "image";
             const Icon = asset.resourceType === "video" ? FileVideo2 : asset.resourceType === "raw" ? FileText : FileAudio2;
             const dirtyAlt = (altDrafts[asset.id] ?? asset.altText) !== asset.altText;
-            return <article className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm" key={asset.id}>
-              <button aria-label={`Preview ${fileLabel(asset)}`} className="relative block aspect-video w-full bg-slate-100 text-primary" onClick={() => setPreview(asset)} type="button">
+            return <article className="min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs" key={asset.id}>
+              <button aria-label={`Preview ${fileLabel(asset)}`} className="relative block aspect-video w-full bg-surface-strong text-primary" onClick={() => setPreview(asset)} type="button">
                 {isImage ? <img alt={asset.altText || fileLabel(asset)} className="size-full object-cover" loading="lazy" src={asset.secureUrl} /> : <span className="grid size-full place-items-center"><Icon aria-hidden="true" className="size-12" /></span>}
                 <span className="absolute bottom-2 right-2 rounded-full bg-slate-950/75 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">Preview</span>
               </button>
               <div className="min-w-0 p-4">
-                <h3 className="truncate font-display text-sm font-bold text-slate-900" title={asset.publicId}>{fileLabel(asset)}</h3>
-                <p className="mt-1 truncate text-xs text-slate-500" title={asset.folder}>{asset.format?.toUpperCase() || asset.resourceType} · {formatBytes(asset.bytes)}{asset.width && asset.height ? ` · ${asset.width} × ${asset.height}` : ""}</p>
-                <p className="mt-1 text-[11px] text-slate-400">{asset.createdAt ? new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(asset.createdAt)) : ""}</p>
-                {isImage && <div className="mt-3"><label className="block text-xs font-semibold text-slate-600">Alternative text<input className="mt-1 min-h-10 w-full rounded-lg border border-slate-300 px-3 text-xs font-normal outline-none focus:border-primary focus:ring-2 focus:ring-primary/15" maxLength={500} onChange={(event) => setAltDrafts((current) => ({ ...current, [asset.id]: event.target.value }))} placeholder="Describe the image" value={altDrafts[asset.id] ?? asset.altText} /></label><button className="mt-2 min-h-9 rounded-lg border border-primary/30 px-3 text-xs font-semibold text-primary transition hover:bg-primary/5 disabled:opacity-50" disabled={!dirtyAlt || savingAlt === asset.id} onClick={() => void saveAltText(asset)} type="button">{savingAlt === asset.id ? "Saving…" : "Save alt text"}</button></div>}
-                <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                <h3 className="truncate font-display text-sm font-bold text-foreground" title={asset.publicId}>{fileLabel(asset)}</h3>
+                <p className="mt-1 truncate text-xs text-muted" title={asset.folder}>{asset.format?.toUpperCase() || asset.resourceType} · {formatBytes(asset.bytes)}{asset.width && asset.height ? ` · ${asset.width} × ${asset.height}` : ""}</p>
+                <p className="mt-1 text-[11px] text-muted">{asset.createdAt ? new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(asset.createdAt)) : ""}</p>
+                {isImage && <div className="mt-3"><label className="block text-xs font-semibold text-muted">Alternative text<input className="mt-1 min-h-10 w-full rounded-xl border border-border bg-surface px-3 text-xs font-normal text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" maxLength={500} onChange={(event) => setAltDrafts((current) => ({ ...current, [asset.id]: event.target.value }))} placeholder="Describe the image" value={altDrafts[asset.id] ?? asset.altText} /></label><button className="mt-2 min-h-9 rounded-lg border border-primary/30 px-3 text-xs font-semibold text-primary transition hover:bg-primary/5 disabled:opacity-50" disabled={!dirtyAlt || savingAlt === asset.id} onClick={() => void saveAltText(asset)} type="button">{savingAlt === asset.id ? "Saving…" : "Save alt text"}</button></div>}
+                <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
                   <a className="inline-flex min-h-9 min-w-0 items-center gap-1.5 truncate text-xs font-semibold text-primary hover:underline" href={asset.secureUrl} rel="noreferrer" target="_blank">Open file <ExternalLink aria-hidden="true" className="size-3.5 shrink-0" /></a>
                   <button aria-label={`Delete ${fileLabel(asset)}`} className="grid size-9 shrink-0 place-items-center rounded-lg border border-red-200 text-red-700 transition hover:bg-red-50 disabled:opacity-50" disabled={deleting === asset.id} onClick={() => void deleteAsset(asset)} type="button"><Trash2 aria-hidden="true" className="size-4" /></button>
                 </div>
@@ -227,7 +227,7 @@ export function MediaLibraryManager() {
             </article>;
           })}
         </div>
-          : <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center sm:p-12"><FileImage aria-hidden="true" className="mx-auto size-9 text-slate-400" /><h3 className="mt-3 font-display text-lg font-bold text-slate-900">{assets.length ? "No files match your search" : "No media uploaded"}</h3><p className="mt-1 text-sm text-slate-500">{assets.length ? "Try another name or file type." : "Uploaded files will appear here."}</p></div>}
+          : <div className="mt-5 rounded-2xl border border-dashed border-border bg-surface p-10 text-center sm:p-12"><FileImage aria-hidden="true" className="mx-auto size-9 text-muted" /><h3 className="mt-3 font-display text-lg font-bold text-foreground">{assets.length ? "No files match your search" : "No media uploaded"}</h3><p className="mt-1 text-sm text-muted">{assets.length ? "Try another name or file type." : "Uploaded files will appear here."}</p></div>}
     </section>
 
     {preview && <dialog aria-labelledby="media-preview-title" className="m-auto max-h-[92dvh] w-[min(94vw,60rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/70" onClose={() => setPreview(null)} ref={previewRef}>

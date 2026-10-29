@@ -4,40 +4,662 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { Archive, Check, Eye, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { authGet, authMutation } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
-import { formatServiceDate, formatServiceTime, serviceTypes, sortServices, toChurchService, weekdays, type ChurchService } from "@/lib/content/services";
+import {
+  formatServiceDate,
+  formatServiceTime,
+  serviceTypes,
+  sortServices,
+  toChurchService,
+  weekdays,
+  type ChurchService,
+} from "@/lib/content/services";
 
-type ManagedService = ChurchService & { slug?: string; published?: boolean; updatedAt?: string; createdAt?: string };
-type ApiRecord = { id: string; title: string; description?: string | null; slug: string; details: Record<string, unknown>; published?: boolean; updatedAt?: string; createdAt?: string };
-const empty = (): Partial<ManagedService> => ({ scheduleType: "weekly", dayOfWeek: 0, startTime: "", endTime: null, serviceType: serviceTypes[0], location: "", targetAudience: null, instructions: null, active: true, displayOrder: 0, publicationStatus: "draft", description: "" });
+type ManagedService = ChurchService & {
+  slug?: string;
+  published?: boolean;
+  updatedAt?: string;
+  createdAt?: string;
+};
 
-function asManaged(record: ApiRecord): ManagedService { return { ...toChurchService(record), slug: record.slug, published: record.published, updatedAt: record.updatedAt, createdAt: record.createdAt }; }
+type ApiRecord = {
+  id: string;
+  title: string;
+  description?: string | null;
+  slug: string;
+  details: Record<string, unknown>;
+  published?: boolean;
+  updatedAt?: string;
+  createdAt?: string;
+};
+
+const empty = (): Partial<ManagedService> => ({
+  scheduleType: "weekly",
+  dayOfWeek: 0,
+  startTime: "",
+  endTime: null,
+  serviceType: serviceTypes[0],
+  location: "",
+  targetAudience: null,
+  instructions: null,
+  active: true,
+  displayOrder: 0,
+  publicationStatus: "draft",
+  description: "",
+});
+
+function asManaged(record: ApiRecord): ManagedService {
+  return {
+    ...toChurchService(record),
+    slug: record.slug,
+    published: record.published,
+    updatedAt: record.updatedAt,
+    createdAt: record.createdAt,
+  };
+}
 
 export function ServiceScheduleManager() {
   const confirm = useConfirmation();
-  const [records, setRecords] = useState<ManagedService[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(""); const [notice, setNotice] = useState(""); const [query, setQuery] = useState(""); const [typeFilter, setTypeFilter] = useState(""); const [statusFilter, setStatusFilter] = useState(""); const [editing, setEditing] = useState<Partial<ManagedService> | null>(null); const [viewing, setViewing] = useState<ManagedService | null>(null); const [saving, setSaving] = useState(false);
-  const load = useCallback(async () => { const data = await authGet<{ items?: ApiRecord[] }>("/admin/content/services"); return sortServices((data.items ?? []).map(asManaged)) as ManagedService[]; }, []);
-  const refresh = useCallback(async () => { setRecords(await load()); }, [load]);
+  const [records, setRecords] = useState<ManagedService[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [editing, setEditing] = useState<Partial<ManagedService> | null>(null);
+  const [viewing, setViewing] = useState<ManagedService | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    const data = await authGet<{ items?: ApiRecord[] }>("/admin/content/services");
+    return sortServices((data.items ?? []).map(asManaged)) as ManagedService[];
+  }, []);
+
+  const refresh = useCallback(async () => {
+    setRecords(await load());
+  }, [load]);
+
   useEffect(() => {
     let active = true;
-    void load().then((services) => { if (active) setRecords(services); })
-      .catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "Could not load services."); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+    void load()
+      .then((services) => {
+        if (active) setRecords(services);
+      })
+      .catch((cause: unknown) => {
+        if (active) setError(cause instanceof Error ? cause.message : "Could not load services.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [load]);
-  const visible = useMemo(() => records.filter((service) => (!query || `${service.title} ${service.location}`.toLowerCase().includes(query.toLowerCase())) && (!typeFilter || service.serviceType === typeFilter) && (!statusFilter || service.publicationStatus === statusFilter)), [records, query, statusFilter, typeFilter]);
-  function open(record?: ManagedService) { setError(""); setNotice(""); setEditing(record ? { ...record } : empty()); }
-  async function persist(event: FormEvent<HTMLFormElement>) { event.preventDefault(); if (!editing) return; const data = new FormData(event.currentTarget); const scheduleType = String(data.get("scheduleType")); const status = String(data.get("publicationStatus")); const previousStatus = editing.publicationStatus ?? "draft"; const serviceTitle = String(data.get("title")).trim(); const changesPublicStatus = status !== previousStatus && (status !== "draft" || previousStatus === "published"); const savingLive = status === "published"; if ((changesPublicStatus || savingLive) && !await confirm({ title: `${status === "published" ? (previousStatus === "published" ? "Save live changes to" : "Publish") : status === "archived" ? "Archive" : "Unpublish"} this service?`, description: status === "published" ? `“${serviceTitle}” will be visible on the public website.` : status === "archived" ? `“${serviceTitle}” will be removed from active service listings.` : `“${serviceTitle}” will no longer appear publicly.`, confirmLabel: status === "published" ? (previousStatus === "published" ? "Save live changes" : "Publish service") : status === "archived" ? "Archive service" : "Save as draft", tone: status === "published" ? "primary" : "danger" })) return; const details = { scheduleType, serviceType: String(data.get("serviceType")), dayOfWeek: scheduleType === "weekly" ? Number(data.get("dayOfWeek")) : null, serviceDate: scheduleType === "special" ? String(data.get("serviceDate")) : null, startTime: String(data.get("startTime")), endTime: String(data.get("endTime")) || null, location: String(data.get("location")), targetAudience: String(data.get("targetAudience")) || null, instructions: String(data.get("instructions")) || null, active: data.get("active") === "on", displayOrder: Number(data.get("displayOrder")), publicationStatus: status }; const body = { type: "services", title: serviceTitle, description: String(data.get("description")) || undefined, details, published: status === "published" };
-    setSaving(true); setError(""); try { if (editing.id) await authMutation(`/admin/content/${editing.id}`, "PATCH", body); else await authMutation("/admin/content", "POST", body); setEditing(null); setNotice(editing.id ? status === "draft" && editing.published ? "Draft saved. The live schedule remains unchanged until it is published." : "Service saved." : "Service created."); await refresh(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not save service."); } finally { setSaving(false); } }
-  async function changeStatus(record: ManagedService, action: "publish" | "unpublish" | "archive") { const label = action === "publish" ? "Publish" : action === "archive" ? "Archive" : "Unpublish"; if (!await confirm({ title: `${label} this service?`, description: action === "publish" ? `“${record.title}” will be visible on the public website.` : action === "archive" ? `“${record.title}” will be removed from active service listings.` : `“${record.title}” will no longer appear publicly.`, confirmLabel: `${label} service`, tone: action === "publish" ? "primary" : "danger" })) return; setError(""); try { const details = { ...record, publicationStatus: action === "publish" ? "published" : action === "archive" ? "archived" : "unpublished" }; await authMutation(`/admin/content/${record.id}`, "PATCH", action === "unpublish" ? { unpublish: true } : { details, published: action === "publish" }); setNotice(`Service ${action === "publish" ? "published" : action === "archive" ? "archived" : "unpublished"}.`); await refresh(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not update this service."); } }
-  async function remove(record: ManagedService) { if (!await confirm({ title: "Delete this service?", description: `“${record.title}” will be permanently deleted. This action cannot be undone.`, confirmLabel: "Delete service", tone: "danger" })) return; try { await authMutation(`/admin/content/${record.id}`, "DELETE"); setNotice("Service deleted."); await refresh(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not delete this service."); } }
-  return <div><header className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-primary">Church · Admin workspace</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-slate-900">Services and Schedule Management</h1><p className="mt-2 text-sm leading-6 text-slate-500 font-normal">Create weekly and special services. Only active, published schedules appear on the public website.</p></div><button className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-white shadow-sm hover:bg-primary-hover transition" onClick={() => open()} type="button"><Plus className="mr-2 size-4" />Add Service</button></header>
-    {error && <p className="mt-5 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">{error}</p>}{notice && <p className="mt-5 border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">{notice}</p>}
-    <section className="mt-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm"><div className="flex flex-col gap-3 border-b border-slate-200 p-4 lg:flex-row lg:items-center lg:justify-between"><p className="text-sm font-medium text-slate-500">{records.length} service{records.length === 1 ? "" : "s"} in the database</p><div className="flex flex-col gap-3 sm:flex-row"><select aria-label="Filter by service type" className="h-11 rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition" onChange={(event) => setTypeFilter(event.target.value)} value={typeFilter}><option value="">All types</option>{serviceTypes.map((type) => <option key={type}>{type}</option>)}</select><select aria-label="Filter by publication status" className="h-11 rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm font-medium outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition" onChange={(event) => setStatusFilter(event.target.value)} value={statusFilter}><option value="">All statuses</option>{["draft", "published", "unpublished", "archived"].map((status) => <option key={status}>{status}</option>)}</select><label className="relative"><Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-slate-400" /><input className="h-11 rounded-xl border border-slate-300 bg-slate-50 pl-10 pr-3.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition" onChange={(event) => setQuery(event.target.value)} placeholder="Search services…" type="search" value={query} /></label></div></div>
-      {loading ? <p className="p-8 text-sm text-slate-500">Loading services…</p> : visible.length ? <div className="divide-y divide-slate-100">{visible.map((service) => <article className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between" key={service.id}><div><div className="flex flex-wrap items-center gap-2"><h2 className="font-display text-base font-bold text-slate-900">{service.title}</h2><span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold capitalize text-slate-700">{service.publicationStatus}</span>{!service.active && <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800">Inactive</span>}</div><p className="mt-2 text-sm text-slate-600">{service.serviceType} · {formatServiceDate(service)} · {formatServiceTime(service)} · {service.location}</p></div><div className="flex flex-wrap gap-2"><button aria-label={`View ${service.title}`} className="grid size-10 place-items-center rounded-xl border border-slate-300 text-slate-600 hover:text-primary transition" onClick={() => setViewing(service)} type="button"><Eye className="size-4" /></button><button aria-label={`Edit ${service.title}`} className="grid size-10 place-items-center rounded-xl border border-slate-300 text-slate-600 hover:text-primary transition" onClick={() => open(service)} type="button"><Pencil className="size-4" /></button>{service.publicationStatus !== "published" && service.active && <button className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100 transition" onClick={() => void changeStatus(service, "publish")} type="button"><Check className="size-4" />Publish</button>}{service.publicationStatus === "published" && <button className="min-h-10 rounded-xl border border-slate-300 px-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition" onClick={() => void changeStatus(service, "unpublish")} type="button">Unpublish</button>}{service.publicationStatus !== "archived" && <button aria-label={`Archive ${service.title}`} className="grid size-10 place-items-center rounded-xl border border-slate-300 text-slate-600 hover:text-amber-700 transition" onClick={() => void changeStatus(service, "archive")} type="button"><Archive className="size-4" /></button>}<button aria-label={`Delete ${service.title}`} className="grid size-10 place-items-center rounded-xl border border-red-200 text-red-700 hover:bg-red-50 transition" onClick={() => void remove(service)} type="button"><Trash2 className="size-4" /></button></div></article>)}</div> : <div className="p-12 text-center"><p className="font-display text-base font-bold text-slate-900">No services found</p><button className="mt-4 text-sm font-semibold text-primary hover:underline" onClick={() => open()} type="button">Add a service</button></div>}</section>
-    {editing && <ServiceForm service={editing} saving={saving} onClose={() => setEditing(null)} onSubmit={persist} />}{viewing && <ServiceDetails service={viewing} onClose={() => setViewing(null)} />}
-  </div>;
+
+  const visible = useMemo(
+    () =>
+      records.filter(
+        (service) =>
+          (!query || `${service.title} ${service.location}`.toLowerCase().includes(query.toLowerCase())) &&
+          (!typeFilter || service.serviceType === typeFilter) &&
+          (!statusFilter || service.publicationStatus === statusFilter)
+      ),
+    [records, query, statusFilter, typeFilter]
+  );
+
+  function open(record?: ManagedService) {
+    setError("");
+    setNotice("");
+    setEditing(record ? { ...record } : empty());
+  }
+
+  async function persist(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editing) return;
+    const data = new FormData(event.currentTarget);
+    const scheduleType = String(data.get("scheduleType"));
+    const status = String(data.get("publicationStatus"));
+    const previousStatus = editing.publicationStatus ?? "draft";
+    const serviceTitle = String(data.get("title")).trim();
+    const changesPublicStatus = status !== previousStatus && (status !== "draft" || previousStatus === "published");
+    const savingLive = status === "published";
+
+    if (
+      (changesPublicStatus || savingLive) &&
+      !(await confirm({
+        title: `${
+          status === "published"
+            ? previousStatus === "published"
+              ? "Save live changes to"
+              : "Publish"
+            : status === "archived"
+            ? "Archive"
+            : "Unpublish"
+        } this service?`,
+        description:
+          status === "published"
+            ? `“${serviceTitle}” will be visible on the public website.`
+            : status === "archived"
+            ? `“${serviceTitle}” will be removed from active service listings.`
+            : `“${serviceTitle}” will no longer appear publicly.`,
+        confirmLabel:
+          status === "published"
+            ? previousStatus === "published"
+              ? "Save live changes"
+              : "Publish service"
+            : status === "archived"
+            ? "Archive service"
+            : "Save as draft",
+        tone: status === "published" ? "primary" : "danger",
+      }))
+    )
+      return;
+
+    const details = {
+      scheduleType,
+      serviceType: String(data.get("serviceType")),
+      dayOfWeek: scheduleType === "weekly" ? Number(data.get("dayOfWeek")) : null,
+      serviceDate: scheduleType === "special" ? String(data.get("serviceDate")) : null,
+      startTime: String(data.get("startTime")),
+      endTime: String(data.get("endTime")) || null,
+      location: String(data.get("location")),
+      targetAudience: String(data.get("targetAudience")) || null,
+      instructions: String(data.get("instructions")) || null,
+      active: data.get("active") === "on",
+      displayOrder: Number(data.get("displayOrder")),
+      publicationStatus: status,
+    };
+    const body = {
+      type: "services",
+      title: serviceTitle,
+      description: String(data.get("description")) || undefined,
+      details,
+      published: status === "published",
+    };
+
+    setSaving(true);
+    setError("");
+    try {
+      if (editing.id) await authMutation(`/admin/content/${editing.id}`, "PATCH", body);
+      else await authMutation("/admin/content", "POST", body);
+      setEditing(null);
+      setNotice(
+        editing.id
+          ? status === "draft" && editing.published
+            ? "Draft saved. The live schedule remains unchanged until it is published."
+            : "Service saved."
+          : "Service created."
+      );
+      await refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not save service.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function changeStatus(record: ManagedService, action: "publish" | "unpublish" | "archive") {
+    const label = action === "publish" ? "Publish" : action === "archive" ? "Archive" : "Unpublish";
+    if (
+      !(await confirm({
+        title: `${label} this service?`,
+        description:
+          action === "publish"
+            ? `“${record.title}” will be visible on the public website.`
+            : action === "archive"
+            ? `“${record.title}” will be removed from active service listings.`
+            : `“${record.title}” will no longer appear publicly.`,
+        confirmLabel: `${label} service`,
+        tone: action === "publish" ? "primary" : "danger",
+      }))
+    )
+      return;
+    setError("");
+    try {
+      const details = {
+        ...record,
+        publicationStatus: action === "publish" ? "published" : action === "archive" ? "archived" : "unpublished",
+      };
+      await authMutation(
+        `/admin/content/${record.id}`,
+        "PATCH",
+        action === "unpublish" ? { unpublish: true } : { details, published: action === "publish" }
+      );
+      setNotice(`Service ${action === "publish" ? "published" : action === "archive" ? "archived" : "unpublished"}.`);
+      await refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not update this service.");
+    }
+  }
+
+  async function remove(record: ManagedService) {
+    if (
+      !(await confirm({
+        title: "Delete this service?",
+        description: `“${record.title}” will be permanently deleted. This action cannot be undone.`,
+        confirmLabel: "Delete service",
+        tone: "danger",
+      }))
+    )
+      return;
+    try {
+      await authMutation(`/admin/content/${record.id}`, "DELETE");
+      setNotice("Service deleted.");
+      await refresh();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not delete this service.");
+    }
+  }
+
+  return (
+    <div>
+      <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-primary">Church · Admin workspace</p>
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground">
+            Services and Schedule Management
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Create weekly and special services. Only active, published schedules appear on the public website.
+          </p>
+        </div>
+        <button
+          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-xs hover:bg-primary-hover transition"
+          onClick={() => open()}
+          type="button"
+        >
+          <Plus className="mr-2 size-4" />
+          Add Service
+        </button>
+      </header>
+
+      {error && (
+        <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800" role="status">
+          {notice}
+        </p>
+      )}
+
+      <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface shadow-xs">
+        <div className="flex flex-col gap-3 border-b border-border p-4 lg:flex-row lg:items-center lg:justify-between">
+          <p className="text-sm font-medium text-muted">
+            {records.length} service{records.length === 1 ? "" : "s"} in the database
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <select
+              aria-label="Filter by service type"
+              className="h-11 rounded-xl border border-border bg-surface px-3.5 text-sm font-medium text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              onChange={(event) => setTypeFilter(event.target.value)}
+              value={typeFilter}
+            >
+              <option value="">All types</option>
+              {serviceTypes.map((type) => (
+                <option key={type}>{type}</option>
+              ))}
+            </select>
+            <select
+              aria-label="Filter by publication status"
+              className="h-11 rounded-xl border border-border bg-surface px-3.5 text-sm font-medium text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              onChange={(event) => setStatusFilter(event.target.value)}
+              value={statusFilter}
+            >
+              <option value="">All statuses</option>
+              {["draft", "published", "unpublished", "archived"].map((status) => (
+                <option key={status}>{status}</option>
+              ))}
+            </select>
+            <label className="relative">
+              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
+              <input
+                className="h-11 rounded-xl border border-border bg-surface pl-10 pr-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search services…"
+                type="search"
+                value={query}
+              />
+            </label>
+          </div>
+        </div>
+
+        {loading ? (
+          <p className="p-8 text-sm text-muted">Loading services…</p>
+        ) : visible.length ? (
+          <div className="divide-y divide-border">
+            {visible.map((service) => (
+              <article
+                className="flex flex-col gap-4 p-5 transition hover:bg-surface-strong/40 lg:flex-row lg:items-center lg:justify-between"
+                key={service.id}
+              >
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="font-display text-base font-bold text-foreground">{service.title}</h2>
+                    <span
+                      className={`admin-badge ${
+                        service.publicationStatus === "published"
+                          ? "admin-badge-published"
+                          : service.publicationStatus === "archived"
+                          ? "admin-badge-archived"
+                          : "admin-badge-draft"
+                      }`}
+                    >
+                      {service.publicationStatus}
+                    </span>
+                    {!service.active && (
+                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-sm text-muted">
+                    {service.serviceType} · {formatServiceDate(service)} · {formatServiceTime(service)} ·{" "}
+                    {service.location}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    aria-label={`View ${service.title}`}
+                    className="grid size-10 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:border-primary/40 hover:text-primary"
+                    onClick={() => setViewing(service)}
+                    type="button"
+                  >
+                    <Eye className="size-4" />
+                  </button>
+                  <button
+                    aria-label={`Edit ${service.title}`}
+                    className="grid size-10 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:border-primary/40 hover:text-primary"
+                    onClick={() => open(service)}
+                    type="button"
+                  >
+                    <Pencil className="size-4" />
+                  </button>
+                  {service.publicationStatus !== "published" && service.active && (
+                    <button
+                      className="inline-flex min-h-10 items-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                      onClick={() => void changeStatus(service, "publish")}
+                      type="button"
+                    >
+                      <Check className="size-4" />
+                      Publish
+                    </button>
+                  )}
+                  {service.publicationStatus === "published" && (
+                    <button
+                      className="min-h-10 rounded-xl border border-border bg-surface px-3.5 text-sm font-semibold text-foreground transition hover:bg-surface-strong"
+                      onClick={() => void changeStatus(service, "unpublish")}
+                      type="button"
+                    >
+                      Unpublish
+                    </button>
+                  )}
+                  {service.publicationStatus !== "archived" && (
+                    <button
+                      aria-label={`Archive ${service.title}`}
+                      className="grid size-10 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:text-amber-700"
+                      onClick={() => void changeStatus(service, "archive")}
+                      type="button"
+                    >
+                      <Archive className="size-4" />
+                    </button>
+                  )}
+                  <button
+                    aria-label={`Delete ${service.title}`}
+                    className="grid size-10 place-items-center rounded-xl border border-red-200 bg-surface text-red-700 transition hover:bg-red-50"
+                    onClick={() => void remove(service)}
+                    type="button"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="p-12 text-center">
+            <p className="font-display text-base font-bold text-foreground">No services found</p>
+            <button className="mt-4 text-sm font-semibold text-primary hover:underline" onClick={() => open()} type="button">
+              Add a service
+            </button>
+          </div>
+        )}
+      </section>
+
+      {editing && (
+        <ServiceForm
+          onClose={() => setEditing(null)}
+          onSubmit={persist}
+          saving={saving}
+          service={editing}
+        />
+      )}
+      {viewing && <ServiceDetails onClose={() => setViewing(null)} service={viewing} />}
+    </div>
+  );
 }
 
-function ServiceForm({ service, saving, onClose, onSubmit }: { service: Partial<ManagedService>; saving: boolean; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }) { const [scheduleType, setScheduleType] = useState(service.scheduleType ?? "weekly"); return <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/50 sm:items-center sm:p-6"><form aria-modal="true" className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl sm:rounded-2xl sm:p-7" onSubmit={onSubmit} role="dialog"><div className="flex items-start justify-between border-b border-slate-200 pb-4"><div><h2 className="font-display text-xl font-bold">{service.id ? "Edit service" : "Add service"}</h2><p className="mt-1 text-sm text-slate-500">All times use Africa/Kigali (CAT).</p></div><button aria-label="Close service editor" className="grid size-9 place-items-center rounded-xl border border-slate-300 hover:bg-slate-50" onClick={onClose} type="button"><X className="size-4" /></button></div><div className="mt-6 grid gap-5 sm:grid-cols-2"><Field label="Service name" name="title" required value={service.title} /><label className="text-sm font-medium">Service type<select className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm" defaultValue={service.serviceType} name="serviceType">{serviceTypes.map((type) => <option key={type}>{type}</option>)}</select></label><label className="text-sm font-medium">Schedule<select className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm" name="scheduleType" onChange={(event) => setScheduleType(event.target.value as "weekly" | "special")} value={scheduleType}><option value="weekly">Repeats weekly</option><option value="special">One-time special service</option></select></label>{scheduleType === "weekly" ? <label className="text-sm font-medium">Day of week<select className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm" defaultValue={service.dayOfWeek ?? 0} name="dayOfWeek">{weekdays.map((day, index) => <option key={day} value={index}>{day}</option>)}</select></label> : <Field label="Special service date" name="serviceDate" required type="date" value={service.serviceDate} />}<Field label="Start time" name="startTime" required type="time" value={service.startTime} /><Field label="End time" name="endTime" type="time" value={service.endTime} /><Field label="Location" name="location" required value={service.location} /><Field label="Target audience" name="targetAudience" value={service.targetAudience} /><Field label="Display order" name="displayOrder" min={0} type="number" value={service.displayOrder} /><label className="flex items-center gap-3 self-end text-sm font-medium"><input defaultChecked={service.active !== false} name="active" type="checkbox" />Active (eligible for public display)</label><Field area label="Description" name="description" value={service.description} /><Field area label="Additional instructions" name="instructions" value={service.instructions} /><label className="text-sm font-medium sm:col-span-2">Publication status<select className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm" defaultValue={service.publicationStatus ?? "draft"} name="publicationStatus"><option value="draft">Save as draft</option><option value="published">Publish</option><option value="unpublished">Unpublish</option><option value="archived">Archive</option></select></label></div><div className="mt-6 flex justify-end gap-3 border-t border-slate-200 pt-5"><button className="min-h-11 rounded-xl border border-slate-300 px-5 text-sm font-semibold hover:bg-slate-50 transition" onClick={onClose} type="button">Cancel</button><button className="min-h-11 rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-sm hover:bg-primary-hover disabled:opacity-60 transition" disabled={saving} type="submit">{saving ? "Saving…" : service.id ? "Save service" : "Create service"}</button></div></form></div>; }
-function Field({ label, name, value, type = "text", required, area, min }: { label: string; name: string; value?: string | number | null; type?: string; required?: boolean; area?: boolean; min?: number }) { return <label className={`text-sm font-medium ${area ? "sm:col-span-2" : ""}`}>{label}{required && <span className="ml-1 text-red-600">*</span>}{area ? <textarea className="mt-2 min-h-24 w-full rounded-xl border border-slate-300 bg-slate-50 p-3.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition" defaultValue={value ?? ""} name={name} /> : <input className="mt-2 h-11 w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition" defaultValue={value ?? ""} min={min} name={name} required={required} type={type} />}</label>; }
-function ServiceDetails({ service, onClose }: { service: ManagedService; onClose: () => void }) { return <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/50 sm:items-center sm:p-6"><section aria-modal="true" className="w-full max-w-xl rounded-t-2xl bg-white p-6 shadow-2xl sm:rounded-2xl" role="dialog"><div className="flex justify-between"><div><p className="text-xs font-bold uppercase tracking-wider text-primary">Service details</p><h2 className="mt-1 font-display text-xl font-bold">{service.title}</h2></div><button aria-label="Close details" className="grid size-9 place-items-center rounded-xl border border-slate-300 hover:bg-slate-50" onClick={onClose}><X className="size-4" /></button></div><dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2"><div><dt className="text-slate-500">Schedule</dt><dd className="mt-1 font-semibold">{formatServiceDate(service)} · {formatServiceTime(service)}</dd></div><div><dt className="text-slate-500">Location</dt><dd className="mt-1 font-semibold">{service.location}</dd></div><div><dt className="text-slate-500">Status</dt><dd className="mt-1 font-semibold capitalize">{service.publicationStatus}{service.active ? " · active" : " · inactive"}</dd></div>{service.targetAudience && <div><dt className="text-slate-500">Audience</dt><dd className="mt-1 font-semibold">{service.targetAudience}</dd></div>}</dl>{service.description && <p className="mt-5 text-sm leading-relaxed text-slate-600 font-normal">{service.description}</p>}{service.instructions && <p className="mt-3 text-sm leading-relaxed text-slate-600 font-normal">{service.instructions}</p>}</section></div>; }
+function ServiceForm({
+  service,
+  saving,
+  onClose,
+  onSubmit,
+}: {
+  service: Partial<ManagedService>;
+  saving: boolean;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const [scheduleType, setScheduleType] = useState(service.scheduleType ?? "weekly");
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs sm:items-center sm:p-6">
+      <form
+        aria-modal="true"
+        className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-border bg-surface p-5 shadow-2xl sm:rounded-2xl sm:p-7"
+        onSubmit={onSubmit}
+        role="dialog"
+      >
+        <div className="flex items-start justify-between border-b border-border pb-4">
+          <div>
+            <h2 className="font-display text-xl font-bold text-foreground">
+              {service.id ? "Edit service" : "Add service"}
+            </h2>
+            <p className="mt-1 text-sm text-muted">All times use Africa/Kigali (CAT).</p>
+          </div>
+          <button
+            aria-label="Close service editor"
+            className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+            onClick={onClose}
+            type="button"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+          <Field label="Service name" name="title" required value={service.title} />
+          <label className="text-xs font-bold uppercase tracking-wider text-muted">
+            Service type
+            <select
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              defaultValue={service.serviceType}
+              name="serviceType"
+            >
+              {serviceTypes.map((type) => (
+                <option key={type}>{type}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-bold uppercase tracking-wider text-muted">
+            Schedule
+            <select
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              name="scheduleType"
+              onChange={(event) => setScheduleType(event.target.value as "weekly" | "special")}
+              value={scheduleType}
+            >
+              <option value="weekly">Repeats weekly</option>
+              <option value="special">One-time special service</option>
+            </select>
+          </label>
+          {scheduleType === "weekly" ? (
+            <label className="text-xs font-bold uppercase tracking-wider text-muted">
+              Day of week
+              <select
+                className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                defaultValue={service.dayOfWeek ?? 0}
+                name="dayOfWeek"
+              >
+                {weekdays.map((day, index) => (
+                  <option key={day} value={index}>
+                    {day}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <Field label="Special service date" name="serviceDate" required type="date" value={service.serviceDate} />
+          )}
+          <Field label="Start time" name="startTime" required type="time" value={service.startTime} />
+          <Field label="End time" name="endTime" type="time" value={service.endTime} />
+          <Field label="Location" name="location" required value={service.location} />
+          <Field label="Target audience" name="targetAudience" value={service.targetAudience} />
+          <Field label="Display order" min={0} name="displayOrder" type="number" value={service.displayOrder} />
+          <label className="flex items-center gap-3 self-end text-xs font-bold uppercase tracking-wider text-muted">
+            <input className="size-4 rounded-sm accent-primary" defaultChecked={service.active !== false} name="active" type="checkbox" />
+            Active (eligible for public display)
+          </label>
+          <Field area label="Description" name="description" value={service.description} />
+          <Field area label="Additional instructions" name="instructions" value={service.instructions} />
+          <label className="text-xs font-bold uppercase tracking-wider text-muted sm:col-span-2">
+            Publication status
+            <select
+              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              defaultValue={service.publicationStatus ?? "draft"}
+              name="publicationStatus"
+            >
+              <option value="draft">Save as draft</option>
+              <option value="published">Publish</option>
+              <option value="unpublished">Unpublish</option>
+              <option value="archived">Archive</option>
+            </select>
+          </label>
+        </div>
+        <div className="mt-6 flex justify-end gap-3 border-t border-border pt-5">
+          <button
+            className="min-h-11 rounded-xl border border-border bg-surface px-5 text-sm font-semibold text-foreground transition hover:bg-surface-strong"
+            onClick={onClose}
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            className="min-h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-xs transition hover:bg-primary-hover disabled:opacity-60"
+            disabled={saving}
+            type="submit"
+          >
+            {saving ? "Saving…" : service.id ? "Save service" : "Create service"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  name,
+  value,
+  type = "text",
+  required,
+  area,
+  min,
+}: {
+  label: string;
+  name: string;
+  value?: string | number | null;
+  type?: string;
+  required?: boolean;
+  area?: boolean;
+  min?: number;
+}) {
+  return (
+    <label className={`block text-xs font-bold uppercase tracking-wider text-muted ${area ? "sm:col-span-2" : ""}`}>
+      {label}
+      {required && <span className="ml-1 text-red-500">*</span>}
+      {area ? (
+        <textarea
+          className="mt-2 min-h-24 w-full rounded-xl border border-border bg-surface p-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          defaultValue={value ?? ""}
+          name={name}
+        />
+      ) : (
+        <input
+          className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          defaultValue={value ?? ""}
+          min={min}
+          name={name}
+          required={required}
+          type={type}
+        />
+      )}
+    </label>
+  );
+}
+
+function ServiceDetails({ service, onClose }: { service: ManagedService; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs sm:items-center sm:p-6">
+      <section
+        aria-modal="true"
+        className="w-full max-w-xl rounded-t-2xl border border-border bg-surface p-6 shadow-2xl sm:rounded-2xl"
+        role="dialog"
+      >
+        <div className="flex justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-primary">Service details</p>
+            <h2 className="mt-1 font-display text-xl font-bold text-foreground">{service.title}</h2>
+          </div>
+          <button
+            aria-label="Close details"
+            className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+            onClick={onClose}
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+        <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-xs font-bold uppercase tracking-wider text-muted">Schedule</dt>
+            <dd className="mt-1 font-semibold text-foreground">
+              {formatServiceDate(service)} · {formatServiceTime(service)}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-bold uppercase tracking-wider text-muted">Location</dt>
+            <dd className="mt-1 font-semibold text-foreground">{service.location}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-bold uppercase tracking-wider text-muted">Status</dt>
+            <dd className="mt-1 font-semibold capitalize text-foreground">
+              {service.publicationStatus}
+              {service.active ? " · active" : " · inactive"}
+            </dd>
+          </div>
+          {service.targetAudience && (
+            <div>
+              <dt className="text-xs font-bold uppercase tracking-wider text-muted">Audience</dt>
+              <dd className="mt-1 font-semibold text-foreground">{service.targetAudience}</dd>
+            </div>
+          )}
+        </dl>
+        {service.description && (
+          <p className="mt-5 text-sm leading-relaxed text-muted font-normal">{service.description}</p>
+        )}
+        {service.instructions && (
+          <p className="mt-3 text-sm leading-relaxed text-muted font-normal">{service.instructions}</p>
+        )}
+      </section>
+    </div>
+  );
+}
