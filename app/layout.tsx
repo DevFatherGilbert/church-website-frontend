@@ -32,6 +32,9 @@ export async function generateMetadata(): Promise<Metadata> {
       images: logo ? [{ url: logo, alt: name }] : undefined,
     },
     icons: { icon: logo, shortcut: logo, apple: logo },
+    verification: {
+      google: "I-Z3eWK8Rsnkn2TJ3LgoMZHqUIUVuLXtk4RmvfRsknM",
+    },
   };
 }
 
