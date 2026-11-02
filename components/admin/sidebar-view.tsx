@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import { useChurchBrand } from "@/components/brand/church-brand-provider";
+import { handleAdminLogout } from "@/lib/auth/logout";
 import {
   Activity,
   BookOpen,
@@ -14,6 +15,7 @@ import {
   Image,
   Inbox,
   LayoutDashboard,
+  LogOut,
   Megaphone,
   Mic2,
   Settings,
@@ -111,6 +113,16 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
       </nav>
 
 
+      <div className="border-t border-white/10 p-4">
+        <button
+          className="flex w-full min-h-10 items-center gap-3 rounded-xl px-3.5 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/15 hover:text-red-100"
+          onClick={() => void handleAdminLogout()}
+          type="button"
+        >
+          <LogOut aria-hidden="true" className="size-[18px] shrink-0 text-red-400" />
+          <span>Log Out</span>
+        </button>
+      </div>
     </aside>
   </>;
 }

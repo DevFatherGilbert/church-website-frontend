@@ -77,10 +77,10 @@ export default function AdminWorkspaceLayout({ children }: { children: ReactNode
           <p className="text-sm font-bold uppercase tracking-wide text-text">
             {authStatus === "redirecting"
               ? `Welcome to ${churchName || "Church"} Admin`
-              : "Faithfulness and dedication is important"}
+              : "Jesus is All in All"}
           </p>
         </div>
-        <p className="mt-2 text-sm leading-6 text-muted">{authStatus === "redirecting" ? "Taking you to the secure sign-in page." : "One moment while we get your dashboard ready."}</p>
+        <p className="mt-2 text-sm leading-6 text-muted">{authStatus === "redirecting" ? "Taking you to the secure sign-in page." : "Christ is the center of all we do · Preparing your dashboard..."}</p>
         <div aria-hidden="true" className="mt-7 space-y-2.5">
           <div className="mx-auto h-2 w-2/3 animate-pulse rounded-full bg-surface-strong" />
           <div className="mx-auto h-2 w-1/2 animate-pulse rounded-full bg-surface-strong [animation-delay:120ms]" />
