@@ -77,16 +77,7 @@ export function HeaderView({
             </div>
           </div>
 
-          <button
-            aria-label="Log out of admin session"
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-red-200/80 bg-red-50/50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100/80 hover:text-red-800 hover:border-red-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
-            onClick={() => void handleAdminLogout()}
-            title="Log out"
-            type="button"
-          >
-            <LogOut aria-hidden="true" className="size-4 text-red-600" />
-            <span className="hidden sm:inline">Log out</span>
-          </button>
+        
         </div>
       </div>
     </header>

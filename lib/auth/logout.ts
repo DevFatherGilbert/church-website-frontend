@@ -19,3 +19,4 @@ export async function handleAdminLogout(): Promise<void> {
     window.location.href = "/admin/login";
   }
 }
+
