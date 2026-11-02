@@ -85,9 +85,7 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
             <span className="block truncate font-display text-sm font-extrabold uppercase leading-tight tracking-wide text-white">
               {churchName || "Our Church"}
             </span>
-            <span className="mt-0.5 block text-[0.68rem] font-semibold uppercase tracking-wider text-amber-400">
-              Admin Workspace
-            </span>
+          
           </span>
         </Link>
         <button aria-label="Close navigation menu" className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden" onClick={onClose} type="button"><X aria-hidden="true" className="size-5" /></button>
@@ -112,13 +110,7 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
         </div>)}
       </nav>
 
-      <div className="border-t border-white/10 p-5">
-        <div className="rounded-xl bg-white/5 border border-white/10 p-4">
-          <p className="text-sm font-semibold text-white">Need assistance?</p>
-          <p className="mt-1 text-xs leading-5 text-slate-300">Contact church administration if you need guidance managing content.</p>
-        </div>
-        <p className="mt-4 px-1 text-[11px] text-slate-400">Church Admin Workspace</p>
-      </div>
+
     </aside>
   </>;
 }
