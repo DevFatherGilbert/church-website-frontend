@@ -1,9 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Archive, Check, Eye, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Archive, Calendar, Check, Clock, Eye, MapPin, Pencil, Plus, Search, Sparkles, Trash2, Users, X } from "lucide-react";
 import { authGet, authMutation } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
+import {
+  ActionSuccessPopup,
+  RecordSuccessBadge,
+  useActionSuccess,
+} from "./action-success-popup";
 import {
   formatServiceDate,
   formatServiceTime,
@@ -69,6 +74,7 @@ export function ServiceScheduleManager() {
   const [editing, setEditing] = useState<Partial<ManagedService> | null>(null);
   const [viewing, setViewing] = useState<ManagedService | null>(null);
   const [saving, setSaving] = useState(false);
+  const { successData, showSuccess, dismissSuccess, recentlyUpdatedId } = useActionSuccess();
 
   const load = useCallback(async () => {
     const data = await authGet<{ items?: ApiRecord[] }>("/admin/content/services");
@@ -183,13 +189,15 @@ export function ServiceScheduleManager() {
       if (editing.id) await authMutation(`/admin/content/${editing.id}`, "PATCH", body);
       else await authMutation("/admin/content", "POST", body);
       setEditing(null);
-      setNotice(
-        editing.id
-          ? status === "draft" && editing.published
-            ? "Draft saved. The live schedule remains unchanged until it is published."
-            : "Service saved."
-          : "Service created."
-      );
+      showSuccess({
+        id: editing.id,
+        name: serviceTitle,
+        action: status === "published" ? "published" : "saved",
+        message:
+          status === "published"
+            ? "Service schedule is live and visible to church attendees."
+            : "Service details saved successfully.",
+      });
       await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save service.");
@@ -225,7 +233,12 @@ export function ServiceScheduleManager() {
         "PATCH",
         action === "unpublish" ? { unpublish: true } : { details, published: action === "publish" }
       );
-      setNotice(`Service ${action === "publish" ? "published" : action === "archive" ? "archived" : "unpublished"}.`);
+      showSuccess({
+        id: record.id,
+        name: record.title,
+        action: action === "publish" ? "published" : "updated",
+        message: `Service status updated to ${action}.`,
+      });
       await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not update this service.");
@@ -244,7 +257,12 @@ export function ServiceScheduleManager() {
       return;
     try {
       await authMutation(`/admin/content/${record.id}`, "DELETE");
-      setNotice("Service deleted.");
+      showSuccess({
+        id: record.id,
+        name: record.title,
+        action: "deleted",
+        message: "Service permanently deleted.",
+      });
       await refresh();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not delete this service.");
@@ -253,6 +271,7 @@ export function ServiceScheduleManager() {
 
   return (
     <div>
+      <ActionSuccessPopup data={successData} onDismiss={dismissSuccess} />
       <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-primary">Church · Admin workspace</p>
@@ -329,37 +348,45 @@ export function ServiceScheduleManager() {
           <p className="p-8 text-sm text-muted">Loading services…</p>
         ) : visible.length ? (
           <div className="divide-y divide-border">
-            {visible.map((service) => (
-              <article
-                className="flex flex-col gap-4 p-5 transition hover:bg-surface-strong/40 lg:flex-row lg:items-center lg:justify-between"
-                key={service.id}
-              >
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-display text-base font-bold text-foreground">{service.title}</h2>
-                    <span
-                      className={`admin-badge ${
-                        service.publicationStatus === "published"
-                          ? "admin-badge-published"
-                          : service.publicationStatus === "archived"
-                          ? "admin-badge-archived"
-                          : "admin-badge-draft"
-                      }`}
-                    >
-                      {service.publicationStatus}
-                    </span>
-                    {!service.active && (
-                      <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
-                        Inactive
+            {visible.map((service) => {
+              const isHighlighted = recentlyUpdatedId === service.id || successData?.name === service.title;
+              return (
+                <article
+                  className={`flex flex-col gap-4 p-5 transition duration-300 lg:flex-row lg:items-center lg:justify-between ${
+                    isHighlighted ? "bg-emerald-50/60 ring-2 ring-emerald-500/40 rounded-xl" : "hover:bg-surface-strong/40"
+                  }`}
+                  key={service.id}
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-display text-base font-bold text-foreground">{service.title}</h2>
+                      <RecordSuccessBadge
+                        action={successData?.action === "published" ? "published" : "saved"}
+                        isCurrent={isHighlighted}
+                      />
+                      <span
+                        className={`admin-badge ${
+                          service.publicationStatus === "published"
+                            ? "admin-badge-published"
+                            : service.publicationStatus === "archived"
+                            ? "admin-badge-archived"
+                            : "admin-badge-draft"
+                        }`}
+                      >
+                        {service.publicationStatus}
                       </span>
-                    )}
+                      {!service.active && (
+                        <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-2 text-sm text-muted">
+                      {service.serviceType} · {formatServiceDate(service)} · {formatServiceTime(service)} ·{" "}
+                      {service.location}
+                    </p>
                   </div>
-                  <p className="mt-2 text-sm text-muted">
-                    {service.serviceType} · {formatServiceDate(service)} · {formatServiceTime(service)} ·{" "}
-                    {service.location}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2">
                   <button
                     aria-label={`View ${service.title}`}
                     className="grid size-10 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:border-primary/40 hover:text-primary"
@@ -415,7 +442,8 @@ export function ServiceScheduleManager() {
                   </button>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="p-12 text-center">
@@ -452,113 +480,209 @@ function ServiceForm({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const [scheduleType, setScheduleType] = useState(service.scheduleType ?? "weekly");
+  const isEditing = Boolean(service.id);
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs sm:items-center sm:p-6">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !saving) onClose();
+      }}
+    >
       <form
         aria-modal="true"
-        className="max-h-[94vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-border bg-surface p-5 shadow-2xl sm:rounded-2xl sm:p-7"
+        className="relative flex flex-col max-h-[92vh] w-full max-w-3xl rounded-3xl border border-slate-200/90 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         onSubmit={onSubmit}
         role="dialog"
       >
-        <div className="flex items-start justify-between border-b border-border pb-4">
-          <div>
-            <h2 className="font-display text-xl font-bold text-foreground">
-              {service.id ? "Edit service" : "Add service"}
-            </h2>
-            <p className="mt-1 text-sm text-muted">All times use Africa/Kigali (CAT).</p>
+        {/* Header */}
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 sm:px-8 py-5 backdrop-blur-md">
+          <div className="flex items-center gap-3.5 min-w-0 pr-4">
+            <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 text-primary border border-primary/20 shadow-xs">
+              <Clock className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-slate-900 truncate">
+                  {isEditing ? `Edit: ${service.title || "Service"}` : "Create Service Schedule"}
+                </h2>
+                <span className="hidden sm:inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                  {isEditing ? "Editing" : "New"}
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs sm:text-sm text-slate-500 truncate">
+                Configure service timings, recurrence, and audience. (Africa/Kigali CAT)
+              </p>
+            </div>
           </div>
+
           <button
             aria-label="Close service editor"
-            className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+            className="grid size-10 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 hover:rotate-90 shrink-0"
+            disabled={saving}
             onClick={onClose}
             type="button"
           >
             <X className="size-4" />
           </button>
         </div>
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <Field label="Service name" name="title" required value={service.title} />
-          <label className="text-xs font-bold uppercase tracking-wider text-muted">
-            Service type
-            <select
-              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-              defaultValue={service.serviceType}
-              name="serviceType"
-            >
-              {serviceTypes.map((type) => (
-                <option key={type}>{type}</option>
-              ))}
-            </select>
-          </label>
-          <label className="text-xs font-bold uppercase tracking-wider text-muted">
-            Schedule
-            <select
-              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-              name="scheduleType"
-              onChange={(event) => setScheduleType(event.target.value as "weekly" | "special")}
-              value={scheduleType}
-            >
-              <option value="weekly">Repeats weekly</option>
-              <option value="special">One-time special service</option>
-            </select>
-          </label>
-          {scheduleType === "weekly" ? (
-            <label className="text-xs font-bold uppercase tracking-wider text-muted">
-              Day of week
-              <select
-                className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                defaultValue={service.dayOfWeek ?? 0}
-                name="dayOfWeek"
-              >
-                {weekdays.map((day, index) => (
-                  <option key={day} value={index}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : (
-            <Field label="Special service date" name="serviceDate" required type="date" value={service.serviceDate} />
-          )}
-          <Field label="Start time" name="startTime" required type="time" value={service.startTime} />
-          <Field label="End time" name="endTime" type="time" value={service.endTime} />
-          <Field label="Location" name="location" required value={service.location} />
-          <Field label="Target audience" name="targetAudience" value={service.targetAudience} />
-          <Field label="Display order" min={0} name="displayOrder" type="number" value={service.displayOrder} />
-          <label className="flex items-center gap-3 self-end text-xs font-bold uppercase tracking-wider text-muted">
-            <input className="size-4 rounded-sm accent-primary" defaultChecked={service.active !== false} name="active" type="checkbox" />
-            Active (eligible for public display)
-          </label>
-          <Field area label="Description" name="description" value={service.description} />
-          <Field area label="Additional instructions" name="instructions" value={service.instructions} />
-          <label className="text-xs font-bold uppercase tracking-wider text-muted sm:col-span-2">
-            Publication status
-            <select
-              className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-              defaultValue={service.publicationStatus ?? "draft"}
-              name="publicationStatus"
-            >
-              <option value="draft">Save as draft</option>
-              <option value="published">Publish</option>
-              <option value="unpublished">Unpublish</option>
-              <option value="archived">Archive</option>
-            </select>
-          </label>
+
+        {/* Body */}
+        <div className="overflow-y-auto px-6 sm:px-8 py-6 space-y-6 flex-1 text-slate-900">
+          {/* Section 1: Service Basics */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+              <Calendar className="size-4 text-primary" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                1. Service Basics & Type
+              </h3>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="Service Name" name="title" required value={service.title} />
+
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                Service Type <span className="text-red-500">*</span>
+                <select
+                  className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm font-medium text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  defaultValue={service.serviceType}
+                  name="serviceType"
+                >
+                  {serviceTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 sm:col-span-2">
+                Schedule Recurrence
+                <select
+                  className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm font-medium text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  name="scheduleType"
+                  onChange={(event) => setScheduleType(event.target.value as "weekly" | "special")}
+                  value={scheduleType}
+                >
+                  <option value="weekly">Repeats Weekly</option>
+                  <option value="special">One-Time Special Service</option>
+                </select>
+              </label>
+
+              {scheduleType === "weekly" ? (
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 sm:col-span-2">
+                  Day of Week <span className="text-red-500">*</span>
+                  <select
+                    className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm font-medium text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    defaultValue={service.dayOfWeek ?? 0}
+                    name="dayOfWeek"
+                  >
+                    {weekdays.map((day, index) => (
+                      <option key={day} value={index}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <Field
+                  label="Special Service Date"
+                  name="serviceDate"
+                  required
+                  type="date"
+                  value={service.serviceDate}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Section 2: Timing & Location */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+              <Clock className="size-4 text-primary" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                2. Timing & Location
+              </h3>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="Start Time" name="startTime" required type="time" value={service.startTime} />
+              <Field label="End Time" name="endTime" type="time" value={service.endTime} />
+              <Field label="Location / Venue" name="location" required value={service.location} />
+              <Field label="Target Audience (e.g. Everyone, Youth)" name="targetAudience" value={service.targetAudience} />
+            </div>
+          </div>
+
+          {/* Section 3: Details & Publication */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+              <Sparkles className="size-4 text-primary" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                3. Details & Publication Status
+              </h3>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field area label="Description (What to expect)" name="description" value={service.description} />
+              <Field area label="Special Instructions (e.g. Bring Bible, Livestream info)" name="instructions" value={service.instructions} />
+              <Field label="Display Order" min={0} name="displayOrder" type="number" value={service.displayOrder} />
+
+              <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/50 p-4 self-end">
+                <input
+                  className="size-5 rounded-md accent-primary"
+                  defaultChecked={service.active !== false}
+                  id="service-active-toggle"
+                  name="active"
+                  type="checkbox"
+                />
+                <label className="text-xs font-bold text-slate-700 cursor-pointer" htmlFor="service-active-toggle">
+                  Active (Eligible for public display)
+                </label>
+              </div>
+
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 sm:col-span-2">
+                Publication Status <span className="text-red-500">*</span>
+                <select
+                  className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm font-medium text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  defaultValue={service.publicationStatus ?? "draft"}
+                  name="publicationStatus"
+                >
+                  <option value="draft">Save as Draft (Private)</option>
+                  <option value="published">Publish (Live on Website)</option>
+                  <option value="unpublished">Unpublished (Hidden)</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </label>
+            </div>
+          </div>
         </div>
-        <div className="mt-6 flex justify-end gap-3 border-t border-border pt-5">
+
+        {/* Footer */}
+        <div className="sticky bottom-0 z-20 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 border-t border-slate-100 bg-slate-50/90 px-6 sm:px-8 py-4 backdrop-blur-md">
           <button
-            className="min-h-11 rounded-xl border border-border bg-surface px-5 text-sm font-semibold text-foreground transition hover:bg-surface-strong"
+            className="w-full sm:w-auto h-11 px-5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+            disabled={saving}
             onClick={onClose}
             type="button"
           >
             Cancel
           </button>
           <button
-            className="min-h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-xs transition hover:bg-primary-hover disabled:opacity-60"
+            className="w-full sm:w-auto h-11 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-hover text-white text-sm font-bold shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
             disabled={saving}
             type="submit"
           >
-            {saving ? "Saving…" : service.id ? "Save service" : "Create service"}
+            {saving ? (
+              "Saving Service…"
+            ) : isEditing ? (
+              <>
+                <Check className="size-4" /> Save Changes
+              </>
+            ) : (
+              <>
+                <Plus className="size-4" /> Create Service
+              </>
+            )}
           </button>
         </div>
       </form>
@@ -584,18 +708,18 @@ function Field({
   min?: number;
 }) {
   return (
-    <label className={`block text-xs font-bold uppercase tracking-wider text-muted ${area ? "sm:col-span-2" : ""}`}>
+    <label className={`block text-xs font-bold uppercase tracking-wider text-slate-600 ${area ? "sm:col-span-2" : ""}`}>
       {label}
       {required && <span className="ml-1 text-red-500">*</span>}
       {area ? (
         <textarea
-          className="mt-2 min-h-24 w-full rounded-xl border border-border bg-surface p-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="mt-2 min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm leading-relaxed text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
           defaultValue={value ?? ""}
           name={name}
         />
       ) : (
         <input
-          className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
           defaultValue={value ?? ""}
           min={min}
           name={name}
@@ -609,56 +733,75 @@ function Field({
 
 function ServiceDetails({ service, onClose }: { service: ManagedService; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs sm:items-center sm:p-6">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <section
         aria-modal="true"
-        className="w-full max-w-xl rounded-t-2xl border border-border bg-surface p-6 shadow-2xl sm:rounded-2xl"
+        className="relative flex flex-col max-h-[90vh] w-full max-w-xl rounded-3xl border border-slate-200/90 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
         role="dialog"
       >
-        <div className="flex justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-primary">Service details</p>
-            <h2 className="mt-1 font-display text-xl font-bold text-foreground">{service.title}</h2>
+        <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 sm:px-8 py-5">
+          <div className="flex items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Clock className="size-5" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-primary">Service Overview</p>
+              <h2 className="mt-0.5 font-display text-xl font-bold text-slate-900">{service.title}</h2>
+            </div>
           </div>
           <button
             aria-label="Close details"
-            className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+            className="grid size-9 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition"
             onClick={onClose}
           >
             <X className="size-4" />
           </button>
         </div>
-        <dl className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-xs font-bold uppercase tracking-wider text-muted">Schedule</dt>
-            <dd className="mt-1 font-semibold text-foreground">
-              {formatServiceDate(service)} · {formatServiceTime(service)}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs font-bold uppercase tracking-wider text-muted">Location</dt>
-            <dd className="mt-1 font-semibold text-foreground">{service.location}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-bold uppercase tracking-wider text-muted">Status</dt>
-            <dd className="mt-1 font-semibold capitalize text-foreground">
-              {service.publicationStatus}
-              {service.active ? " · active" : " · inactive"}
-            </dd>
-          </div>
-          {service.targetAudience && (
-            <div>
-              <dt className="text-xs font-bold uppercase tracking-wider text-muted">Audience</dt>
-              <dd className="mt-1 font-semibold text-foreground">{service.targetAudience}</dd>
+
+        <div className="overflow-y-auto p-6 sm:p-8 space-y-5 text-slate-900">
+          <dl className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+              <dt className="text-xs font-bold uppercase tracking-wider text-slate-500">Schedule</dt>
+              <dd className="mt-1 font-semibold text-slate-900">
+                {formatServiceDate(service)} · {formatServiceTime(service)}
+              </dd>
+            </div>
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+              <dt className="text-xs font-bold uppercase tracking-wider text-slate-500">Location</dt>
+              <dd className="mt-1 font-semibold text-slate-900">{service.location}</dd>
+            </div>
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+              <dt className="text-xs font-bold uppercase tracking-wider text-slate-500">Status</dt>
+              <dd className="mt-1 font-semibold capitalize text-slate-900">
+                {service.publicationStatus}
+                {service.active ? " · Active" : " · Inactive"}
+              </dd>
+            </div>
+            {service.targetAudience && (
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                <dt className="text-xs font-bold uppercase tracking-wider text-slate-500">Audience</dt>
+                <dd className="mt-1 font-semibold text-slate-900">{service.targetAudience}</dd>
+              </div>
+            )}
+          </dl>
+          {service.description && (
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Description</p>
+              <p className="text-sm leading-relaxed text-slate-700">{service.description}</p>
             </div>
           )}
-        </dl>
-        {service.description && (
-          <p className="mt-5 text-sm leading-relaxed text-muted font-normal">{service.description}</p>
-        )}
-        {service.instructions && (
-          <p className="mt-3 text-sm leading-relaxed text-muted font-normal">{service.instructions}</p>
-        )}
+          {service.instructions && (
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Instructions</p>
+              <p className="text-sm leading-relaxed text-slate-700">{service.instructions}</p>
+            </div>
+          )}
+        </div>
       </section>
     </div>
   );

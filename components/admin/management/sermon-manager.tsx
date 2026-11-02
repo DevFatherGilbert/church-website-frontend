@@ -36,6 +36,7 @@ import {
 import { formatSermonDate, parseVideoUrl } from "@/lib/media/video-utils";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
 import { StatCardView, type StatCardData } from "@/components/admin/stat-card-view";
+import { ActionSuccessPopup, useActionSuccess } from "./action-success-popup";
 
 const STANDARD_CATEGORIES = [
   "Faith",
@@ -104,6 +105,7 @@ export function SermonManager() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const { successData, showSuccess, dismissSuccess } = useActionSuccess();
 
   // Filters for sermons
   const [searchQuery, setSearchQuery] = useState("");
@@ -394,12 +396,25 @@ export function SermonManager() {
     try {
       if (editingSermon) {
         await authMutation(`/admin/sermons/${editingSermon.id}`, "PATCH", payload);
-        setNotice("Sermon updated successfully.");
       } else {
         await authMutation("/admin/sermons", "POST", payload);
-        setNotice("Sermon created successfully.");
       }
       setSermonModalOpen(false);
+      showSuccess({
+        id: editingSermon?.id,
+        name: formTitle.trim(),
+        action: formStatus === "published" ? "published" : editingSermon ? "updated" : "created",
+        message:
+          formStatus === "published"
+            ? "This sermon is now published in the public sermon library."
+            : formStatus === "archived"
+              ? "This sermon is archived and removed from active listings."
+            : editingSermon?.status === "published"
+              ? "This sermon was unpublished and moved to drafts."
+            : editingSermon
+              ? "Sermon changes saved successfully."
+              : "Sermon created successfully.",
+      });
       await loadData();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save sermon.");
@@ -416,11 +431,12 @@ export function SermonManager() {
     if (!await confirm({ title: action === "publish" ? "Publish this sermon?" : "Unpublish this sermon?", description: action === "publish" ? `“${sermon.title}” will be available to visitors.` : `“${sermon.title}” will be removed from the public sermon library.`, confirmLabel: action === "publish" ? "Publish sermon" : "Unpublish", tone: action === "publish" ? "primary" : "danger" })) return;
     try {
       await authMutation(`/admin/sermons/${sermon.id}/${action}`, "PATCH");
-      setNotice(
-        action === "publish"
-          ? `“${sermon.title}” is now published and live.`
-          : `“${sermon.title}” was unpublished and moved to drafts.`,
-      );
+      showSuccess({
+        id: sermon.id,
+        name: sermon.title,
+        action: action === "publish" ? "published" : "updated",
+        message: action === "publish" ? "This sermon is now published and live." : "This sermon was unpublished and moved to drafts.",
+      });
       await loadData();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : `Could not ${action} sermon.`);
@@ -434,7 +450,7 @@ export function SermonManager() {
     setNotice("");
     try {
       await authMutation(`/admin/sermons/${sermon.id}`, "DELETE");
-      setNotice(`“${sermon.title}” was deleted.`);
+      showSuccess({ id: sermon.id, name: sermon.title, action: "deleted", message: "Sermon permanently deleted." });
       await loadData();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Failed to delete sermon.");
@@ -443,6 +459,7 @@ export function SermonManager() {
 
   // Open Speaker Modal
   const openNewSpeaker = () => {
+    setError("");
     setEditingSpeaker(null);
     setSpeakerName("");
     setSpeakerTitle("");
@@ -454,6 +471,7 @@ export function SermonManager() {
   };
 
   const openEditSpeaker = (speaker: Speaker) => {
+    setError("");
     setEditingSpeaker(speaker);
     setSpeakerName(speaker.name);
     setSpeakerTitle(speaker.title ?? "");
@@ -512,10 +530,8 @@ export function SermonManager() {
     try {
       if (editingSpeaker) {
         await authMutation(`/admin/speakers/${editingSpeaker.id}`, "PATCH", payload);
-        setNotice(`Speaker “${payload.name}” updated.`);
       } else {
         const created = await authMutation<Speaker>("/admin/speakers", "POST", payload);
-        setNotice(`Speaker “${payload.name}” added.`);
         // If we opened this from sermon modal, select it automatically
         if (sermonModalOpen && created?.id) {
           setFormSpeakerId(created.id);
@@ -523,6 +539,12 @@ export function SermonManager() {
         }
       }
       setSpeakerModalOpen(false);
+      showSuccess({
+        id: editingSpeaker?.id,
+        name: payload.name,
+        action: editingSpeaker ? "updated" : "created",
+        message: editingSpeaker ? "Speaker profile updated successfully." : "Speaker added successfully.",
+      });
       await loadData();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Failed to save speaker.");
@@ -536,7 +558,7 @@ export function SermonManager() {
     if (!await confirm({ title: "Delete this speaker?", description: `“${speaker.name}” will be deleted. Existing sermons will keep the speaker’s name.`, confirmLabel: "Delete speaker", tone: "danger" })) return;
     try {
       await authMutation(`/admin/speakers/${speaker.id}`, "DELETE");
-      setNotice(`Speaker “${speaker.name}” was deleted.`);
+      showSuccess({ id: speaker.id, name: speaker.name, action: "deleted", message: "Speaker permanently deleted." });
       await loadData();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Failed to delete speaker.");
@@ -589,6 +611,7 @@ export function SermonManager() {
 
   return (
     <div className="space-y-6">
+      <ActionSuccessPopup data={successData} onDismiss={dismissSuccess} />
       {/* Header */}
       <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
@@ -1061,30 +1084,40 @@ export function SermonManager() {
       {/* CREATE / EDIT SERMON MODAL */}
       {sermonModalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-0 sm:items-center sm:p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-md animate-in fade-in duration-200 sm:p-6"
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setSermonModalOpen(false);
+            if (e.target === e.currentTarget && !saving && !imageUploading && !audioUploading) setSermonModalOpen(false);
           }}
         >
           <section
             aria-labelledby="sermon-form-title"
             aria-modal="true"
-            className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
+            className="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] animate-in zoom-in-95 duration-200"
             role="dialog"
           >
             {/* Modal Header */}
-            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-              <div>
-                <h2 className="font-display text-lg font-bold text-slate-900" id="sermon-form-title">
-                  {editingSermon ? `Edit Sermon: ${editingSermon.title}` : "Create New Sermon"}
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Fill in message details, Scripture references, media links, and set publication status.
-                </p>
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur-md sm:px-8">
+              <div className="flex min-w-0 items-center gap-3.5 pr-4">
+                <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 text-primary shadow-xs">
+                  <Mic aria-hidden="true" className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="truncate font-display text-xl font-bold tracking-tight text-slate-900 sm:text-2xl" id="sermon-form-title">
+                      {editingSermon ? `Edit Sermon: ${editingSermon.title}` : "Create New Sermon"}
+                    </h2>
+                    <span className="hidden items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary sm:inline-flex">
+                      {editingSermon ? "Editing" : "New"}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                    Fill in message details, Scripture references, media links, and publication status.
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-100"
                   onClick={openCurrentFormPreview}
                   type="button"
                 >
@@ -1093,7 +1126,8 @@ export function SermonManager() {
                 </button>
                 <button
                   aria-label="Close form"
-                  className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-700"
+                  className="grid size-10 shrink-0 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400 transition-all duration-200 hover:rotate-90 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+                  disabled={saving || imageUploading || audioUploading}
                   onClick={() => setSermonModalOpen(false)}
                   type="button"
                 >
@@ -1103,7 +1137,12 @@ export function SermonManager() {
             </div>
 
             {/* Form */}
-            <form className="p-6 space-y-6" onSubmit={handleSaveSermon}>
+            <form className="flex-1 space-y-6 overflow-y-auto px-6 py-6 text-slate-900 sm:px-8" onSubmit={handleSaveSermon}>
+              {error && (
+                <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
+                  {error}
+                </p>
+              )}
               {/* SECTION: Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-primary border-b border-primary/20 pb-1">
@@ -1580,9 +1619,10 @@ export function SermonManager() {
               </div>
 
               {/* Form Footer */}
-              <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+              <div className="sticky bottom-0 z-20 -mx-6 -mb-6 flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/95 px-6 py-4 backdrop-blur-md sm:-mx-8 sm:flex-row sm:justify-end sm:px-8">
                 <button
                   className="min-h-11 rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  disabled={saving || imageUploading || audioUploading}
                   onClick={() => setSermonModalOpen(false)}
                   type="button"
                 >
@@ -1604,31 +1644,45 @@ export function SermonManager() {
       {/* CREATE / EDIT SPEAKER MODAL */}
       {speakerModalOpen && (
         <div
-          className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-950/60 p-0 sm:items-center sm:p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-md animate-in fade-in duration-200 sm:p-6"
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setSpeakerModalOpen(false);
+            if (e.target === e.currentTarget && !saving && !speakerUploading) setSpeakerModalOpen(false);
           }}
         >
           <section
             aria-labelledby="speaker-form-title"
             aria-modal="true"
-            className="w-full max-w-md rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl overflow-hidden"
+            className="relative flex max-h-[92vh] w-full max-w-xl flex-col overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] animate-in zoom-in-95 duration-200"
             role="dialog"
           >
-            <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-              <h2 className="font-display text-base font-bold text-slate-900" id="speaker-form-title">
-                {editingSpeaker ? `Edit Speaker: ${editingSpeaker.name}` : "Add New Speaker"}
-              </h2>
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur-md sm:px-8">
+              <div className="flex min-w-0 items-center gap-3.5 pr-4">
+                <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 text-primary shadow-xs">
+                  <User aria-hidden="true" className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="truncate font-display text-xl font-bold tracking-tight text-slate-900" id="speaker-form-title">
+                    {editingSpeaker ? `Edit Speaker: ${editingSpeaker.name}` : "Add New Speaker"}
+                  </h2>
+                  <p className="mt-0.5 text-sm text-slate-500">Manage speaker details for the sermon library.</p>
+                </div>
+              </div>
               <button
                 aria-label="Close"
-                className="grid size-8 place-items-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-700"
+                className="grid size-10 shrink-0 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400 transition-all duration-200 hover:rotate-90 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+                disabled={saving || speakerUploading}
                 onClick={() => setSpeakerModalOpen(false)}
                 type="button"
               >
                 <X className="size-4" />
               </button>
             </div>
-            <form className="p-6 space-y-4" onSubmit={handleSaveSpeaker}>
+            <form className="flex-1 space-y-5 overflow-y-auto px-6 py-6 text-slate-900 sm:px-8" onSubmit={handleSaveSpeaker}>
+              {error && (
+                <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
+                  {error}
+                </p>
+              )}
               <div>
                 <label className="block text-xs font-semibold text-slate-700">
                   Full Name <span className="text-red-500">*</span>
@@ -1726,16 +1780,17 @@ export function SermonManager() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 border-t border-slate-200 pt-4">
+              <div className="sticky bottom-0 z-20 -mx-6 -mb-6 flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/95 px-6 py-4 backdrop-blur-md sm:-mx-8 sm:flex-row sm:justify-end sm:px-8">
                 <button
-                  className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  className="min-h-11 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  disabled={saving || speakerUploading}
                   onClick={() => setSpeakerModalOpen(false)}
                   type="button"
                 >
                   Cancel
                 </button>
                 <button
-                  className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-60 shadow-sm"
+                  className="min-h-11 rounded-xl bg-primary px-6 text-sm font-bold text-white shadow-md transition hover:bg-primary-hover disabled:opacity-60"
                   disabled={saving || speakerUploading}
                   type="submit"
                 >

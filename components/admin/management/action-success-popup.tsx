@@ -111,6 +111,14 @@ export function ActionSuccessPopup({
                   </>
                 ) : isDeleted ? (
                   "Deleted"
+                ) : data.action === "created" ? (
+                  <>
+                    <Save className="size-3" /> Created
+                  </>
+                ) : data.action === "updated" ? (
+                  <>
+                    <Save className="size-3" /> Updated
+                  </>
                 ) : (
                   <>
                     <Save className="size-3" /> Saved

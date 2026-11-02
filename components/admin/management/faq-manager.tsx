@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import { ArrowDown, ArrowUp, Eye, EyeOff, HelpCircle, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { authGet, authMutation } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
+import { ActionSuccessPopup, useActionSuccess } from "./action-success-popup";
 
 const categories = [
   "Church Services",
@@ -65,6 +66,7 @@ export function FaqManager() {
   const [preview, setPreview] = useState(false);
   const [answerDraft, setAnswerDraft] = useState("");
   const [questionDraft, setQuestionDraft] = useState("");
+  const { successData, showSuccess, dismissSuccess } = useActionSuccess();
 
   const loadFaqs = useCallback(async () => {
     const result = await authGet<FaqResponse>("/admin/faqs");
@@ -162,7 +164,19 @@ export function FaqManager() {
       if (editing) await authMutation(`/admin/faqs/${editing.id}`, "PATCH", body);
       else await authMutation("/admin/faqs", "POST", body);
       setEditorOpen(false);
-      setNotice(editing ? "FAQ changes saved." : "FAQ created.");
+      showSuccess({
+        id: editing?.id,
+        name: question,
+        action: nextStatus === "PUBLISHED" ? "published" : editing ? "updated" : "created",
+        message:
+          nextStatus === "PUBLISHED"
+            ? "This answer is now published on the church website."
+            : editing?.status === "PUBLISHED"
+              ? "This answer is unpublished and no longer appears on the public website."
+            : editing
+              ? "FAQ changes saved successfully."
+              : "FAQ created successfully.",
+      });
       await loadFaqs();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save this FAQ.");
@@ -190,7 +204,12 @@ export function FaqManager() {
 
     try {
       await authMutation(`/admin/faqs/${faq.id}/status`, "PATCH", { status: nextStatus });
-      setNotice(nextStatus === "PUBLISHED" ? "FAQ published." : "FAQ unpublished.");
+      showSuccess({
+        id: faq.id,
+        name: faq.question,
+        action: nextStatus === "PUBLISHED" ? "published" : "updated",
+        message: nextStatus === "PUBLISHED" ? "This answer is now visible to visitors." : "This answer is no longer published.",
+      });
       await loadFaqs();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not change FAQ status.");
@@ -211,7 +230,7 @@ export function FaqManager() {
     setNotice("");
     try {
       await authMutation(`/admin/faqs/${faq.id}`, "DELETE");
-      setNotice("FAQ deleted.");
+      showSuccess({ id: faq.id, name: faq.question, action: "deleted", message: "FAQ permanently deleted." });
       await loadFaqs();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not delete this FAQ.");
@@ -236,6 +255,7 @@ export function FaqManager() {
 
   return (
     <div>
+      <ActionSuccessPopup data={successData} onDismiss={dismissSuccess} />
       <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary">Church Admin</p>
@@ -407,27 +427,38 @@ export function FaqManager() {
 
       {editorOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs p-0 sm:items-center sm:p-5"
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/75 p-3 backdrop-blur-md animate-in fade-in duration-200 sm:p-6"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setEditorOpen(false);
+            if (event.target === event.currentTarget && !saving) setEditorOpen(false);
           }}
         >
           <section
             aria-labelledby="faq-editor-title"
             aria-modal="true"
-            className="max-h-[95vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl"
+            className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] animate-in zoom-in-95 duration-200"
             role="dialog"
           >
-            <div className="sticky top-0 z-10 flex items-start justify-between border-b border-border bg-surface/95 px-6 py-4 backdrop-blur-sm sm:px-7">
-              <div>
-                <h2 className="font-display text-xl font-bold text-foreground" id="faq-editor-title">
-                  {editing ? "Edit FAQ" : "Create FAQ"}
-                </h2>
-                <p className="mt-0.5 text-xs text-muted">Only publish answers approved by church leadership.</p>
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 py-5 backdrop-blur-md sm:px-8">
+              <div className="flex min-w-0 items-center gap-3.5 pr-4">
+                <div className="grid size-11 shrink-0 place-items-center rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 text-primary shadow-xs">
+                  <HelpCircle aria-hidden="true" className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="truncate font-display text-xl font-bold tracking-tight text-slate-900 sm:text-2xl" id="faq-editor-title">
+                      {editing ? "Edit FAQ" : "Create FAQ"}
+                    </h2>
+                    <span className="hidden items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary sm:inline-flex">
+                      {editing ? "Editing" : "New"}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-slate-500 sm:text-sm">Only publish answers approved by church leadership.</p>
+                </div>
               </div>
               <button
                 aria-label="Close FAQ editor"
-                className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+                className="grid size-10 shrink-0 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400 transition-all duration-200 hover:rotate-90 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+                disabled={saving}
                 onClick={() => setEditorOpen(false)}
                 type="button"
               >
@@ -435,7 +466,7 @@ export function FaqManager() {
               </button>
             </div>
 
-            <form className="space-y-5 p-6 sm:p-7" id="faq-form" key={editing?.id ?? "new-faq"} onSubmit={saveFaq}>
+            <form className="flex-1 space-y-5 overflow-y-auto px-6 py-6 text-slate-900 sm:px-8" id="faq-form" key={editing?.id ?? "new-faq"} onSubmit={saveFaq}>
               <label className="block text-xs font-bold uppercase tracking-wider text-muted">
                 Question <span className="text-red-500">*</span>
                 <input
@@ -526,9 +557,10 @@ export function FaqManager() {
                 </p>
               )}
 
-              <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
+              <div className="sticky bottom-0 z-20 -mx-6 -mb-6 flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/95 px-6 py-4 backdrop-blur-md sm:-mx-8 sm:flex-row sm:justify-end sm:px-8">
                 <button
                   className="min-h-11 rounded-xl border border-border bg-surface px-5 text-sm font-semibold text-foreground transition hover:bg-surface-strong"
+                  disabled={saving}
                   onClick={() => setEditorOpen(false)}
                   type="button"
                 >

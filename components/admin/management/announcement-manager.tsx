@@ -2,10 +2,15 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Archive, CalendarClock, Check, ImagePlus, Pencil, Search, X } from "lucide-react";
+import { Archive, Bell, CalendarClock, Check, ImagePlus, Pencil, Search, Sparkles, X } from "lucide-react";
 import { authGet, authMutation, authUpload } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
 import { ImageUploadDropzone } from "@/components/admin/management/image-upload-dropzone";
+import {
+  ActionSuccessPopup,
+  RecordSuccessBadge,
+  useActionSuccess,
+} from "./action-success-popup";
 import {
   announcementCategories,
   announcementCategoryLabel,
@@ -78,6 +83,7 @@ export function AnnouncementManager() {
   const [saving, setSaving] = useState(false);
   const [processingId, setProcessingId] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
+  const { successData, showSuccess, dismissSuccess, recentlyUpdatedId } = useActionSuccess();
 
   const loadAnnouncements = useCallback(async () => {
     const result = await authGet<{ items: Announcement[] }>("/admin/announcements");
@@ -214,7 +220,17 @@ export function AnnouncementManager() {
         await authMutation("/admin/announcements", "POST", body);
       }
       setModalOpen(false);
-      setNotice(editing ? "Announcement updated." : "Announcement created.");
+      showSuccess({
+        id: editing?.id,
+        name: title.trim(),
+        action: action === "PUBLISHED" ? "published" : "saved",
+        message:
+          action === "PUBLISHED"
+            ? "Announcement is published and live on the church website."
+            : action === "SCHEDULED"
+              ? `Announcement scheduled for ${formatDate(publicationDate)}.`
+              : "Announcement saved as a draft.",
+      });
       await loadAnnouncements();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save this announcement.");
@@ -243,7 +259,12 @@ export function AnnouncementManager() {
         unpublish: "unpublished",
         archive: "archived",
       }[action];
-      setNotice(`Announcement ${actionLabel}.`);
+      showSuccess({
+        id: item.id,
+        name: item.title,
+        action: action === "publish" ? "published" : "updated",
+        message: `Announcement ${actionLabel}.`,
+      });
       await loadAnnouncements();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : `Could not ${action} this announcement.`);
@@ -271,6 +292,7 @@ export function AnnouncementManager() {
 
   return (
     <div>
+      <ActionSuccessPopup data={successData} onDismiss={dismissSuccess} />
       <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary">Church · Admin</p>
@@ -347,76 +369,87 @@ export function AnnouncementManager() {
           <p className="p-8 text-sm text-muted">Loading announcements…</p>
         ) : filteredItems.length ? (
           <div className="divide-y divide-border">
-            {filteredItems.map((item) => (
-              <article
-                className="grid gap-4 p-5 transition hover:bg-surface-strong/50 sm:p-6 lg:grid-cols-[5rem_minmax(0,1.1fr)_minmax(8rem,.8fr)_minmax(9rem,.9fr)_minmax(8rem,.8fr)_auto] lg:items-center"
-                key={item.id}
-              >
-                <div className="relative aspect-[4/3] w-20 overflow-hidden rounded-xl border border-border bg-surface-strong">
-                  {item.details.imageUrl ? (
-                    <Image alt="" className="object-cover" fill sizes="80px" src={item.details.imageUrl} unoptimized />
-                  ) : (
-                    <div className="grid h-full place-items-center text-xs text-muted">No image</div>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <h2 className="truncate font-display text-base font-bold text-foreground">{item.title}</h2>
-                  <p className="mt-0.5 truncate text-xs text-muted">/{item.slug}</p>
-                  <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted">{item.description}</p>
-                </div>
-                <p className="text-sm font-semibold text-primary">{announcementCategoryLabel(item.details.category)}</p>
-                <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted lg:block">
-                  <dt className="font-bold uppercase tracking-wider text-muted">Publishes</dt>
-                  <dd className="text-foreground">{formatDate(item.details.publicationDate)}</dd>
-                  <dt className="font-bold uppercase tracking-wider text-muted lg:mt-1.5">Expires</dt>
-                  <dd className="text-foreground">{formatDate(item.details.expiryDate)}</dd>
-                </dl>
-                <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted lg:block">
-                  <dt className="sr-only">Status</dt>
-                  <dd>
-                    <span className={`admin-badge ${statusStyle(item.details.status)}`}>
-                      {item.details.status[0] + item.details.status.slice(1).toLowerCase()}
-                    </span>
-                  </dd>
-                  <dt className="font-bold uppercase tracking-wider text-muted lg:mt-2">Created</dt>
-                  <dd className="text-foreground">{formatDate(item.createdAt)}</dd>
-                  <dt className="font-bold uppercase tracking-wider text-muted lg:mt-1">Updated</dt>
-                  <dd className="text-foreground">{formatDate(item.updatedAt)}</dd>
-                </dl>
-                <div className="flex flex-wrap items-center gap-2">
-                  {item.details.status === "PUBLISHED" && (
-                    <a
-                      className="inline-flex min-h-9 items-center rounded-lg px-2 text-xs font-semibold text-primary hover:underline"
-                      href={`/announcements/${item.slug}`}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      View
-                    </a>
-                  )}
-                  <button
-                    aria-label={`Edit ${item.title}`}
-                    className="grid size-9 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:border-primary/40 hover:text-primary"
-                    onClick={() => resetForm(item)}
-                    type="button"
-                  >
-                    <Pencil aria-hidden="true" className="size-4" />
-                  </button>
-                  {availableActions(item).map(({ label, action, icon: Icon }) => (
+            {filteredItems.map((item) => {
+              const isHighlighted = recentlyUpdatedId === item.id || successData?.name === item.title;
+              return (
+                <article
+                  className={`grid gap-4 p-5 transition duration-300 sm:p-6 lg:grid-cols-[5rem_minmax(0,1.1fr)_minmax(8rem,.8fr)_minmax(9rem,.9fr)_minmax(8rem,.8fr)_auto] lg:items-center ${
+                    isHighlighted ? "bg-emerald-50/70 ring-2 ring-emerald-500/40 rounded-xl" : "hover:bg-surface-strong/50"
+                  }`}
+                  key={item.id}
+                >
+                  <div className="relative aspect-[4/3] w-20 overflow-hidden rounded-xl border border-border bg-surface-strong">
+                    {item.details.imageUrl ? (
+                      <Image alt="" className="object-cover" fill sizes="80px" src={item.details.imageUrl} unoptimized />
+                    ) : (
+                      <div className="grid h-full place-items-center text-xs text-muted">No image</div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h2 className="truncate font-display text-base font-bold text-foreground">{item.title}</h2>
+                      <RecordSuccessBadge
+                        action={successData?.action === "published" ? "published" : "saved"}
+                        isCurrent={isHighlighted}
+                      />
+                    </div>
+                    <p className="mt-0.5 truncate text-xs text-muted">/{item.slug}</p>
+                    <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted">{item.description}</p>
+                  </div>
+                  <p className="text-sm font-semibold text-primary">{announcementCategoryLabel(item.details.category)}</p>
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted lg:block">
+                    <dt className="font-bold uppercase tracking-wider text-muted">Publishes</dt>
+                    <dd className="text-foreground">{formatDate(item.details.publicationDate)}</dd>
+                    <dt className="font-bold uppercase tracking-wider text-muted lg:mt-1.5">Expires</dt>
+                    <dd className="text-foreground">{formatDate(item.details.expiryDate)}</dd>
+                  </dl>
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-muted lg:block">
+                    <dt className="sr-only">Status</dt>
+                    <dd>
+                      <span className={`admin-badge ${statusStyle(item.details.status)}`}>
+                        {item.details.status[0] + item.details.status.slice(1).toLowerCase()}
+                      </span>
+                    </dd>
+                    <dt className="font-bold uppercase tracking-wider text-muted lg:mt-2">Created</dt>
+                    <dd className="text-foreground">{formatDate(item.createdAt)}</dd>
+                    <dt className="font-bold uppercase tracking-wider text-muted lg:mt-1">Updated</dt>
+                    <dd className="text-foreground">{formatDate(item.updatedAt)}</dd>
+                  </dl>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.details.status === "PUBLISHED" && (
+                      <a
+                        className="inline-flex min-h-9 items-center rounded-lg px-2 text-xs font-semibold text-primary hover:underline"
+                        href={`/announcements/${item.slug}`}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        View
+                      </a>
+                    )}
                     <button
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-foreground transition hover:border-primary/40 hover:text-primary disabled:cursor-wait disabled:opacity-60"
-                      disabled={Boolean(processingId)}
-                      key={action}
-                      onClick={() => void changeState(item, action)}
+                      aria-label={`Edit ${item.title}`}
+                      className="grid size-9 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:border-primary/40 hover:text-primary"
+                      onClick={() => resetForm(item)}
                       type="button"
                     >
-                      <Icon aria-hidden="true" className="size-3.5" />
-                      {processingId === item.id ? `${label}…` : label}
+                      <Pencil aria-hidden="true" className="size-4" />
                     </button>
-                  ))}
-                </div>
-              </article>
-            ))}
+                    {availableActions(item).map(({ label, action, icon: Icon }) => (
+                      <button
+                        className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-border bg-surface px-3 text-xs font-semibold text-foreground transition hover:border-primary/40 hover:text-primary disabled:cursor-wait disabled:opacity-60"
+                        disabled={Boolean(processingId)}
+                        key={action}
+                        onClick={() => void changeState(item, action)}
+                        type="button"
+                      >
+                        <Icon aria-hidden="true" className="size-3.5" />
+                        {processingId === item.id ? `${label}…` : label}
+                      </button>
+                    ))}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         ) : (
           <div className="p-12 text-center">
@@ -432,7 +465,7 @@ export function AnnouncementManager() {
 
       {modalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs p-0 sm:items-center sm:p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget && !saving && !uploading) setModalOpen(false);
           }}
@@ -440,19 +473,31 @@ export function AnnouncementManager() {
           <section
             aria-labelledby="announcement-form-title"
             aria-modal="true"
-            className="max-h-[96vh] w-full max-w-3xl overflow-y-auto rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl"
+            className="relative flex flex-col max-h-[92vh] w-full max-w-3xl rounded-3xl border border-slate-200/90 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
             role="dialog"
           >
-            <div className="sticky top-0 z-10 flex items-start justify-between border-b border-border bg-surface/95 px-6 py-4 backdrop-blur-sm sm:px-7">
-              <div>
-                <h2 className="font-display text-xl font-bold text-foreground" id="announcement-form-title">
-                  {editing ? "Edit announcement" : "Create announcement"}
-                </h2>
-                <p className="mt-0.5 text-xs text-muted">Choose an image, category, and publication timing.</p>
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 sm:px-8 py-5 backdrop-blur-md">
+              <div className="flex items-center gap-3.5 min-w-0 pr-4">
+                <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 text-primary border border-primary/20 shadow-xs">
+                  <Bell className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-slate-900 truncate" id="announcement-form-title">
+                      {editing ? `Edit Announcement: ${editing.title}` : "Create New Announcement"}
+                    </h2>
+                    <span className="hidden sm:inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                      {editing ? "Editing" : "New"}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs sm:text-sm text-slate-500 truncate">
+                    Choose an image, category, and publication timing.
+                  </p>
+                </div>
               </div>
               <button
                 aria-label="Close editor"
-                className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+                className="grid size-10 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 hover:rotate-90 shrink-0"
                 disabled={saving || uploading}
                 onClick={() => setModalOpen(false)}
                 type="button"
@@ -460,32 +505,32 @@ export function AnnouncementManager() {
                 <X aria-hidden="true" className="size-4" />
               </button>
             </div>
-            <form className="space-y-5 p-6 sm:p-7" onSubmit={(event) => void submit(event)}>
+            <form className="overflow-y-auto px-6 sm:px-8 py-6 space-y-6 flex-1 text-slate-900" onSubmit={(event) => void submit(event)}>
               <div className="grid gap-5 sm:grid-cols-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted sm:col-span-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 sm:col-span-2">
                   Title <span className="text-red-500">*</span>
                   <input
-                    className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                     maxLength={180}
                     onChange={(event) => setTitle(event.target.value)}
                     required
                     value={title}
                   />
                 </label>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted sm:col-span-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 sm:col-span-2">
                   Description <span className="text-red-500">*</span>
                   <textarea
-                    className="mt-2 min-h-36 w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm leading-relaxed text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="mt-2 min-h-36 w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm leading-relaxed text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                     maxLength={10000}
                     onChange={(event) => setDescription(event.target.value)}
                     required
                     value={description}
                   />
                 </label>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
                   Category <span className="text-red-500">*</span>
                   <select
-                    className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm font-medium text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                     onChange={(event) => setCategory(event.target.value as AnnouncementCategory | "")}
                     required
                     value={category}
@@ -498,10 +543,10 @@ export function AnnouncementManager() {
                     ))}
                   </select>
                 </label>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
                   Publication date <span className="text-red-500">*</span>
                   <input
-                    className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                     onChange={(event) => {
                       setPublicationDate(event.target.value);
                       setCurrentTime(Date.now());
@@ -511,32 +556,32 @@ export function AnnouncementManager() {
                     value={publicationDate}
                   />
                 </label>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted sm:col-span-2">
-                  Expiry date <span className="font-normal text-muted/70">(optional)</span>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 sm:col-span-2">
+                  Expiry date <span className="font-normal text-slate-400">(optional)</span>
                   <input
-                    className="mt-2 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                     onChange={(event) => setExpiryDate(event.target.value)}
                     type="datetime-local"
                     value={expiryDate}
                   />
-                  <span className="mt-1.5 block text-xs font-normal text-muted">
+                  <span className="mt-1.5 block text-xs font-normal text-slate-500">
                     Leave empty if this announcement should not expire automatically.
                   </span>
                 </label>
                 <div className="sm:col-span-2">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted">
-                    Announcement image <span className="text-red-500">*</span>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Announcement Image <span className="text-red-500">*</span>
                   </p>
                   {imageUrl ? (
-                    <div className="mt-2 grid gap-4 rounded-xl border border-border bg-surface-strong/30 p-3 sm:grid-cols-[12rem_1fr] sm:items-center">
-                      <div className="relative aspect-video overflow-hidden rounded-lg bg-surface-strong">
-                        <Image alt={`Preview of ${title || "announcement"}`} className="object-cover" fill sizes="192px" src={previewUrl || imageUrl} unoptimized />
+                    <div className="mt-2 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:grid-cols-[14rem_1fr] sm:items-center">
+                      <div className="relative aspect-video overflow-hidden rounded-xl border border-slate-200 bg-slate-200 shadow-xs">
+                        <Image alt={`Preview of ${title || "announcement"}`} className="object-cover" fill sizes="224px" src={previewUrl || imageUrl} unoptimized />
                       </div>
                       <div>
-                        <p className="break-all text-xs font-bold text-foreground">{imageName || "Current announcement image"}</p>
+                        <p className="break-all text-xs font-bold text-slate-900">{imageName || "Current announcement image"}</p>
                         {uploading && (
-                          <p className="mt-1 text-xs text-primary" role="status">
-                            Uploading image…
+                          <p className="mt-1 text-xs text-primary font-semibold" role="status">
+                            Uploading image to Cloudinary…
                           </p>
                         )}
                         {previewUrl && !uploading && !imageUrl && (
@@ -553,7 +598,7 @@ export function AnnouncementManager() {
                             uploading={uploading}
                           />
                           <button
-                            className="min-h-9 rounded-lg border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+                            className="h-10 rounded-xl border border-red-200 bg-red-50 px-3.5 text-xs font-bold text-red-700 transition hover:bg-red-100"
                             disabled={uploading}
                             onClick={() => {
                               setImageUrl("");
@@ -578,7 +623,7 @@ export function AnnouncementManager() {
                     />
                   )}
                   {imageUrl && !isCloudinaryImageUrl(imageUrl) && (
-                    <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                    <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
                       This image is not stored in Cloudinary. Replace it with a new upload before saving.
                     </p>
                   )}
@@ -586,14 +631,14 @@ export function AnnouncementManager() {
               </div>
 
               {error && (
-                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
+                <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
                   {error}
                 </p>
               )}
 
-              <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:flex-wrap sm:justify-end">
+              <div className="sticky bottom-0 z-20 -mx-6 sm:-mx-8 -mb-6 border-t border-slate-100 bg-slate-50/90 px-6 sm:px-8 py-4 backdrop-blur-md flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
                 <button
-                  className="min-h-11 rounded-xl border border-border bg-surface px-5 text-sm font-semibold text-foreground transition hover:bg-surface-strong"
+                  className="w-full sm:w-auto h-11 px-5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
                   disabled={saving || uploading}
                   onClick={() => setModalOpen(false)}
                   type="button"
@@ -601,7 +646,7 @@ export function AnnouncementManager() {
                   Cancel
                 </button>
                 <button
-                  className="min-h-11 rounded-xl border border-border bg-surface px-5 text-sm font-semibold text-foreground transition hover:bg-surface-strong disabled:opacity-50"
+                  className="w-full sm:w-auto h-11 px-5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-50"
                   disabled={saving || uploading || !imageUrl}
                   name="action"
                   type="submit"
@@ -611,7 +656,7 @@ export function AnnouncementManager() {
                 </button>
                 {Date.parse(publicationDate) > currentTime ? (
                   <button
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md transition hover:bg-primary-hover disabled:opacity-50"
+                    className="w-full sm:w-auto inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-hover px-5 text-sm font-bold text-white shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all disabled:opacity-50"
                     disabled={saving || uploading || !imageUrl}
                     name="action"
                     type="submit"
@@ -622,7 +667,7 @@ export function AnnouncementManager() {
                   </button>
                 ) : (
                   <button
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-md transition hover:bg-primary-hover disabled:opacity-50"
+                    className="w-full sm:w-auto inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary-hover px-5 text-sm font-bold text-white shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all disabled:opacity-50"
                     disabled={saving || uploading || !imageUrl}
                     name="action"
                     type="submit"

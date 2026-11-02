@@ -1,10 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Eye, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { BookOpen, Calendar, Check, Eye, MessageSquare, Pencil, Plus, Search, Sparkles, Trash2, Users, X } from "lucide-react";
 import { authGet, authMutation, authUpload } from "@/lib/api/church-api";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
 import { ImageUploadDropzone } from "@/components/admin/management/image-upload-dropzone";
+import {
+  ActionSuccessPopup,
+  RecordSuccessBadge,
+  useActionSuccess,
+} from "./action-success-popup";
 
 type Section = "sermons" | "events" | "resources" | "leadership" | "settings" | "services" | "testimonials";
 type Field = {
@@ -216,6 +221,7 @@ export function AdminRecordManager({ section }: { section: Section }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [imageUploading, setImageUploading] = useState(false);
+  const { successData, showSuccess, dismissSuccess, recentlyUpdatedId } = useActionSuccess();
 
   const fetchRecords = useCallback(async () => {
     const result = await authGet<ManagedRecord[] | { items?: ManagedRecord[] }>(
@@ -335,8 +341,17 @@ export function AdminRecordManager({ section }: { section: Section }) {
         const path = isContent ? "/admin/content" : config.adminApi ?? config.api;
         await authMutation(path, "POST", body);
       }
+      const recordName = (editing ? nameOf(editing) : String(fields.title ?? fields.name ?? "")) || "Record";
       setModalOpen(false);
-      setNotice(editing ? "Changes saved." : "Record created.");
+      showSuccess({
+        id: editing?.id,
+        name: recordName,
+        action: status === "published" ? "published" : "saved",
+        message:
+          status === "published"
+            ? `“${recordName}” is now published and visible on the website.`
+            : `“${recordName}” details saved successfully.`,
+      });
       await loadRecords();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save this record.");
@@ -354,15 +369,27 @@ export function AdminRecordManager({ section }: { section: Section }) {
       const api = config.adminApi ?? config.api;
       const path = isContent ? `/admin/content/${record.id}` : `${api}/${record.id}`;
       await authMutation(path, "DELETE");
-      setNotice("Record deleted.");
+      showSuccess({
+        id: record.id,
+        name: title,
+        action: "deleted",
+        message: `“${title}” was deleted.`,
+      });
       await loadRecords();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not delete this record.");
     }
   }
 
+  const SectionIcon =
+    section === "events" ? Calendar :
+    section === "leadership" ? Users :
+    section === "resources" ? BookOpen :
+    section === "testimonials" ? MessageSquare : Sparkles;
+
   return (
     <div>
+      <ActionSuccessPopup data={successData} onDismiss={dismissSuccess} />
       <header className="flex flex-col justify-between gap-4 border-b border-border pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-primary">Church · Admin</p>
@@ -446,15 +473,22 @@ export function AdminRecordManager({ section }: { section: Section }) {
                   {visibleRecords.map((record) => {
                     const status = statusOf(record, isContent);
                     const updated = record.updatedAt ?? record.createdAt;
+                    const isHighlighted = recentlyUpdatedId === record.id || successData?.name === nameOf(record);
                     return (
-                      <tr className="transition hover:bg-surface-strong/40" key={record.id}>
+                      <tr className={`transition duration-300 ${isHighlighted ? "bg-emerald-50/70 ring-2 ring-emerald-500/40" : "hover:bg-surface-strong/40"}`} key={record.id}>
                         <td className="max-w-xs px-6 py-4">
                           <div className="flex items-center gap-3">
                             {section === "leadership" && typeof record.details?.imageUrl === "string" && (
                               <img alt="" className="size-11 rounded-full object-cover border border-border" src={record.details.imageUrl} />
                             )}
                             <div>
-                              <p className="truncate font-display text-sm font-bold text-foreground">{nameOf(record)}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="truncate font-display text-sm font-bold text-foreground">{nameOf(record)}</p>
+                                <RecordSuccessBadge
+                                  action={successData?.action === "published" ? "published" : "saved"}
+                                  isCurrent={isHighlighted}
+                                />
+                              </div>
                               <p className="mt-0.5 truncate text-xs text-muted">
                                 {section === "leadership" ? String(record.details?.role ?? "") : secondaryLabel(record)}
                               </p>
@@ -517,10 +551,19 @@ export function AdminRecordManager({ section }: { section: Section }) {
             <div className="divide-y divide-border md:hidden">
               {visibleRecords.map((record) => {
                 const status = statusOf(record, isContent);
+                const isHighlighted = recentlyUpdatedId === record.id || successData?.name === nameOf(record);
                 return (
-                  <article className="p-5" key={record.id}>
+                  <article className={`p-5 transition duration-300 ${isHighlighted ? "bg-emerald-50/70 ring-2 ring-emerald-500/40 rounded-xl" : ""}`} key={record.id}>
                     <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-display text-base font-bold text-foreground">{nameOf(record)}</h3>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-display text-base font-bold text-foreground">{nameOf(record)}</h3>
+                          <RecordSuccessBadge
+                            action={successData?.action === "published" ? "published" : "saved"}
+                            isCurrent={isHighlighted}
+                          />
+                        </div>
+                      </div>
                       <span className="rounded-full bg-surface-strong px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-muted">
                         {status}
                       </span>
@@ -580,62 +623,75 @@ export function AdminRecordManager({ section }: { section: Section }) {
 
       {modalOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs p-0 sm:items-center sm:p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setModalOpen(false);
+            if (event.target === event.currentTarget && !saving && !imageUploading) setModalOpen(false);
           }}
         >
           <section
             aria-labelledby="record-form-title"
             aria-modal="true"
-            className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl"
+            className="relative flex flex-col max-h-[92vh] w-full max-w-2xl sm:max-w-3xl rounded-3xl border border-slate-200/90 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
             role="dialog"
           >
-            <div className="sticky top-0 z-10 flex items-start justify-between border-b border-border bg-surface/95 px-6 py-4 backdrop-blur-sm sm:px-7">
-              <div>
-                <h2 className="font-display text-xl font-bold text-foreground" id="record-form-title">
-                  {editing ? `Edit ${config.title.slice(0, -1)}` : `Add ${config.title.slice(0, -1)}`}
-                </h2>
-                <p className="mt-0.5 text-xs text-muted">Complete the fields and choose whether to publish this record.</p>
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white/95 px-6 sm:px-8 py-5 backdrop-blur-md">
+              <div className="flex items-center gap-3.5 min-w-0 pr-4">
+                <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 text-primary border border-primary/20 shadow-xs">
+                  <SectionIcon className="size-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-slate-900 truncate" id="record-form-title">
+                      {editing ? `Edit ${editing.title ?? editing.name ?? config.title.slice(0, -1)}` : `Create New ${config.title.slice(0, -1)}`}
+                    </h2>
+                    <span className="hidden sm:inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                      {editing ? "Editing" : "New"}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs sm:text-sm text-slate-500 truncate">
+                    Complete the fields below and select publication options.
+                  </p>
+                </div>
               </div>
               <button
                 aria-label="Close editor"
-                className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+                className="grid size-10 place-items-center rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 hover:rotate-90 shrink-0"
+                disabled={saving || imageUploading}
                 onClick={() => setModalOpen(false)}
                 type="button"
               >
                 <X aria-hidden="true" className="size-4" />
               </button>
             </div>
-            <form className="space-y-5 p-6 sm:p-7" key={editing?.id ?? "new-record"} onSubmit={saveRecord}>
+            <form className="overflow-y-auto px-6 sm:px-8 py-6 space-y-6 flex-1 text-slate-900" key={editing?.id ?? "new-record"} onSubmit={saveRecord}>
               <div className="grid gap-5 sm:grid-cols-2">
                 {config.fields.map((field) => {
                   const value = field.name === "status" ? statusOf(editing ?? { id: "" }, isContent) : editing ? readField(editing, field) : "";
                   const wide = field.type === "textarea" || field.type === "image" || field.name === "status" || field.type === "checkbox";
                   if (field.type === "checkbox") {
                     return (
-                      <label className="flex min-h-11 items-center gap-3 text-xs font-bold uppercase tracking-wider text-muted sm:col-span-2" key={field.name}>
-                        <input className="size-4 rounded-sm accent-primary" defaultChecked={editing ? readField(editing, field) === "true" : false} name={field.name} type="checkbox" />
+                      <label className="flex min-h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/50 p-4 text-xs font-bold uppercase tracking-wider text-slate-700 sm:col-span-2 cursor-pointer hover:bg-slate-50" key={field.name}>
+                        <input className="size-5 rounded-md accent-primary" defaultChecked={editing ? readField(editing, field) === "true" : false} name={field.name} type="checkbox" />
                         {field.label}
                       </label>
                     );
                   }
                   return (
-                    <label className={`block text-xs font-bold uppercase tracking-wider text-muted ${wide ? "sm:col-span-2" : ""}`} key={field.name}>
+                    <label className={`block text-xs font-bold uppercase tracking-wider text-slate-600 ${wide ? "sm:col-span-2" : ""}`} key={field.name}>
                       {field.label}
                       {field.required && <span className="ml-1 text-red-500">*</span>}
                       {field.type === "image" ? (
                         <div className="mt-2 space-y-3">
                           {imageUrl && (
-                            <div className="relative aspect-[4/3] max-w-sm overflow-hidden rounded-xl border border-border bg-surface-strong">
+                            <div className="relative aspect-[4/3] max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-xs">
                               <div aria-label="Current image preview" className="size-full bg-cover bg-center" role="img" style={{ backgroundImage: `url("${imageUrl}")` }} />
                               <button
                                 aria-label="Remove image"
-                                className="absolute right-2 top-2 rounded-lg border border-red-200 bg-surface/95 px-2.5 py-1 text-xs font-semibold text-red-700 shadow-xs backdrop-blur-xs transition hover:bg-red-50"
+                                className="absolute right-2 top-2 rounded-xl border border-red-200 bg-white/95 px-3 py-1.5 text-xs font-bold text-red-700 shadow-xs backdrop-blur-xs transition hover:bg-red-50"
                                 onClick={() => setImageUrl("")}
                                 type="button"
                               >
-                                Remove
+                                Remove Image
                               </button>
                             </div>
                           )}
@@ -648,13 +704,13 @@ export function AdminRecordManager({ section }: { section: Section }) {
                             uploading={imageUploading}
                           />
                           <input name={field.name} type="hidden" value={imageUrl} />
-                          <p className="text-[11px] text-muted">
+                          <p className="text-[11px] text-slate-500">
                             {imageUploading ? "Uploading securely to Cloudinary…" : "JPEG, PNG, WebP, or GIF · up to 15 MB"}
                           </p>
                         </div>
                       ) : field.type === "textarea" ? (
                         <textarea
-                          className="mt-1.5 min-h-28 w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm leading-relaxed text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                          className="mt-2 min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-sm leading-relaxed text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                           defaultValue={value}
                           maxLength={field.name === "description" || field.name === "ministryResponsibilities" ? 10000 : undefined}
                           name={field.name}
@@ -662,7 +718,7 @@ export function AdminRecordManager({ section }: { section: Section }) {
                         />
                       ) : field.type === "select" ? (
                         <select
-                          className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                          className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm font-medium text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                           defaultValue={value || "draft"}
                           name={field.name}
                           required={field.required}
@@ -675,7 +731,7 @@ export function AdminRecordManager({ section }: { section: Section }) {
                         </select>
                       ) : (
                         <input
-                          className="mt-1.5 h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                          className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 text-sm text-slate-900 outline-none transition-all hover:bg-white focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10"
                           defaultValue={value}
                           maxLength={field.name === "title" || field.name === "name" ? 180 : undefined}
                           min={field.type === "number" ? 0 : undefined}
@@ -689,24 +745,35 @@ export function AdminRecordManager({ section }: { section: Section }) {
                 })}
               </div>
               {error && (
-                <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
+                <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert">
                   {error}
                 </p>
               )}
-              <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
+              <div className="sticky bottom-0 z-20 -mx-6 sm:-mx-8 -mb-6 border-t border-slate-100 bg-slate-50/90 px-6 sm:px-8 py-4 backdrop-blur-md flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
                 <button
-                  className="min-h-11 rounded-xl border border-border bg-surface px-5 text-sm font-semibold text-foreground transition hover:bg-surface-strong"
+                  className="w-full sm:w-auto h-11 px-5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+                  disabled={saving || imageUploading}
                   onClick={() => setModalOpen(false)}
                   type="button"
                 >
                   Cancel
                 </button>
                 <button
-                  className="min-h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-md transition hover:bg-primary-hover disabled:opacity-60"
+                  className="w-full sm:w-auto h-11 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-hover text-white text-sm font-bold shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                   disabled={saving || imageUploading}
                   type="submit"
                 >
-                  {saving ? "Saving…" : editing ? "Save changes" : "Create record"}
+                  {saving ? (
+                    "Saving…"
+                  ) : editing ? (
+                    <>
+                      <Check className="size-4" /> Save Changes
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="size-4" /> Create Record
+                    </>
+                  )}
                 </button>
               </div>
             </form>
@@ -716,7 +783,7 @@ export function AdminRecordManager({ section }: { section: Section }) {
 
       {viewing && section === "leadership" && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 backdrop-blur-xs p-0 sm:items-center sm:p-6"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setViewing(null);
           }}
@@ -724,45 +791,53 @@ export function AdminRecordManager({ section }: { section: Section }) {
           <section
             aria-labelledby="leader-detail-title"
             aria-modal="true"
-            className="max-h-[94vh] w-full max-w-xl overflow-y-auto rounded-t-2xl border border-border bg-surface shadow-2xl sm:rounded-2xl"
+            className="relative flex flex-col max-h-[90vh] w-full max-w-xl rounded-3xl border border-slate-200/90 bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
             role="dialog"
           >
-            <div className="flex items-start justify-between border-b border-border px-6 py-4 sm:px-7">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-primary">Leader Profile</p>
-                <h2 className="mt-1 font-display text-xl font-bold text-foreground" id="leader-detail-title">
-                  {viewing.title}
-                </h2>
+            <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 sm:px-8 py-5">
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <Users className="size-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-primary">Leader Profile</p>
+                  <h2 className="mt-0.5 font-display text-xl font-bold text-slate-900" id="leader-detail-title">
+                    {viewing.title}
+                  </h2>
+                </div>
               </div>
               <button
                 aria-label="Close profile details"
-                className="grid size-9 place-items-center rounded-xl border border-border text-muted transition hover:bg-surface-strong hover:text-foreground"
+                className="grid size-9 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition"
                 onClick={() => setViewing(null)}
                 type="button"
               >
                 <X aria-hidden="true" className="size-4" />
               </button>
             </div>
-            <div className="space-y-5 p-6 sm:p-7">
+            <div className="overflow-y-auto p-6 sm:p-8 space-y-5 text-slate-900">
               {typeof viewing.details?.imageUrl === "string" && (
-                <img alt={`${viewing.title} profile`} className="aspect-[4/3] w-full rounded-xl object-cover border border-border" src={viewing.details.imageUrl} />
+                <img alt={`${viewing.title} profile`} className="aspect-[4/3] w-full rounded-2xl object-cover border border-slate-200 shadow-xs" src={viewing.details.imageUrl} />
               )}
-              <p className="font-display text-sm font-bold text-primary">{String(viewing.details?.role ?? "")}</p>
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+                <dt className="text-xs font-bold uppercase tracking-wider text-slate-500">Ministry Role</dt>
+                <dd className="mt-1 font-semibold text-primary">{String(viewing.details?.role ?? "")}</dd>
+              </div>
               <div>
-                <h3 className="font-display text-sm font-bold text-foreground">Biography</h3>
-                <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-muted">
+                <h3 className="font-display text-sm font-bold text-slate-900">Biography</h3>
+                <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate-600">
                   {viewing.description || "No biography provided."}
                 </p>
               </div>
               {typeof viewing.details?.ministryResponsibilities === "string" && (
-                <div>
-                  <h3 className="font-display text-sm font-bold text-foreground">Ministry Responsibilities</h3>
-                  <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-muted">
+                <div className="border-t border-slate-100 pt-4">
+                  <h3 className="font-display text-sm font-bold text-slate-900">Ministry Responsibilities</h3>
+                  <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate-600">
                     {viewing.details.ministryResponsibilities}
                   </p>
                 </div>
               )}
-              <p className="text-xs text-muted">
+              <p className="text-xs text-slate-400 border-t border-slate-100 pt-3">
                 Status: {statusOf(viewing, true)} · Display order: {String(viewing.details?.displayOrder ?? 0)}
               </p>
             </div>
