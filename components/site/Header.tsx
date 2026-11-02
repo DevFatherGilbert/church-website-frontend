@@ -181,6 +181,7 @@ export function HeaderView({
   }
 
   const isHeroPage = pathname === "/";
+  const isDarkHeader = !scrolled && isHeroPage;
   const showAnnouncement = Boolean(activeAnnouncement && bannerVisible);
   
   // Modern & Minimalist Color Variables
@@ -318,15 +319,23 @@ export function HeaderView({
                     />
                   </Link>
 
-                  {/* About Dropdown Card */}
+                  {/* About Dropdown Card - matches header background color */}
                   {aboutDropdownOpen && (
                     <div
-                      className="absolute left-0 top-full mt-2 w-72 rounded-2xl border border-stone-200/90 bg-white p-2.5 shadow-2xl backdrop-blur-md z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+                      className={`absolute left-0 top-full mt-2 w-72 rounded-2xl p-2.5 backdrop-blur-xl z-50 animate-in fade-in slide-in-from-top-1 duration-150 transition-all ${
+                        isDarkHeader
+                          ? "border border-white/15 bg-[#0b1833]/95 text-white shadow-[0_20px_50px_rgba(0,0,0,0.55)]"
+                          : "border border-stone-200/90 bg-white text-stone-900 shadow-2xl"
+                      }`}
                       role="menu"
                     >
-                      <div className="border-b border-stone-100 px-3 py-2">
+                      <div className={`border-b px-3 py-2 ${isDarkHeader ? "border-white/10" : "border-stone-100"}`}>
                         <Link
-                          className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-hover transition-colors"
+                          className={`flex items-center justify-between text-xs font-bold uppercase tracking-wider transition-colors ${
+                            isDarkHeader
+                              ? "text-secondary hover:text-secondary-hover"
+                              : "text-primary hover:text-primary-hover"
+                          }`}
                           href="/about"
                           onClick={() => setAboutDropdownOpen(false)}
                           role="menuitem"
@@ -342,23 +351,35 @@ export function HeaderView({
                           return (
                             <Link
                               className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors ${
-                                subActive
-                                  ? "bg-primary/8 text-primary"
-                                  : "text-stone-800 hover:bg-stone-50 hover:text-primary"
+                                isDarkHeader
+                                  ? subActive
+                                    ? "bg-white/15 text-secondary"
+                                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                                  : subActive
+                                    ? "bg-primary/8 text-primary"
+                                    : "text-stone-800 hover:bg-stone-50 hover:text-primary"
                               }`}
                               href={sub.href}
                               key={sub.href}
                               onClick={() => setAboutDropdownOpen(false)}
                               role="menuitem"
                             >
-                              <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                              <div className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg ${
+                                isDarkHeader
+                                  ? "bg-white/10 text-secondary"
+                                  : "bg-primary/10 text-primary"
+                              }`}>
                                 <SubIcon className="size-4" />
                               </div>
                               <div className="min-w-0">
-                                <span className="block text-xs font-bold leading-snug">
+                                <span className={`block text-xs font-bold leading-snug ${
+                                  isDarkHeader ? "text-white" : "text-stone-900"
+                                }`}>
                                   {sub.label}
                                 </span>
-                                <span className="block text-[11px] text-stone-500 leading-tight mt-0.5">
+                                <span className={`block text-[11px] leading-tight mt-0.5 ${
+                                  isDarkHeader ? "text-white/70" : "text-stone-500"
+                                }`}>
                                   {sub.desc}
                                 </span>
                               </div>
