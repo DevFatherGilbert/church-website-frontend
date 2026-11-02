@@ -324,15 +324,7 @@ export function DashboardView() {
           {data.loading ? "Loading data" : connected ? "Live updates" : loadedSources === 7 ? "Data loaded" : `${loadedSources}/7 sources available`}
         </span>
         <time className="text-sm font-medium text-muted">{formattedDate}</time>
-        <button
-          onClick={() => void handleAdminLogout()}
-          className="admin-state-pill text-xs font-semibold text-red-600 border border-red-200/80 hover:bg-red-50 hover:text-red-700 transition-colors"
-          type="button"
-          title="Log out of admin session"
-        >
-          <LogOut className="size-3.5" />
-          <span>Log out</span>
-        </button>
+       
       </div>
     </div>
 
