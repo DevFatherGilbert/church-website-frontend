@@ -412,6 +412,7 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
     setRecord((prev) => {
       const details = { ...(prev.details ?? {}) };
       details.hero = {
+        ...defaultHomepageSettings.hero,
         ...(details.hero ?? {}),
         imageUrl: url,
         imageAlt: altText || details.hero?.imageAlt || "",
@@ -427,6 +428,7 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
     setRecord((prev) => {
       const details = { ...(prev.details ?? {}) };
       details.hero = {
+        ...defaultHomepageSettings.hero,
         ...(details.hero ?? {}),
         imageUrl: nextImages[0]?.url || "",
         imageAlt: nextImages[0]?.alt || "",
@@ -445,6 +447,7 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
     setRecord((prev) => {
       const details = { ...(prev.details ?? {}) };
       details.hero = {
+        ...defaultHomepageSettings.hero,
         ...(details.hero ?? {}),
         imageUrl: existing[0]?.url || "",
         imageAlt: existing[0]?.alt || "",
@@ -461,6 +464,7 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
     setRecord((prev) => {
       const details = { ...(prev.details ?? {}) };
       details.hero = {
+        ...defaultHomepageSettings.hero,
         ...(details.hero ?? {}),
         images: existing,
       };
