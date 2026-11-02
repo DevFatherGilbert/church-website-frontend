@@ -7,7 +7,7 @@ export type HomepageFooterLink = { label: string; href: string; visible: boolean
 export type HomepageLinkCard = { id: string; eyebrow: string; title: string; description: string; href: string; cta: string; visible: boolean; order: number };
 export type HomepageSettings = {
   contentKey: "homepage";
-  hero: { heading: string; description: string; imageUrl: string; imageAlt: string; visible: boolean; primaryCtaLabel: string; primaryCtaHref: string; secondaryCtaLabel: string; secondaryCtaHref: string };
+  hero: { heading: string; description: string; imageUrl: string; imageAlt: string; images?: { url: string; alt?: string; addedAt?: string }[]; visible: boolean; primaryCtaLabel: string; primaryCtaHref: string; secondaryCtaLabel: string; secondaryCtaHref: string };
   siteHeader: {
     brandTagline: string;
     serviceSummary: string;
@@ -65,6 +65,7 @@ export const defaultHomepageSettings: HomepageSettings = {
     description: "A Bible-centered Christian community that worships on the seventh-day Sabbath and seeks to serve with the compassion of Jesus.",
     imageUrl: "",
     imageAlt: "Church worship congregation",
+    images: [],
     visible: true,
     primaryCtaLabel: "Explore our beliefs",
     primaryCtaHref: "/about/beliefs",
@@ -344,7 +345,15 @@ function mergeHomepageSettings(details?: Record<string, unknown> | null): Homepa
     ...defaultHomepageSettings,
     ...safeDetails,
     contentKey: "homepage",
-    hero: { ...defaultHomepageSettings.hero, ...asObject(safeDetails.hero) } as HomepageSettings["hero"],
+    hero: {
+      ...defaultHomepageSettings.hero,
+      ...asObject(safeDetails.hero),
+      images: Array.isArray(asObject(safeDetails.hero).images)
+        ? (asObject(safeDetails.hero).images as { url: string; alt?: string; addedAt?: string }[])
+        : asObject(safeDetails.hero).imageUrl
+          ? [{ url: String(asObject(safeDetails.hero).imageUrl), alt: String(asObject(safeDetails.hero).imageAlt || "") }]
+          : [],
+    } as HomepageSettings["hero"],
     siteHeader: {
       ...defaultHomepageSettings.siteHeader,
       ...asObject(safeDetails.siteHeader),

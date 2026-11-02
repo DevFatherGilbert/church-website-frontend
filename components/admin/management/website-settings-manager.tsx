@@ -400,6 +400,74 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
       return { ...previous, details };
     });
   }
+  
+  function addHeroImage(url: string, altText?: string) {
+    const existing = Array.isArray(record.details.hero?.images)
+      ? record.details.hero.images
+      : record.details.hero?.imageUrl
+        ? [{ url: record.details.hero.imageUrl, alt: record.details.hero.imageAlt || "", addedAt: new Date().toISOString() }]
+        : [];
+    const newImage = { url, alt: altText || "Hero background", addedAt: new Date().toISOString() };
+    const nextImages = [newImage, ...existing.filter((img) => img.url !== url)];
+    setRecord((prev) => {
+      const details = { ...(prev.details ?? {}) };
+      details.hero = {
+        ...(details.hero ?? {}),
+        imageUrl: url,
+        imageAlt: altText || details.hero?.imageAlt || "",
+        images: nextImages,
+      };
+      return { ...prev, details };
+    });
+  }
+
+  function removeHeroImage(index: number) {
+    const existing = Array.isArray(record.details.hero?.images) ? record.details.hero.images : [];
+    const nextImages = existing.filter((_, i) => i !== index);
+    setRecord((prev) => {
+      const details = { ...(prev.details ?? {}) };
+      details.hero = {
+        ...(details.hero ?? {}),
+        imageUrl: nextImages[0]?.url || "",
+        imageAlt: nextImages[0]?.alt || "",
+        images: nextImages,
+      };
+      return { ...prev, details };
+    });
+  }
+
+  function moveHeroImage(index: number, direction: -1 | 1) {
+    const existing = Array.isArray(record.details.hero?.images) ? [...record.details.hero.images] : [];
+    const target = index + direction;
+    if (target < 0 || target >= existing.length) return;
+    const [item] = existing.splice(index, 1);
+    existing.splice(target, 0, item);
+    setRecord((prev) => {
+      const details = { ...(prev.details ?? {}) };
+      details.hero = {
+        ...(details.hero ?? {}),
+        imageUrl: existing[0]?.url || "",
+        imageAlt: existing[0]?.alt || "",
+        images: existing,
+      };
+      return { ...prev, details };
+    });
+  }
+
+  function updateHeroImageAlt(index: number, alt: string) {
+    const existing = Array.isArray(record.details.hero?.images) ? [...record.details.hero.images] : [];
+    if (!existing[index]) return;
+    existing[index] = { ...existing[index], alt };
+    setRecord((prev) => {
+      const details = { ...(prev.details ?? {}) };
+      details.hero = {
+        ...(details.hero ?? {}),
+        images: existing,
+      };
+      return { ...prev, details };
+    });
+  }
+
   async function uploadImage(file: File | undefined, field: "hero.imageUrl" | "profile.imageUrl" | "profile.logoUrl" | "sections.welcome.imageUrl") {
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type) || file.size > 15 * 1024 * 1024) { setError("Choose a JPEG, PNG, WebP, or GIF image up to 15 MB."); return; }
@@ -411,7 +479,7 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
       const result = await authUpload<{ secureUrl?: string; url?: string }>(`/media/upload?purpose=${purpose}`, form);
       const url = result?.secureUrl || result?.url;
       if (!url) throw new Error("The backend did not return an image URL.");
-      setDetails(field, url);
+      if (field === "hero.imageUrl") { addHeroImage(url, file.name.replace(/\.[^/.]+$/, "")); } else { setDetails(field, url); }
     }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Image upload failed."); } finally { setUploading(false); }
   }
@@ -598,7 +666,117 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
             })}
           </div>
         </section>
-        <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7"><div><h2 className="text-lg font-semibold">Hero section</h2><p className="mt-1 text-sm text-slate-500">The headline, supporting message and calls to action.</p></div><div className="grid gap-5 sm:grid-cols-2">{field("Main headline", "hero.heading", false, true)}{field("Supporting description", "hero.description", true)}{field("Primary button text", "hero.primaryCtaLabel")}{field("Primary destination", "hero.primaryCtaHref")}{field("Secondary button text", "hero.secondaryCtaLabel")}{field("Secondary destination", "hero.secondaryCtaHref")}{field("Image alternative text", "hero.imageAlt")}</div><label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={Boolean(record.details.hero?.visible)} onChange={(e) => setDetails("hero.visible", e.target.checked)} />Show hero section</label><div><span className="text-sm font-medium">Hero image</span>{record.details.hero?.imageUrl ? <div className="my-3"><img alt={record.details.hero?.imageAlt || "Homepage hero preview"} className="aspect-video max-h-64 rounded object-cover" src={record.details.hero.imageUrl} /><button type="button" className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50" onClick={() => setDetails("hero.imageUrl", "")}>Remove image</button></div> : null}<ImageUploadDropzone className="mt-2" disabled={uploading} label="Drag and drop a hero image or click to browse" onFile={(file) => void uploadImage(file, "hero.imageUrl")} uploading={uploading} helperText="Images are uploaded through the backend to Cloudinary · JPEG, PNG, WebP, or GIF up to 15 MB" /><MediaLibraryPicker onSelect={(asset) => { setDetails("hero.imageUrl", asset.secureUrl); setDetails("hero.imageAlt", asset.altText); }} /></div></section>
+        <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7"><div><h2 className="text-lg font-semibold">Hero section</h2><p className="mt-1 text-sm text-slate-500">The headline, supporting message and calls to action.</p></div><div className="grid gap-5 sm:grid-cols-2">{field("Main headline", "hero.heading", false, true)}{field("Supporting description", "hero.description", true)}{field("Primary button text", "hero.primaryCtaLabel")}{field("Primary destination", "hero.primaryCtaHref")}{field("Secondary button text", "hero.secondaryCtaLabel")}{field("Secondary destination", "hero.secondaryCtaHref")}{field("Image alternative text", "hero.imageAlt")}</div><label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={Boolean(record.details.hero?.visible)} onChange={(e) => setDetails("hero.visible", e.target.checked)} />Show hero section</label>
+            <div className="space-y-4 border-t border-slate-100 pt-5">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Hero background pictures</h3>
+                <p className="mt-1 text-xs text-slate-500">
+                  Upload multiple photos or select from the media library. The <strong>latest picture is automatically displayed first</strong> on the homepage slideshow.
+                </p>
+              </div>
+
+              {(() => {
+                const heroImages = Array.isArray(record.details.hero?.images) && record.details.hero.images.length > 0
+                  ? record.details.hero.images
+                  : record.details.hero?.imageUrl
+                    ? [{ url: record.details.hero.imageUrl, alt: record.details.hero.imageAlt || "", addedAt: "" }]
+                    : [];
+
+                if (heroImages.length === 0) {
+                  return (
+                    <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-4 text-xs text-slate-500 text-center">
+                      No hero pictures added yet. Upload a picture or choose from the media library below.
+                    </p>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {heroImages.map((img, index) => (
+                      <div
+                        key={`${img.url}-${index}`}
+                        className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-3 shadow-xs"
+                      >
+                        <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-stone-200 border border-slate-200">
+                          <img
+                            src={img.url}
+                            alt={img.alt || "Hero picture"}
+                            className="size-full object-cover"
+                          />
+                          {index === 0 && (
+                            <span className="absolute bottom-0 inset-x-0 bg-primary/95 text-white text-[9px] font-bold text-center py-0.5 uppercase tracking-wider">
+                              Latest
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-slate-800">
+                            Picture {index + 1} {index === 0 && <span className="text-primary font-normal">(Primary · Shown First)</span>}
+                          </p>
+                          <input
+                            className="mt-1 block w-full rounded-md border border-slate-300 px-2.5 py-1 text-xs"
+                            placeholder="Image description (alt text)"
+                            value={img.alt ?? ""}
+                            onChange={(e) => updateHeroImageAlt(index, e.target.value)}
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0 self-end sm:self-center">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => moveHeroImage(index, -1)}
+                            className="grid size-8 place-items-center rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-30"
+                            aria-label="Move picture up"
+                            title="Move picture up"
+                          >
+                            <ArrowUp className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === heroImages.length - 1}
+                            onClick={() => moveHeroImage(index, 1)}
+                            className="grid size-8 place-items-center rounded-lg border border-slate-300 bg-white hover:bg-slate-100 disabled:opacity-30"
+                            aria-label="Move picture down"
+                            title="Move picture down"
+                          >
+                            <ArrowDown className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeHeroImage(index)}
+                            className="grid size-8 place-items-center rounded-lg border border-red-200 bg-white text-red-600 hover:bg-red-50"
+                            aria-label="Remove picture"
+                            title="Remove picture"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              <div className="pt-2 space-y-2">
+                <ImageUploadDropzone
+                  className="mt-2"
+                  disabled={uploading}
+                  label="Upload a new hero picture (will display latest first)"
+                  onFile={(file) => void uploadImage(file, "hero.imageUrl")}
+                  uploading={uploading}
+                  helperText="Images are uploaded through the backend to Cloudinary · JPEG, PNG, WebP, or GIF up to 15 MB"
+                />
+                <MediaLibraryPicker
+                  label="Choose picture from media library"
+                  onSelect={(asset) => {
+                    addHeroImage(asset.secureUrl, asset.altText);
+                  }}
+                />
+              </div>
+            </div>
+</section>
         {(() => {
           const hero = record.details.hero ?? defaultHomepageSettings.hero;
           const visibleSections = Object.entries(record.details.sections ?? {})
@@ -608,7 +786,7 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
           return <section aria-labelledby="homepage-preview-title" className="admin-card p-4 sm:p-6">
             <div className="mb-4"><h2 className="font-display text-lg font-bold text-slate-900" id="homepage-preview-title">Draft preview</h2><p className="mt-1 text-sm text-slate-600">This preview uses the unsaved settings below. Visitors will see these changes only after you publish them.</p></div>
             {hero.visible ? <div className="relative isolate flex min-h-64 items-center overflow-hidden rounded-xl bg-primary-dark p-6 text-white sm:min-h-72 sm:p-10">
-              {hero.imageUrl && <img alt={hero.imageAlt || "Homepage hero image preview"} className="absolute inset-0 -z-20 size-full object-cover" src={hero.imageUrl} />}
+              {(hero.images?.[0]?.url || hero.imageUrl) && <img alt={hero.images?.[0]?.alt || hero.imageAlt || "Homepage hero image preview"} className="absolute inset-0 -z-20 size-full object-cover" src={hero.images?.[0]?.url || hero.imageUrl} />}
               <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/90 via-slate-950/65 to-slate-950/25" />
               <div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[.18em] text-secondary">{record.title || "Church homepage"}</p><h3 className="mt-3 whitespace-pre-line font-display text-2xl font-bold leading-tight sm:text-4xl">{hero.heading || "Welcome"}</h3><p className="mt-3 max-w-xl text-sm leading-6 text-white/85 sm:text-base">{hero.description}</p><div className="mt-5 flex flex-wrap gap-2"><span className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold text-slate-950">{hero.primaryCtaLabel || "Primary action"}</span>{hero.secondaryCtaLabel && <span className="rounded-lg border border-white/50 bg-white/10 px-3 py-2 text-xs font-bold text-white">{hero.secondaryCtaLabel}</span>}</div></div>
             </div> : <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">The hero is hidden. The homepage will begin with the first visible section.</p>}

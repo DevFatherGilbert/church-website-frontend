@@ -22,6 +22,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ServiceUnavailable } from "@/components/feedback/service-unavailable";
+import { HeroBackgroundSlider } from "@/components/media/hero-background-slider";
 import { InteractiveLocationMap } from "@/components/media/interactive-location-map";
 import { ArrangedAudienceStrip } from "@/components/site/arranged-audience-strip";
 import { ArrangedServicesFilter } from "@/components/site/arranged-services-filter";
@@ -265,6 +266,11 @@ export default async function HomeView() {
   ];
 
   const hero = homepage.hero;
+  const heroSliderImages = (hero.images && hero.images.length > 0)
+    ? hero.images
+    : hero.imageUrl
+      ? [{ url: hero.imageUrl, alt: hero.imageAlt || "Church gathering" }]
+      : gallery.map((g) => ({ url: g.src, alt: g.alt }));
 
   const siteUrl = getSiteUrl();
   const churchJsonLd = {
@@ -299,16 +305,7 @@ export default async function HomeView() {
       {/* ── 2. HERO SECTION (SRS Section 9 #2 & Section 11) ───────────────── */}
       {hero.visible && (
         <section className="relative isolate flex min-h-[680px] items-center overflow-hidden bg-primary-dark text-white sm:min-h-[760px] lg:min-h-[840px]">
-          {hero.imageUrl && (
-            <Image
-              alt={hero.imageAlt || "Church gathering"}
-              className="object-cover"
-              fill
-              priority
-              sizes="100vw"
-              src={hero.imageUrl}
-            />
-          )}
+          <HeroBackgroundSlider images={heroSliderImages} />
           <div aria-hidden="true" className="home-hero-overlay absolute inset-0" />
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-transparent to-primary-dark/40" />
 
