@@ -6,20 +6,52 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import {
   ArrowRight,
+  BookOpen,
+  ChevronDown,
   Clock3,
+  Compass,
   Heart,
   Mail,
   MapPin,
   Menu,
   Phone,
+  Shield,
+  Sparkles,
+  Users,
   X,
-  Compass,
 } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import { useChurchBrand } from "@/components/brand/church-brand-provider";
 import { defaultHomepageSettings, type HomepageSettings } from "@/lib/content/website-settings";
 
 const subscribeNever = () => () => {};
+
+const aboutSubLinks = [
+  {
+    label: "Our Story & Heritage",
+    href: "/about/our-story",
+    icon: BookOpen,
+    desc: "Our history and journey of faith",
+  },
+  {
+    label: "Mission & Vision",
+    href: "/about/mission-vision",
+    icon: Sparkles,
+    desc: "Purpose, direction & core values",
+  },
+  {
+    label: "Statement of Faith",
+    href: "/about/beliefs",
+    icon: Shield,
+    desc: "Biblical doctrines and Sabbath truth",
+  },
+  {
+    label: "Pastoral Leadership",
+    href: "/about/leadership",
+    icon: Users,
+    desc: "Meet pastors and ministry leaders",
+  },
+] as const;
 
 function isCurrentPage(pathname: string, href: string) {
   return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
@@ -59,10 +91,13 @@ export function HeaderView({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [bannerVisible, setBannerVisible] = useState(true);
   const [scrolled, setScrolled] = useState(false);
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [mobileAboutExpanded, setMobileAboutExpanded] = useState(false);
   
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavigationRef = useRef<HTMLDivElement>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Active announcement prioritizing database announcement records then site settings announcement
   const activeAnnouncement = urgentAnnouncement
@@ -89,6 +124,18 @@ export function HeaderView({
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Dropdown hover timing
+  function handleDropdownEnter() {
+    if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
+    setAboutDropdownOpen(true);
+  }
+
+  function handleDropdownLeave() {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setAboutDropdownOpen(false);
+    }, 150);
+  }
 
   // Mobile menu focus trap
   useEffect(() => {
@@ -155,21 +202,20 @@ export function HeaderView({
       {activeAnnouncement && bannerVisible && (
         <aside
           aria-label="Urgent church announcement"
-          className="relative z-20 flex min-h-10 items-start border-0 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 py-2 pl-3 pr-11 text-stone-950 sm:items-center sm:px-6 lg:px-8"
+          className="relative z-20 w-full border-b border-amber-500/20 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-stone-950 px-3 py-2 sm:px-6 lg:px-8"
           role="region"
         >
-          <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-2 md:flex-row md:gap-6">
-            
-            {/* Live Indicator & Text Content */}
-            <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center">
-              <span className="flex min-w-0 items-start gap-2">
-                {/* Animated Blue Circle */}
-                <span className="relative mt-0.5 flex size-2.5 shrink-0">
+          <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 pr-7 sm:pr-0">
+            {/* Live Indicator, Title, & CTA Link */}
+            <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-center leading-normal">
+              <span className="inline-flex items-center gap-2">
+                {/* Animated Blue Circle - strictly centered straight with notice text */}
+                <span className="relative flex size-2 shrink-0 items-center justify-center sm:size-2.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex size-2.5 rounded-full bg-primary-hover"></span>
+                  <span className="relative inline-flex size-2 rounded-full bg-primary sm:size-2.5"></span>
                 </span>
                 
-                <span className="min-w-0 break-words font-bold tracking-tight text-stone-950 text-xs sm:text-sm">
+                <span className="font-bold tracking-tight text-stone-950 text-xs sm:text-sm">
                   {activeAnnouncement.title}
                 </span>
               </span>
@@ -180,27 +226,27 @@ export function HeaderView({
                   {activeAnnouncement.description}
                 </span>
               )}
-            </div>
 
-            {/* CTA Link */}
-            {activeAnnouncement.href && (
-              <Link
-                className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-stone-950/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-stone-950 transition-all hover:bg-stone-950 hover:text-white"
-                href={activeAnnouncement.href}
-              >
-                <span>{activeAnnouncement.ctaLabel}</span>
-                <ArrowRight className="size-3" aria-hidden="true" />
-              </Link>
-            )}
+              {/* CTA Link */}
+              {activeAnnouncement.href && (
+                <Link
+                  className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-stone-950/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-stone-950 transition-all hover:bg-stone-950 hover:text-white"
+                  href={activeAnnouncement.href}
+                >
+                  <span>{activeAnnouncement.ctaLabel}</span>
+                  <ArrowRight className="size-3" aria-hidden="true" />
+                </Link>
+              )}
+            </div>
           </div>
 
           <button
             aria-label="Dismiss announcement"
-            className="absolute right-2 top-1/2 flex size-7 shrink-0 -translate-y-1/2 items-center justify-center rounded-full text-stone-700 transition hover:bg-stone-950/10 hover:text-stone-950 sm:right-3"
+            className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-stone-800 transition hover:bg-stone-950/15 hover:text-stone-950 sm:right-3 sm:size-7"
             onClick={() => setBannerVisible(false)}
             type="button"
           >
-            <X className="size-4" />
+            <X className="size-3.5 sm:size-4" />
           </button>
         </aside>
       )}
@@ -244,7 +290,88 @@ export function HeaderView({
         {/* Desktop Nav Links */}
         <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex lg:gap-2 shrink min-w-0">
           {configuredNavigation.map((link) => {
+            const isAbout = link.href === "/about";
             const active = isCurrentPage(pathname, link.href);
+
+            if (isAbout) {
+              return (
+                <div
+                  className="relative"
+                  key={`${link.href}-${link.order}`}
+                  onMouseEnter={handleDropdownEnter}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <Link
+                    aria-current={active ? "page" : undefined}
+                    aria-expanded={aboutDropdownOpen}
+                    aria-haspopup="true"
+                    className={`inline-flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-2 text-xs lg:text-sm font-semibold tracking-wide transition-colors duration-200 ${
+                      active ? navActiveColor : `${navTextColor} ${navHoverColor}`
+                    }`}
+                    href={link.href}
+                  >
+                    <span>{link.label}</span>
+                    <ChevronDown
+                      className={`size-3.5 transition-transform duration-200 ${
+                        aboutDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </Link>
+
+                  {/* About Dropdown Card */}
+                  {aboutDropdownOpen && (
+                    <div
+                      className="absolute left-0 top-full mt-2 w-72 rounded-2xl border border-stone-200/90 bg-white p-2.5 shadow-2xl backdrop-blur-md z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+                      role="menu"
+                    >
+                      <div className="border-b border-stone-100 px-3 py-2">
+                        <Link
+                          className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-primary hover:text-primary-hover transition-colors"
+                          href="/about"
+                          onClick={() => setAboutDropdownOpen(false)}
+                          role="menuitem"
+                        >
+                          <span>About the Church</span>
+                          <ArrowRight className="size-3" />
+                        </Link>
+                      </div>
+                      <div className="mt-1 space-y-0.5">
+                        {aboutSubLinks.map((sub) => {
+                          const SubIcon = sub.icon;
+                          const subActive = pathname === sub.href;
+                          return (
+                            <Link
+                              className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors ${
+                                subActive
+                                  ? "bg-primary/8 text-primary"
+                                  : "text-stone-800 hover:bg-stone-50 hover:text-primary"
+                              }`}
+                              href={sub.href}
+                              key={sub.href}
+                              onClick={() => setAboutDropdownOpen(false)}
+                              role="menuitem"
+                            >
+                              <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <SubIcon className="size-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <span className="block text-xs font-bold leading-snug">
+                                  {sub.label}
+                                </span>
+                                <span className="block text-[11px] text-stone-500 leading-tight mt-0.5">
+                                  {sub.desc}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             return (
               <Link
                 aria-current={active ? "page" : undefined}
@@ -387,7 +514,73 @@ export function HeaderView({
             {/* Nav Links */}
             <nav aria-label="Mobile navigation links" className="mt-6 space-y-1">
               {configuredNavigation.map((link) => {
+                const isAbout = link.href === "/about";
                 const active = isCurrentPage(pathname, link.href);
+
+                if (isAbout) {
+                  return (
+                    <div key={`${link.href}-${link.order}`} className="rounded-xl overflow-hidden">
+                      <div
+                        className={`flex h-12 items-center justify-between rounded-xl px-4 text-sm font-semibold tracking-wide transition-colors ${
+                          active
+                            ? "bg-primary/6 text-primary"
+                            : "text-stone-600 hover:bg-stone-50 hover:text-primary"
+                        }`}
+                      >
+                        <Link
+                          className="flex-1"
+                          href={link.href}
+                          onClick={closeMobileMenu}
+                        >
+                          {link.label}
+                        </Link>
+                        <button
+                          aria-expanded={mobileAboutExpanded}
+                          aria-label="Toggle About submenu"
+                          className="p-2 -mr-2 text-stone-500 hover:text-primary transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMobileAboutExpanded((prev) => !prev);
+                          }}
+                          type="button"
+                        >
+                          <ChevronDown
+                            className={`size-4 transition-transform duration-200 ${
+                              mobileAboutExpanded ? "rotate-180 text-primary" : ""
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      {mobileAboutExpanded && (
+                        <div className="ml-3 my-1 space-y-1 border-l-2 border-primary/20 pl-3 py-1">
+                          <Link
+                            className="block py-2 text-xs font-semibold text-stone-600 hover:text-primary"
+                            href="/about"
+                            onClick={closeMobileMenu}
+                          >
+                            About the Church (Overview)
+                          </Link>
+                          {aboutSubLinks.map((sub) => (
+                            <Link
+                              className={`block py-2 text-xs font-semibold transition-colors ${
+                                pathname === sub.href
+                                  ? "text-primary font-bold"
+                                  : "text-stone-600 hover:text-primary"
+                              }`}
+                              href={sub.href}
+                              key={sub.href}
+                              onClick={closeMobileMenu}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
                   <Link
                     aria-current={active ? "page" : undefined}
