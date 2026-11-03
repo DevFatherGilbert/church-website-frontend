@@ -1231,6 +1231,17 @@ export default async function HomeView() {
                               rel="noreferrer"
                               target="_blank"
                             >
+                              {item.iconUrl && (
+                                <Image
+                                  alt=""
+                                  aria-hidden="true"
+                                  className="size-4 rounded-sm object-contain"
+                                  height={16}
+                                  src={item.iconUrl}
+                                  unoptimized
+                                  width={16}
+                                />
+                              )}
                               {item.label} <ArrowUpRight className="size-3" />
                             </a>
                           ))

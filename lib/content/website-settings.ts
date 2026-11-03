@@ -54,7 +54,7 @@ export type ChurchInformation = {
   vision: { heading: string; statement: string; description: string; visible: boolean };
   coreValues: { title: string; description: string; order: number; visible: boolean }[];
   beliefs: { title: string; description: string; order: number; visible: boolean }[];
-  socialLinks: { label: string; url: string; visible: boolean }[];
+  socialLinks: { label: string; url: string; iconUrl?: string; visible: boolean }[];
 };
 export type WebsiteSettingRecord = { id: string; type: string; title: string; slug: string; description?: string | null; details: Record<string, unknown>; published: boolean; updatedAt?: string };
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Clock, LogIn, Mail, MapPin, Phone } from "lucide-react";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import { defaultHomepageSettings, getPublicWebsiteSettings } from "@/lib/content/website-settings";
@@ -192,6 +193,17 @@ export async function SiteFooter() {
                   rel="noreferrer"
                   target="_blank"
                 >
+                  {item.iconUrl && (
+                    <Image
+                      alt=""
+                      aria-hidden="true"
+                      className="size-4 rounded-sm bg-white object-contain p-0.5"
+                      height={16}
+                      src={item.iconUrl}
+                      unoptimized
+                      width={16}
+                    />
+                  )}
                   {item.label} <span aria-hidden="true">↗</span>
                 </a>
               ))

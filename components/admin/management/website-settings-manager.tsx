@@ -538,8 +538,35 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
     return <label className="block text-sm font-medium text-slate-700">{label}{required && <span className="text-red-600"> *</span>}{multiline ? <textarea className={areaClass} value={String(value ?? "")} onChange={(e) => path === "description" ? setRecord((old) => ({ ...old, description: e.target.value })) : setDetails(path, e.target.value)} maxLength={10000} /> : <input className={inputClass} required={required} value={String(value ?? "")} onChange={(e) => path === "title" ? setRecord((old) => ({ ...old, title: e.target.value })) : setDetails(path, e.target.value)} />}</label>;
   };
   const socialLinks = (record.details.socialLinks ?? []) as ChurchInformation["socialLinks"];
-  function updateSocial(index: number, key: "label" | "url" | "visible", value: string | boolean) {
-    setDetails("socialLinks", socialLinks.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item));
+  function updateSocial(index: number, key: "label" | "url" | "iconUrl" | "visible", value: string | boolean) {
+    setRecord((previous) => {
+      const details = structuredClone(previous.details);
+      details.socialLinks = (details.socialLinks ?? []).map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [key]: value } : item,
+      );
+      return { ...previous, details };
+    });
+  }
+  async function uploadSocialIcon(file: File | undefined, index: number) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type) || file.size > 15 * 1024 * 1024) {
+      setError("Choose a JPEG, PNG, WebP, or GIF image up to 15 MB.");
+      return;
+    }
+    setUploading(true);
+    setError("");
+    try {
+      const form = new FormData();
+      form.set("file", file);
+      const result = await authUpload<{ secureUrl?: string; url?: string }>("/media/upload?purpose=branding", form);
+      const url = result?.secureUrl || result?.url;
+      if (!url) throw new Error("The backend did not return an image URL.");
+      updateSocial(index, "iconUrl", url);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Social icon upload failed.");
+    } finally {
+      setUploading(false);
+    }
   }
   const navigation = record.details.siteHeader?.navigation ?? defaultHomepageSettings.siteHeader.navigation;
   function updateNavigation(index: number, key: "label" | "href" | "visible", value: string | boolean) {
@@ -843,8 +870,78 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
         />
 
         <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
-          <div className="space-y-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-lg font-semibold">Social media links</h2><p className="mt-1 text-sm text-slate-500">Visible links appear in the public footer.</p></div><button className="min-h-10 rounded-lg border border-primary px-4 text-sm font-semibold text-primary hover:bg-primary/5" onClick={() => setDetails("socialLinks", [...socialLinks, { label: "", url: "", visible: true }])} type="button">Add social link</button></div>
-            {socialLinks.map((item, index) => <div className="grid gap-3 rounded-xl border border-slate-200 p-4 sm:grid-cols-[1fr_2fr_auto_auto] sm:items-end" key={`social-${index}-${item.label}`}><label className="block text-sm font-medium text-slate-700">Platform / label<input className={inputClass} onChange={(e) => updateSocial(index, "label", e.target.value)} placeholder="Instagram" value={item.label} /></label><label className="block text-sm font-medium text-slate-700">Profile URL<input className={inputClass} onChange={(e) => updateSocial(index, "url", e.target.value)} placeholder="https://instagram.com/yourchurch" type="url" value={item.url} /></label><label className="flex min-h-11 items-center gap-2 text-sm"><input checked={item.visible} onChange={(e) => updateSocial(index, "visible", e.target.checked)} type="checkbox" />Visible</label><button aria-label={`Remove ${item.label || "social link"}`} className="min-h-11 rounded-lg border border-red-200 px-3 text-sm font-semibold text-red-700 hover:bg-red-50" onClick={() => setDetails("socialLinks", socialLinks.filter((_, itemIndex) => itemIndex !== index))} type="button">Remove</button></div>)}
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold">Social media links</h2>
+                <p className="mt-1 text-sm text-slate-500">Visible links appear on the homepage and in the public footer. Add an image of each platform to show its logo.</p>
+              </div>
+              <button
+                className="min-h-10 rounded-lg border border-primary px-4 text-sm font-semibold text-primary hover:bg-primary/5 disabled:opacity-60"
+                disabled={uploading}
+                onClick={() => setDetails("socialLinks", [...socialLinks, { label: "", url: "", visible: true }])}
+                type="button"
+              >
+                Add social link
+              </button>
+            </div>
+            {socialLinks.map((item, index) => (
+              <div className="space-y-4 rounded-xl border border-slate-200 p-4" key={`social-${index}-${item.label}`}>
+                <div className="grid gap-3 sm:grid-cols-[1fr_2fr_auto_auto] sm:items-end">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Platform / label
+                    <input className={inputClass} onChange={(e) => updateSocial(index, "label", e.target.value)} placeholder="Instagram" value={item.label} />
+                  </label>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Profile URL
+                    <input className={inputClass} onChange={(e) => updateSocial(index, "url", e.target.value)} placeholder="https://instagram.com/yourchurch" type="url" value={item.url} />
+                  </label>
+                  <label className="flex min-h-11 items-center gap-2 text-sm">
+                    <input checked={item.visible} onChange={(e) => updateSocial(index, "visible", e.target.checked)} type="checkbox" />
+                    Visible
+                  </label>
+                  <button
+                    aria-label={`Remove ${item.label || "social link"}`}
+                    className="min-h-11 rounded-lg border border-red-200 px-3 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+                    disabled={uploading}
+                    onClick={() => setDetails("socialLinks", socialLinks.filter((_, itemIndex) => itemIndex !== index))}
+                    type="button"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 border-t border-slate-100 pt-4">
+                  {item.iconUrl ? (
+                    <div className="flex items-center gap-3">
+                      <img alt="" aria-hidden="true" className="size-10 rounded-lg border border-slate-200 bg-white object-contain p-1" src={item.iconUrl} />
+                      <button
+                        className="min-h-10 rounded-lg border border-red-200 px-3 text-xs font-semibold text-red-700 hover:bg-red-50"
+                        onClick={() => updateSocial(index, "iconUrl", "")}
+                        type="button"
+                      >
+                        Remove image
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500">No platform image selected.</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <ImageUploadDropzone
+                      compact
+                      disabled={uploading}
+                      label={item.iconUrl ? "Replace platform image" : "Upload platform image"}
+                      onFile={(file) => void uploadSocialIcon(file, index)}
+                      uploading={uploading}
+                      helperText="JPEG, PNG, WebP, or GIF · up to 15 MB"
+                    />
+                    <MediaLibraryPicker
+                      label="Choose from media library"
+                      onSelect={(asset) => updateSocial(index, "iconUrl", asset.secureUrl)}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
             {socialLinks.length === 0 && <p className="rounded-lg bg-slate-50 p-4 text-sm text-slate-500">No social links added yet.</p>}
           </div>
         </section>
