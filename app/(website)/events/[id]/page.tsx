@@ -87,24 +87,15 @@ export default async function EventDetailPage({ params }: Props) {
           { label: "Events", href: "/events" },
           { label: name, href: `/events/${id}` },
         ]}
-        description={event?.description ?? "Details for this gathering will be shared when the event is confirmed."}
+        description=""
         eyebrow="EVENT DETAILS"
         title={name}
+        compact
       />
 
-      <section className="page-container section-space">
-        <div className="mb-8">
-          <Link
-            className="inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary transition"
-            href="/events"
-          >
-            <ArrowLeft className="size-4" />
-            Back to All Events
-          </Link>
-        </div>
-
-        <div className="grid gap-12 lg:grid-cols-[1fr_.40fr]">
-          <div className="space-y-8">
+      <section className="page-container py-8 sm:py-12">
+        <div className="grid gap-8 lg:grid-cols-[1fr_.40fr] lg:gap-12">
+          <div className="order-last space-y-8 lg:order-first">
             {event?.flyerUrl && (
               <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-border shadow-md">
                 <Image
@@ -156,7 +147,7 @@ export default async function EventDetailPage({ params }: Props) {
             )}
           </div>
 
-          <aside className="h-fit space-y-6">
+          <aside className="order-first h-fit space-y-6 lg:order-last">
             <div className="rounded-2xl border border-border bg-surface p-6 shadow-xs sm:p-8">
               <p className="text-xs font-bold uppercase tracking-wider text-muted">Plan Ahead</p>
               <dl className="mt-6 divide-y divide-border text-sm">
@@ -240,6 +231,13 @@ export default async function EventDetailPage({ params }: Props) {
             </div>
           </aside>
         </div>
+        <Link
+          className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary transition"
+          href="/events"
+        >
+          <ArrowLeft className="size-4" />
+          Back to All Events
+        </Link>
       </section>
     </main>
   );

@@ -75,10 +75,11 @@ export default async function ServicesPage() {
         emphasis="for you."
         eyebrow="GATHER WITH US"
         title="There’s always a place"
+        compact
       />
 
       {/* ── Regular Worship Services with Photography (SRS Section 12 & 26) ── */}
-      <section className="page-container py-16 sm:py-24">
+      <section className="page-container py-8 sm:py-12">
         <div className="max-w-2xl mb-12">
           <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
             REGULAR SERVICES

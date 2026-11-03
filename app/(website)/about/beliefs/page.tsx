@@ -91,7 +91,7 @@ export default async function BeliefsPage() {
       />
 
       {/* ── Intro Scripture Section ── */}
-      <section className="page-container py-16 sm:py-20">
+      <section className="page-container py-8 sm:py-12">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">

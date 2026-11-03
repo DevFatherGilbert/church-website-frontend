@@ -126,12 +126,12 @@ export async function SiteFooter() {
                   </Link>
                 </li>
               ))}
-              <li>
+              {/* <li>
                 <Link className="inline-flex items-center gap-1.5 font-semibold text-secondary-light hover:underline" href="/admin/login">
                   <LogIn className="size-3.5" aria-hidden="true" />
                   <span>Staff Portal</span>
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 

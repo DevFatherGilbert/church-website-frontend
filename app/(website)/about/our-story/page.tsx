@@ -66,7 +66,7 @@ export default async function OurStoryPage() {
       />
 
       {/* ── Story Narrative Section with Picture Feature ── */}
-      <section className="page-container py-16 sm:py-24">
+      <section className="page-container py-8 sm:py-12">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">

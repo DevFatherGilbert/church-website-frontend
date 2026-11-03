@@ -27,11 +27,12 @@ export function PrayerRequestPage() {
         emphasis="alone."
         eyebrow="PASTORAL PRAYER & CARE"
         title="You do not have to walk"
+        compact
       />
 
-      <section className="page-container py-16 sm:py-24 grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+      <section className="page-container grid gap-12 py-8 sm:py-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         {/* Left column — Visual assurances and scripture */}
-        <div className="space-y-8">
+        <div className="order-2 space-y-8 lg:order-1">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               SAFE & CONFIDENTIAL
@@ -83,7 +84,7 @@ export function PrayerRequestPage() {
         </div>
 
         {/* Right column — Submission Form */}
-        <div className="surface-card h-fit rounded-3xl p-7 sm:p-10 shadow-lg border border-primary/10">
+        <div className="surface-card order-1 h-fit rounded-3xl border border-primary/10 p-7 shadow-lg sm:p-10 lg:order-2">
           <div className="flex items-center gap-2 mb-2">
             <span className="size-2 rounded-full bg-secondary" />
             <p className="eyebrow text-primary text-xs font-bold uppercase tracking-wider">

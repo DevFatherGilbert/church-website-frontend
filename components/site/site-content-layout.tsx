@@ -28,7 +28,7 @@ export function SiteContentLayout({
         eyebrow={page.eyebrow}
         title={page.title}
       />
-      <section className="page-container py-16 sm:py-24">
+      <section className="page-container py-8 sm:py-12">
         <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
           <div className="min-w-0">
             <h2 className="font-headline text-3xl font-bold uppercase tracking-wide text-primary sm:text-4xl">

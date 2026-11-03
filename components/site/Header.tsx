@@ -94,6 +94,7 @@ export function HeaderView({
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [mobileAboutExpanded, setMobileAboutExpanded] = useState(false);
   
+  const siteHeaderRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavigationRef = useRef<HTMLDivElement>(null);
@@ -123,6 +124,24 @@ export function HeaderView({
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const header = siteHeaderRef.current;
+    if (!header) return;
+
+    const root = document.documentElement;
+    const updateHeaderHeight = () => {
+      root.style.setProperty("--site-header-height", `${header.getBoundingClientRect().height}px`);
+    };
+    const observer = new ResizeObserver(updateHeaderHeight);
+    observer.observe(header);
+    updateHeaderHeight();
+
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--site-header-height");
+    };
   }, []);
 
   // Dropdown hover timing
@@ -191,6 +210,7 @@ export function HeaderView({
 
   return (
     <header
+      ref={siteHeaderRef}
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-500 ${
         scrolled
       ? `bg-white/95 shadow-[0_10px_30px_-20px_rgba(22,45,82,0.35)] backdrop-blur-md border-b border-stone-200/80 ${showAnnouncement ? "py-0" : "py-1"}`

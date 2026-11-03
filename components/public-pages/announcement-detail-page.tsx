@@ -19,12 +19,13 @@ export async function AnnouncementDetailPage({ slug }: { slug: string }) {
           { label: "Announcements", href: "/announcements" },
           { label: title, href: `/announcements/${slug}` },
         ]}
-        description={item.description ?? ""}
+        description=""
         eyebrow="CHURCH ANNOUNCEMENT"
         title={title}
+        compact
       />
 
-      <article className="reading-container section-space">
+      <article className="reading-container py-4 sm:py-6">
         <div className="mb-8">
           <Link
             className="inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary transition"
@@ -71,10 +72,6 @@ export async function AnnouncementDetailPage({ slug }: { slug: string }) {
           )}
         </div>
 
-        <h1 className="mt-5 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          {title}
-        </h1>
-
         {item.description && (
           <div className="mt-6 whitespace-pre-line text-base leading-relaxed text-muted">
             {item.description}
@@ -94,4 +91,3 @@ export async function AnnouncementDetailPage({ slug }: { slug: string }) {
     </main>
   );
 }
-

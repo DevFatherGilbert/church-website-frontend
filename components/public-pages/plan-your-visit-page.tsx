@@ -40,7 +40,7 @@ export function PlanYourVisitPage({
     .join(", ");
 
   return (
-    <main className="bg-background">
+    <main className="flex flex-col bg-background">
       <PageHero
         breadcrumbs={[
           { label: "Home", href: "/" },
@@ -50,10 +50,11 @@ export function PlanYourVisitPage({
         emphasis="save you a seat."
         eyebrow="YOUR FIRST VISIT"
         title="Come as you are, we’ll"
+        compact
       />
 
       {/* ── Visual Experience Preview Section ── */}
-      <section className="page-container py-12 sm:py-20 border-b border-border/80">
+      <section className="order-2 page-container border-b border-border/80 py-12 sm:py-20">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
@@ -137,7 +138,7 @@ export function PlanYourVisitPage({
       </section>
 
       {/* ── Schedule & Form Section ── */}
-      <section className="page-container py-16 sm:py-24 grid gap-12 lg:grid-cols-2">
+      <section className="order-1 page-container grid gap-12 py-8 sm:py-12 lg:grid-cols-2">
         <div className="space-y-8">
           <div>
             <div className="flex items-center gap-2">

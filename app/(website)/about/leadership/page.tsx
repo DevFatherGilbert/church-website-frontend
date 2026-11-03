@@ -36,7 +36,7 @@ export default async function LeadershipPage() {
 
   return <main>
     <PageHero eyebrow="OUR LEADERSHIP" title="People who" emphasis="serve." description="Meet the people who support worship, ministry and care across the church community." breadcrumbs={[{ label: "Home", href: "/" }, { label: "About", href: "/about/our-story" }]} />
-    <section aria-label="Published church leaders" className="page-container section-space">
+    <section aria-label="Published church leaders" className="page-container py-8 sm:py-12">
       {leaders.length ? (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {leaders.map((leader) => (

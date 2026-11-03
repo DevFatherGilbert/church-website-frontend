@@ -80,7 +80,7 @@ export default async function MissionVisionPage() {
       />
 
       {/* ── Scripture Anchor Banner ── */}
-      <section className="bg-primary-dark text-white py-10 px-5 border-b border-secondary/30">
+      <section className="bg-primary-dark text-white py-4 px-5 border-b border-secondary/30">
         <div className="max-w-4xl mx-auto text-center">
           <p className="font-display text-xl sm:text-2xl font-medium italic text-secondary-light">
             “Where there is no vision, the people perish; but he that keepeth the law, happy is he.”
@@ -92,7 +92,7 @@ export default async function MissionVisionPage() {
       </section>
 
       {/* ── Mission & Vision Cards with Rich Photography ── */}
-      <section className="page-container py-16 sm:py-24">
+      <section className="page-container py-8 sm:py-12">
         <div className="grid gap-10 lg:grid-cols-2">
           {/* Mission Card */}
           <article className="group flex flex-col overflow-hidden rounded-3xl border border-primary/10 bg-white shadow-md transition-all hover:shadow-xl">

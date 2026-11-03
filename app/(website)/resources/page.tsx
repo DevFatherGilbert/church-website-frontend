@@ -106,9 +106,10 @@ export default async function ResourcesPage() {
         emphasis="your faith."
         eyebrow="CHRISTIAN RESOURCES"
         title="Tools to nurture"
+        compact
       />
 
-      <section aria-label="Published church resources" className="page-container py-16 sm:py-24">
+      <section aria-label="Published church resources" className="page-container py-8 sm:py-12">
         <div className="max-w-2xl mb-12">
           <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
             DIGITAL RESOURCE LIBRARY

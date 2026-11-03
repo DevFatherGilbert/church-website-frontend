@@ -23,8 +23,8 @@ export default async function MinistriesPage() {
   const items = apiItems && apiItems.length > 0 ? apiItems : DEFAULT_MINISTRIES;
 
   return <main>
-    <PageHero eyebrow="FIND YOUR PEOPLE" title="There’s more than" emphasis="one way in." description="Explore the ministries and groups that help people connect, grow in faith, and serve the community." breadcrumbs={[{ label: "Home", href: "/" }]} />
-    <section className="page-container section-space" aria-label="Published ministries">
+    <PageHero eyebrow="FIND YOUR PEOPLE" title="There’s more than" emphasis="one way in." description="Explore the ministries and groups that help people connect, grow in faith, and serve the community." breadcrumbs={[{ label: "Home", href: "/" }]} compact />
+    <section className="page-container py-8 sm:py-12" aria-label="Published ministries">
       {items?.length ? (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((ministry) => (

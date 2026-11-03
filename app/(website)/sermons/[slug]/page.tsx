@@ -117,21 +117,11 @@ export default async function SermonDetailPage({ params }: Props) {
         }
         eyebrow={`${sermon.category.toUpperCase()} · MESSAGE`}
         title={sermon.title}
+        compact
       />
 
       {/* Main Section */}
-      <section className="page-container section-space">
-        {/* Back Link */}
-        <div className="mb-8">
-          <Link
-            className="inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary transition"
-            href="/sermons"
-          >
-            <ArrowLeft className="size-4" />
-            Back to All Sermons
-          </Link>
-        </div>
-
+      <section className="page-container py-8 sm:py-12">
         <div className="grid gap-12 lg:grid-cols-[1fr_.40fr]">
           {/* Main Content Column */}
           <div className="space-y-10">
@@ -405,6 +395,13 @@ export default async function SermonDetailPage({ params }: Props) {
             </div>
           </aside>
         </div>
+        <Link
+          className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary transition"
+          href="/sermons"
+        >
+          <ArrowLeft className="size-4" />
+          Back to All Sermons
+        </Link>
       </section>
     </main>
   );

@@ -38,9 +38,10 @@ export default async function ContactPage({
         emphasis="hear from you."
         eyebrow="VISIT · CONNECT · PRAY"
         title="We’d love to"
+        compact
       />
 
-      <section className="page-container py-16 sm:py-24 grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      <section className="page-container grid gap-12 py-8 sm:py-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
         {/* Left column — church info with photo */}
         <aside className="space-y-6">
           <div>

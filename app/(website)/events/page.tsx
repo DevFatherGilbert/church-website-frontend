@@ -63,44 +63,10 @@ export default async function EventsPage() {
         title="Good things are"
         emphasis="coming up."
         description="Keep up with worship gatherings, conferences, retreats, community activities, youth programs and special celebrations."
+        compact
       />
-      {/* Event Type Photos */}
-      <section className="bg-surface-strong border-y border-border">
-        <div className="page-container py-10">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {EVENT_TYPE_PHOTOS.map(({ src, alt, label, desc }) => (
-              <div key={label} className="group relative overflow-hidden rounded-2xl aspect-[4/3] bg-primary-dark">
-                <Image
-                  src={src}
-                  alt={alt}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-85"
-                  sizes="(max-width: 640px) 100vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-4 left-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-white/70">{desc}</p>
-                  <p className="mt-0.5 text-base font-bold text-white">{label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-muted">
-            {[
-              { icon: Calendar, text: "Regular Sabbath gatherings" },
-              { icon: Clock, text: "Evening & midweek meetings" },
-              { icon: MapPin, text: "On-site & community locations" },
-            ].map(({ icon: Icon, text }) => (
-              <span key={text} className="flex items-center gap-2 font-medium">
-                <Icon className="size-4 text-primary" />
-                {text}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section className="page-container section-space">
+      <section className="page-container py-8 sm:py-12">
         {events?.length ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
@@ -199,6 +165,41 @@ export default async function EventsPage() {
             </Link>
           </div>
         )}
+      </section>
+
+      <section className="bg-surface-strong border-y border-border">
+        <div className="page-container py-10">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {EVENT_TYPE_PHOTOS.map(({ src, alt, label, desc }) => (
+              <div key={label} className="group relative overflow-hidden rounded-2xl aspect-[4/3] bg-primary-dark">
+                <Image
+                  src={src}
+                  alt={alt}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-85"
+                  sizes="(max-width: 640px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-4 left-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-white/70">{desc}</p>
+                  <p className="mt-0.5 text-base font-bold text-white">{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-muted">
+            {[
+              { icon: Calendar, text: "Regular Sabbath gatherings" },
+              { icon: Clock, text: "Evening & midweek meetings" },
+              { icon: MapPin, text: "On-site & community locations" },
+            ].map(({ icon: Icon, text }) => (
+              <span key={text} className="flex items-center gap-2 font-medium">
+                <Icon className="size-4 text-primary" />
+                {text}
+              </span>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   );

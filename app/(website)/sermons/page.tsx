@@ -65,9 +65,14 @@ export default async function SermonsPage() {
         emphasis="way ahead."
         eyebrow="SERMONS & TEACHINGS"
         title="Words for the"
+        compact
       />
 
-      {/* Visual Feature Strip */}
+      {/* Sermon Library */}
+      <section className="page-container py-8 sm:py-12">
+        <SermonLibrary sermons={sermons ?? []} />
+      </section>
+
       <section className="bg-surface-strong border-y border-border">
         <div className="page-container py-10">
           <div className="grid gap-4 sm:grid-cols-3">
@@ -102,11 +107,6 @@ export default async function SermonsPage() {
             ))}
           </div>
         </div>
-      </section>
-
-      {/* Sermon Library */}
-      <section className="page-container section-space">
-        <SermonLibrary sermons={sermons ?? []} />
       </section>
 
       {/* Bottom CTA */}

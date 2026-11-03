@@ -66,19 +66,10 @@ export async function MinistryDetail({ slug }: { slug: string }) {
         description={ministry.description}
         eyebrow="FIND YOUR PEOPLE"
         title={ministry.name}
+        compact
       />
 
-      <section className="page-container section-space">
-        <div className="mb-8">
-          <Link
-            className="inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary transition"
-            href="/ministries"
-          >
-            <ArrowLeft className="size-4" />
-            Back to All Ministries
-          </Link>
-        </div>
-
+      <section className="page-container py-8 sm:py-12">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]">
           <div className="space-y-6">
             {ministry.imageUrl && (
@@ -186,6 +177,13 @@ export async function MinistryDetail({ slug }: { slug: string }) {
             </div>
           </aside>
         </div>
+        <Link
+          className="mx-auto mt-8 inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-primary transition"
+          href="/ministries"
+        >
+          <ArrowLeft className="size-4" />
+          Back to All Ministries
+        </Link>
       </section>
     </main>
   );
