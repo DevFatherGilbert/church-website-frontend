@@ -85,7 +85,7 @@ export default async function AboutPage() {
       <section className="page-container py-16 sm:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               ABOUT OUR CONGREGATION
             </p>
             <h2 className="font-headline mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-wide text-primary leading-tight">
@@ -153,7 +153,7 @@ export default async function AboutPage() {
       <section className="bg-surface-strong/60 py-16 sm:py-24 border-y border-border/80">
         <div className="page-container">
           <div className="max-w-2xl">
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               DISCOVER MORE
             </p>
             <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -184,10 +184,10 @@ export default async function AboutPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent" />
                     <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between">
-                      <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-stone-950">
+                      <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-secondary-foreground">
                         {item.eyebrow}
                       </span>
-                      <div className="flex size-9 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-md transition-colors group-hover:bg-secondary group-hover:text-stone-950">
+                      <div className="flex size-9 items-center justify-center rounded-xl bg-white/20 text-white backdrop-blur-md transition-colors group-hover:bg-secondary group-hover:text-secondary-foreground">
                         <Icon className="size-4" />
                       </div>
                     </div>
@@ -219,7 +219,7 @@ export default async function AboutPage() {
         <div className="relative overflow-hidden rounded-3xl bg-primary-dark p-8 text-white sm:p-12 lg:p-14">
           <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-secondary-light">
                 JOIN OUR CHURCH FAMILY
               </p>
               <h3 className="font-display mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold">

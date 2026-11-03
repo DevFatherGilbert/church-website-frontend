@@ -312,7 +312,7 @@ export function AdminLoginForm({ initialStep = "login", basePath = "" }: { initi
           </div>
 
           <label className="mb-4 flex items-start gap-3 text-sm leading-6 text-muted cursor-pointer">
-            <input className="mt-1 size-4 accent-amber-600 rounded" name="acceptTerms" required type="checkbox" />
+            <input className="mt-1 size-4 accent-primary rounded" name="acceptTerms" required type="checkbox" />
             <span>I agree to the terms of use and privacy policy.</span>
           </label>
 

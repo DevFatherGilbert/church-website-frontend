@@ -94,7 +94,7 @@ export default async function BeliefsPage() {
       <section className="page-container py-16 sm:py-20">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               OUR SPIRITUAL FOUNDATION
             </p>
             <h2 className="font-headline mt-3 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary leading-tight">
@@ -120,7 +120,7 @@ export default async function BeliefsPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-transparent to-transparent" />
             <div className="absolute bottom-5 left-6 right-6 text-white">
-              <p className="text-xs font-bold uppercase tracking-widest text-secondary">
+              <p className="text-xs font-bold uppercase tracking-widest text-primary">
                 THE LIVING WORD
               </p>
               <p className="font-display mt-1 text-lg font-bold">
@@ -135,7 +135,7 @@ export default async function BeliefsPage() {
       <section className="bg-surface-strong/70 py-16 sm:py-24 border-y border-border/80">
         <div className="page-container">
           <div className="max-w-2xl mb-12">
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               FUNDAMENTAL PILLARS
             </p>
             <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -162,7 +162,7 @@ export default async function BeliefsPage() {
                       <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                         <IconComp className="size-5" />
                       </div>
-                      <span className="rounded-full bg-secondary/30 px-3 py-1 text-[11px] font-bold text-amber-950 uppercase tracking-wider">
+                      <span className="rounded-full bg-secondary/15 px-3 py-1 text-[11px] font-bold text-primary uppercase tracking-wider">
                         Pillar 0{idx + 1}
                       </span>
                     </div>

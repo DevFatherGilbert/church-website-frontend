@@ -18,10 +18,10 @@ export function ServiceUnavailable({ onRetry }: { onRetry?: () => void }) {
     <main className="relative isolate flex min-h-[70svh] items-center justify-center overflow-hidden bg-[hsl(var(--brand-primary-dark))] px-5 py-20 text-white sm:px-8">
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,hsl(var(--brand-secondary)/.2),transparent_42%),radial-gradient(ellipse_at_bottom_left,hsl(var(--brand-primary)/.8),transparent_55%)]" />
       <div className="w-full max-w-2xl text-center">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-secondary shadow-2xl shadow-black/10">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-secondary-light shadow-2xl shadow-black/10">
           <Church aria-hidden="true" className="size-8" />
         </div>
-        <p className="eyebrow mt-8 text-secondary">A brief pause</p>
+        <p className="eyebrow mt-8 text-secondary-light">A brief pause</p>
         <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">
           We’ll be back shortly.
         </h1>

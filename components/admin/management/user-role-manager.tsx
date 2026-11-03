@@ -385,7 +385,7 @@ export function UserRoleManager() {
                         )}
 
                         {user.role === "admin" ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold text-amber-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
                             <Crown className="size-3" /> Administrator
                           </span>
                         ) : (

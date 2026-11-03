@@ -623,7 +623,7 @@ export function AnnouncementManager() {
                     />
                   )}
                   {imageUrl && !isCloudinaryImageUrl(imageUrl) && (
-                    <p className="mt-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                    <p className="mt-2 rounded-2xl border border-primary/20 bg-primary/5 p-3 text-xs text-primary">
                       This image is not stored in Cloudinary. Replace it with a new upload before saving.
                     </p>
                   )}

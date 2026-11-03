@@ -38,7 +38,7 @@ export function PageHero({
                   )}
                   <Link
                     href={item.href}
-                    className="transition-colors hover:text-secondary"
+                    className="transition-colors hover:text-secondary-light"
                   >
                     {item.label}
                   </Link>
@@ -48,7 +48,7 @@ export function PageHero({
           </nav>
         )}
 
-        <div className="inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-3.5 py-1 text-[11px] font-bold tracking-widest text-secondary uppercase backdrop-blur-sm">
+        <div className="inline-flex items-center gap-2 rounded-full border border-secondary-light/30 bg-secondary-light/10 px-3.5 py-1 text-[11px] font-bold tracking-widest text-secondary-light uppercase backdrop-blur-sm">
           <span className="size-1.5 rounded-full bg-secondary animate-pulse" />
           {eyebrow}
         </div>
@@ -56,7 +56,7 @@ export function PageHero({
         <h1 className="mt-5 max-w-4xl font-display text-[clamp(2.5rem,6vw,4.25rem)] font-extrabold leading-[1.08] tracking-[-0.03em] text-white">
           {title}
           {emphasis && (
-            <span className="bg-gradient-to-r from-secondary via-amber-200 to-secondary bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-secondary-light via-white to-secondary-light bg-clip-text text-transparent">
               {" "}
               {emphasis}
             </span>
@@ -76,4 +76,3 @@ export function PageHero({
     </section>
   );
 }
-

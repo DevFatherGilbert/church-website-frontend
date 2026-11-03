@@ -34,10 +34,10 @@ export async function SiteFooter() {
                 />
               </div>
               <div>
-                <span className="block font-display text-2xl font-bold tracking-tight text-white transition-colors group-hover:text-secondary">
+                <span className="block font-display text-2xl font-bold tracking-tight text-white transition-colors group-hover:text-secondary-light">
                   {displayChurchName}
                 </span>
-                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-secondary">
+                <span className="block text-xs font-semibold uppercase tracking-[0.16em] text-secondary-light">
                   {footer.tagline}
                 </span>
               </div>
@@ -55,7 +55,7 @@ export async function SiteFooter() {
               {footer.visitCtaLabel} <span aria-hidden="true">→</span>
             </Link>
             <Link
-              className="button border border-secondary/50 bg-secondary/10 text-xs uppercase tracking-wider font-bold text-secondary hover:bg-secondary/20"
+              className="button border border-secondary-light/50 bg-secondary-light/10 text-xs uppercase tracking-wider font-bold text-secondary-light hover:bg-secondary-light/20"
               href={footer.prayerCtaHref}
             >
               {footer.prayerCtaLabel}
@@ -80,7 +80,7 @@ export async function SiteFooter() {
             <ul className="mt-5 space-y-3 text-sm">
               {churchLinks.map((item) => (
                 <li key={item.label}>
-                  <Link className="text-slate-400 transition-colors hover:text-secondary" href={item.href}>
+                  <Link className="text-slate-400 transition-colors hover:text-secondary-light" href={item.href}>
                     {item.label}
                   </Link>
                 </li>
@@ -97,7 +97,7 @@ export async function SiteFooter() {
             <ul className="mt-5 space-y-3 text-sm">
               {ministryLinks.map((item) => (
                 <li key={item.label}>
-                  <Link className="text-slate-400 transition-colors hover:text-secondary" href={item.href}>
+                  <Link className="text-slate-400 transition-colors hover:text-secondary-light" href={item.href}>
                     {item.label}
                   </Link>
                 </li>
@@ -114,20 +114,20 @@ export async function SiteFooter() {
             <ul className="mt-5 space-y-3 text-sm">
               {resourceLinks.map((item) => (
                 <li key={item.label}>
-                  <Link className="text-slate-400 transition-colors hover:text-secondary" href={item.href}>
+                  <Link className="text-slate-400 transition-colors hover:text-secondary-light" href={item.href}>
                     {item.label}
                   </Link>
                 </li>
               ))}
               {supportLinks.map((item) => (
                 <li key={item.label}>
-                  <Link className="text-slate-400 transition-colors hover:text-secondary" href={item.href}>
+                  <Link className="text-slate-400 transition-colors hover:text-secondary-light" href={item.href}>
                     {item.label}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link className="inline-flex items-center gap-1.5 font-semibold text-secondary hover:underline" href="/admin/login">
+                <Link className="inline-flex items-center gap-1.5 font-semibold text-secondary-light hover:underline" href="/admin/login">
                   <LogIn className="size-3.5" aria-hidden="true" />
                   <span>Staff Portal</span>
                 </Link>
@@ -143,7 +143,7 @@ export async function SiteFooter() {
             </div>
             <div className="mt-5 space-y-4 text-xs leading-relaxed text-slate-400">
               <div className="flex items-start gap-2.5">
-                <Clock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-secondary" />
+                <Clock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-secondary-light" />
                 <div>
                   <span className="block font-semibold text-white">{footer.serviceTitle}</span>
                   <span className="block text-slate-400">{footer.serviceSummary}</span>
@@ -152,14 +152,14 @@ export async function SiteFooter() {
 
               {(church.contact.address || location) && (
                 <div className="flex items-start gap-2.5">
-                  <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-secondary" />
+                  <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-secondary-light" />
                   <span>{[church.contact.address, location].filter(Boolean).join(", ")}</span>
                 </div>
               )}
 
               {church.contact.phone && (
                 <div className="flex items-center gap-2.5">
-                  <Phone aria-hidden="true" className="size-4 shrink-0 text-secondary" />
+                  <Phone aria-hidden="true" className="size-4 shrink-0 text-secondary-light" />
                   <a className="transition-colors hover:text-white" href={`tel:${church.contact.phone}`}>
                     {church.contact.phone}
                   </a>
@@ -168,7 +168,7 @@ export async function SiteFooter() {
 
               {church.contact.email && (
                 <div className="flex items-center gap-2.5">
-                  <Mail aria-hidden="true" className="size-4 shrink-0 text-secondary" />
+                  <Mail aria-hidden="true" className="size-4 shrink-0 text-secondary-light" />
                   <a className="transition-colors hover:text-white" href={`mailto:${church.contact.email}`}>
                     {church.contact.email}
                   </a>
@@ -187,7 +187,7 @@ export async function SiteFooter() {
             {socials.length > 0 ? (
               socials.map((item) => (
                 <a
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 font-medium text-slate-300 transition-colors hover:border-secondary/60 hover:text-secondary"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 font-medium text-slate-300 transition-colors hover:border-secondary-light/60 hover:text-secondary-light"
                   href={item.url}
                   key={`${item.label}-${item.url}`}
                   rel="noreferrer"
@@ -210,7 +210,7 @@ export async function SiteFooter() {
             ) : <span className="text-xs text-slate-400">{footer.emptySocialText}</span>}
           </div>
           <a
-            className="inline-flex items-center gap-1 text-slate-400 transition-colors hover:text-secondary"
+            className="inline-flex items-center gap-1 text-slate-400 transition-colors hover:text-secondary-light"
             href="#top"
           >
             {footer.backToTopLabel} <span aria-hidden="true">↑</span>
@@ -223,7 +223,7 @@ export async function SiteFooter() {
             © {new Date().getFullYear()} {displayChurchName}. {footer.copyrightSuffix}
           </span>
           <nav className="flex flex-wrap items-center gap-6" aria-label="Legal navigation">
-            <Link className="inline-flex items-center gap-1.5 font-semibold text-slate-400 transition-colors hover:text-secondary" href="/admin/login">
+            <Link className="inline-flex items-center gap-1.5 font-semibold text-slate-400 transition-colors hover:text-secondary-light" href="/admin/login">
               <LogIn className="size-3.5" aria-hidden="true" />
               <span>Staff Login</span>
             </Link>

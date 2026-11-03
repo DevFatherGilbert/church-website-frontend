@@ -105,7 +105,7 @@ export function SidebarView({ isOpen, onClose }: SidebarViewProps) {
               key={href}
               onClick={onClose}
             >
-              <Icon aria-hidden="true" className={`size-[18px] shrink-0 ${active ? "text-amber-400" : "text-slate-400"}`} />
+              <Icon aria-hidden="true" className={`size-[18px] shrink-0 ${active ? "text-primary" : "text-slate-400"}`} />
               <span>{label}</span>
             </Link>;
           })}

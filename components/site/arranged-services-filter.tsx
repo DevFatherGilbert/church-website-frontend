@@ -80,7 +80,7 @@ export function ArrangedServicesFilter({ services }: { services: ChurchService[]
               }`}
             >
               {isMainWorship && (
-                <div className="absolute top-0 right-0 rounded-bl-xl bg-primary px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-secondary">
+                <div className="absolute top-0 right-0 rounded-bl-xl bg-primary px-3.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
                   Primary Gathering
                 </div>
               )}
@@ -89,7 +89,7 @@ export function ArrangedServicesFilter({ services }: { services: ChurchService[]
                 {/* Badge Row */}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/15 border border-secondary/30 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-primary">
-                    <Sparkles className="size-3 text-secondary" />
+                    <Sparkles className="size-3 text-primary" />
                     {service.serviceType || "Regular Service"}
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500">

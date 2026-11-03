@@ -10,44 +10,46 @@ export function ArrangedAudienceStrip({ cards }: { cards: HomepageLinkCard[] }) 
   if (!visibleCards.length) return null;
 
   return (
-    <section aria-label="Quick Access Gateways" className="relative z-20 border-b border-border/80 bg-white">
+    <section aria-label="Quick Access Gateways" className="relative z-20 -mt-14 sm:-mt-16 lg:-mt-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Desktop: 4-column balanced grid with border dividers; Mobile: horizontal swipeable snap strip */}
-        <div className="flex overflow-x-auto py-3 gap-3 scrollbar-none snap-x snap-mandatory sm:py-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-border/60">
-          {visibleCards.map((item) => {
-            const Icon = iconById[item.id] ?? Sparkles;
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                className="group relative flex min-w-[280px] flex-1 flex-col justify-between rounded-xl border border-border/70 bg-surface p-5 transition-all duration-300 hover:border-secondary/50 hover:bg-surface-strong/50 hover:shadow-md sm:min-w-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-6 lg:p-7 snap-start"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-secondary">
-                      {item.eyebrow}
-                    </span>
-                    <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-secondary group-hover:scale-105">
-                      <Icon className="size-4" aria-hidden="true" />
+        <div className="overflow-hidden rounded-2xl border border-border/70 bg-white shadow-[0_24px_70px_-20px_rgba(0,0,0,0.28)]">
+          {/* Desktop: 4-column balanced grid with border dividers; Mobile: horizontal swipeable snap strip */}
+          <div className="flex overflow-x-auto py-3 gap-3 scrollbar-none snap-x snap-mandatory sm:py-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-border/60">
+            {visibleCards.map((item) => {
+              const Icon = iconById[item.id] ?? Sparkles;
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className="group relative flex min-w-[280px] flex-1 flex-col justify-between rounded-xl border border-border/70 bg-surface p-5 transition-all duration-300 hover:border-secondary/50 hover:bg-surface-strong/50 hover:shadow-md sm:min-w-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-6 lg:p-7 snap-start"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-primary">
+                        {item.eyebrow}
+                      </span>
+                      <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:scale-105">
+                        <Icon className="size-4" aria-hidden="true" />
+                      </div>
                     </div>
+
+                    <h3 className="mt-3 font-display text-lg font-bold text-text group-hover:text-primary transition-colors">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted line-clamp-2">
+                      {item.description}
+                    </p>
                   </div>
 
-                  <h3 className="mt-3 font-display text-lg font-bold text-text group-hover:text-primary transition-colors">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-1.5 text-xs leading-relaxed text-muted line-clamp-2">
-                    {item.description}
-                  </p>
-                </div>
-
-                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary group-hover:text-secondary transition-colors">
-                  <span>{item.cta}</span>
-                  <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
-                </div>
-              </Link>
-            );
-          })}
+                  <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary group-hover:text-primary-hover transition-colors">
+                    <span>{item.cta}</span>
+                    <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

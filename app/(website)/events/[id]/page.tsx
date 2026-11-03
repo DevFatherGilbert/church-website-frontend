@@ -129,8 +129,8 @@ export default async function EventDetailPage({ params }: Props) {
             </div>
 
             {event?.registrationInfo && (
-              <div className="rounded-2xl border border-amber-200/60 bg-amber-50/50 p-6 dark:border-amber-900/40 dark:bg-amber-950/20">
-                <h3 className="flex items-center gap-2 font-display text-base font-bold text-amber-950 dark:text-amber-200">
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+                <h3 className="flex items-center gap-2 font-display text-base font-bold text-primary">
                   <CheckCircle2 className="size-5 text-primary" />
                   Registration Information
                 </h3>

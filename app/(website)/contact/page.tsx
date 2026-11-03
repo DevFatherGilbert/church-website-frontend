@@ -44,7 +44,7 @@ export default async function ContactPage({
         {/* Left column — church info with photo */}
         <aside className="space-y-6">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               GET IN TOUCH
             </p>
             <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -68,7 +68,7 @@ export default async function ContactPage({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent" />
             <div className="absolute bottom-4 left-5 right-5 text-white">
-              <span className="block text-xs font-bold uppercase tracking-wider text-secondary">
+              <span className="block text-xs font-bold uppercase tracking-wider text-primary">
                 Our Church Sanctuary
               </span>
               <p className="font-display mt-0.5 text-sm font-semibold text-white/90">

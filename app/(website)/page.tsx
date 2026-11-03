@@ -105,7 +105,7 @@ function SectionHeading({
 }) {
   return (
     <header className={`max-w-2xl ${align === "center" ? "mx-auto text-center" : ""}`}>
-      <p className={`text-xs font-extrabold uppercase tracking-[0.24em] ${light ? "text-secondary" : "text-secondary"}`}>
+      <p className={`text-xs font-extrabold uppercase tracking-[0.24em] ${light ? "text-secondary-light" : "text-primary"}`}>
         {eyebrow}
       </p>
       <h2
@@ -312,7 +312,7 @@ export default async function HomeView() {
           {/* Account for fixed header (~90px) + announcement banner (~40px) */}
           <div className={`${container} relative z-10 pb-20 pt-44 sm:pb-28 sm:pt-52 lg:pt-56`}>
             <div className="max-w-3xl">
-              <div className="glass-pill-gold inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-secondary shadow-sm">
+              <div className="glass-pill-accent inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-secondary-light shadow-sm">
                 <span className="size-2 rounded-full bg-secondary animate-pulse" />
                 <span>{churchName || "A Community of Faith"}</span>
               </div>
@@ -347,15 +347,15 @@ export default async function HomeView() {
 
               {(publicServices[0] || church.contact.address || location) && (
                 <div className="glass-pill mt-12 flex flex-wrap items-center gap-6 rounded-2xl p-4 text-xs text-white/90 shadow-lg sm:p-5">
-                  {publicServices[0] && <span className="flex items-center gap-2.5 font-medium"><Clock3 aria-hidden="true" className="size-4 shrink-0 text-secondary" /><span>{publicServices[0].title}: <strong className="font-bold text-white">{formatServiceDate(publicServices[0])} · {formatServiceTime(publicServices[0])}</strong></span></span>}
-                  {(church.contact.address || location) && <span className="flex items-center gap-2.5 font-medium"><MapPin aria-hidden="true" className="size-4 shrink-0 text-secondary" /><span className="truncate">{[church.contact.address, location].filter(Boolean).join(", ")}</span></span>}
+                  {publicServices[0] && <span className="flex items-center gap-2.5 font-medium"><Clock3 aria-hidden="true" className="size-4 shrink-0 text-secondary-light" /><span>{publicServices[0].title}: <strong className="font-bold text-white">{formatServiceDate(publicServices[0])} · {formatServiceTime(publicServices[0])}</strong></span></span>}
+                  {(church.contact.address || location) && <span className="flex items-center gap-2.5 font-medium"><MapPin aria-hidden="true" className="size-4 shrink-0 text-secondary-light" /><span className="truncate">{[church.contact.address, location].filter(Boolean).join(", ")}</span></span>}
                 </div>
               )}
             </div>
 
             <a
               aria-label="Explore the homepage"
-              className="absolute bottom-8 right-10 hidden items-center gap-3 text-xs font-semibold uppercase tracking-[.18em] text-white/70 transition-colors hover:text-secondary lg:inline-flex"
+              className="absolute bottom-8 right-10 hidden items-center gap-3 text-xs font-semibold uppercase tracking-[.18em] text-white/70 transition-colors hover:text-secondary-light lg:inline-flex"
               href="#welcome"
             >
               Explore <ArrowDown aria-hidden="true" className="size-4" />
@@ -384,7 +384,7 @@ export default async function HomeView() {
                 {/* Left Column: Heading, description, pillars, CTAs */}
                 <div className="lg:py-4">
                   <header>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
                       {config.eyebrow || "WELCOME TO"}
                     </p>
                     <h2 className="font-headline mt-3 text-4xl sm:text-5xl lg:text-6xl font-bold uppercase tracking-wide text-primary leading-[1.12]">
@@ -439,7 +439,7 @@ export default async function HomeView() {
                     </div>)}
                   </div>
 
-                  {/* Floating Gold Quote Pill */}
+                  {/* Floating Quote Pill */}
                   <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:-bottom-5 sm:right-6 rounded-2xl bg-secondary px-6 py-3.5 shadow-xl border-2 border-white">
                     <p className="font-display text-sm sm:text-base font-bold text-stone-950 italic whitespace-nowrap">
                       “{config.quote || "Come as you are — there’s a place for you."}”
@@ -458,7 +458,7 @@ export default async function HomeView() {
               <div className={container}>
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10 pb-6 border-b border-border/40">
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+                    <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
                       {factsSettings.eyebrow || "MORE ABOUT US"}
                     </p>
                     <h2 className="font-headline mt-2 text-3xl sm:text-4xl text-primary font-bold uppercase tracking-wide">
@@ -607,7 +607,7 @@ export default async function HomeView() {
                     {/* Mission & Vision from SRS Sections 14 & 15 */}
                     <div className="mt-10 space-y-6">
                       <div className="border-l-4 border-secondary pl-5">
-                        <p className="eyebrow text-secondary uppercase tracking-wider text-xs font-bold">
+                        <p className="eyebrow text-secondary-light uppercase tracking-wider text-xs font-bold">
                           {church.mission.heading || "Our Mission"}
                         </p>
                         <p className="mt-2 font-display text-xl leading-snug font-semibold text-white sm:text-2xl">
@@ -615,8 +615,8 @@ export default async function HomeView() {
                         </p>
                       </div>
 
-                      <div className="border-l-4 border-amber-400/60 pl-5">
-                        <p className="eyebrow text-secondary uppercase tracking-wider text-xs font-bold">
+                      <div className="border-l-4 border-secondary/60 pl-5">
+                        <p className="eyebrow text-secondary-light uppercase tracking-wider text-xs font-bold">
                           {church.vision.heading || "Our Vision"}
                         </p>
                         <p className="mt-2 font-display text-xl leading-snug font-semibold text-white sm:text-2xl">
@@ -629,13 +629,13 @@ export default async function HomeView() {
                   {/* Core Values (SRS Section 16) */}
                   <div>
                     <div className="flex items-center gap-2 mb-6">
-                      <Sparkles aria-hidden="true" className="size-5 text-secondary" />
-                      <h3 className="eyebrow text-secondary uppercase tracking-wider text-xs font-bold">Our Core Values</h3>
+                      <Sparkles aria-hidden="true" className="size-5 text-secondary-light" />
+                      <h3 className="eyebrow text-secondary-light uppercase tracking-wider text-xs font-bold">Our Core Values</h3>
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                       {values.map((value) => (
                         <article className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm" key={value.title}>
-                          <p className="text-sm font-bold uppercase tracking-wider text-secondary">{value.title}</p>
+                          <p className="text-sm font-bold uppercase tracking-wider text-secondary-light">{value.title}</p>
                           <p className="mt-2 text-xs leading-relaxed text-white/75">{value.description}</p>
                         </article>
                       ))}
@@ -648,11 +648,11 @@ export default async function HomeView() {
                     const icons = [BookOpen, Heart, Users, Sparkles];
                     const IconComponent = icons[index % icons.length];
                     return <Link className="group rounded-xl border border-white/15 bg-white/5 p-6 transition-colors hover:border-secondary hover:bg-white/10" href={card.href} key={card.id}>
-                      <IconComponent aria-hidden="true" className="size-6 text-secondary" />
-                      {card.eyebrow && <span className="mt-3 block text-[10px] font-bold uppercase tracking-wider text-secondary">{card.eyebrow}</span>}
-                      <h4 className="mt-2 font-display text-lg font-bold text-white group-hover:text-secondary">{card.title}</h4>
+                      <IconComponent aria-hidden="true" className="size-6 text-secondary-light" />
+                      {card.eyebrow && <span className="mt-3 block text-[10px] font-bold uppercase tracking-wider text-secondary-light">{card.eyebrow}</span>}
+                      <h4 className="mt-2 font-display text-lg font-bold text-white group-hover:text-secondary-light">{card.title}</h4>
                       <p className="mt-2 text-xs leading-relaxed text-white/70">{card.description}</p>
-                      <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-secondary">{card.cta} <ArrowRight aria-hidden="true" className="size-3.5" /></span>
+                      <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-secondary-light">{card.cta} <ArrowRight aria-hidden="true" className="size-3.5" /></span>
                     </Link>;
                   })}
                 </div>
@@ -713,8 +713,8 @@ export default async function HomeView() {
                           </h3>
 
                           {ministry.meetingSchedule && (
-                            <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-secondary">
-                              <Clock3 className="size-3.5 text-secondary shrink-0" />
+                            <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-primary">
+                              <Clock3 className="size-3.5 text-primary shrink-0" />
                               <span>{ministry.meetingSchedule}</span>
                             </p>
                           )}
@@ -787,7 +787,7 @@ export default async function HomeView() {
                                 unoptimized
                               />
                               <div className="absolute top-3 left-3 flex flex-col items-center rounded-xl bg-white/95 px-3 py-1.5 shadow-md backdrop-blur-xs text-center min-w-[50px]">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-secondary">
+                                <span className="text-[10px] font-black uppercase tracking-wider text-primary">
                                   {monthStr}
                                 </span>
                                 <span className="text-lg font-black leading-none text-stone-900">
@@ -798,14 +798,14 @@ export default async function HomeView() {
                           ) : (
                             <div className="relative p-6 pb-0 flex items-center gap-3">
                               <div className="flex flex-col items-center rounded-xl bg-primary px-3.5 py-2 text-center text-white min-w-[55px] shadow-sm">
-                                <span className="text-[10px] font-extrabold uppercase tracking-wider text-secondary">
+                                <span className="text-[10px] font-extrabold uppercase tracking-wider text-secondary-light">
                                   {monthStr}
                                 </span>
                                 <span className="text-xl font-black leading-none">
                                   {dayStr}
                                 </span>
                               </div>
-                              <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+                              <span className="text-xs font-bold uppercase tracking-wider text-primary">
                                 Upcoming Gathering
                               </span>
                             </div>
@@ -821,7 +821,7 @@ export default async function HomeView() {
                               )}
                               {event.location && (
                                 <span className="flex items-center gap-1 truncate text-stone-600">
-                                  <MapPin className="size-3.5 text-secondary shrink-0" />
+                                  <MapPin className="size-3.5 text-primary shrink-0" />
                                   <span className="truncate">{event.location}</span>
                                 </span>
                               )}
@@ -892,7 +892,7 @@ export default async function HomeView() {
                             unoptimized
                           />
                         ) : (
-                          <div className="grid h-full place-items-center bg-primary-dark text-secondary">
+                          <div className="grid h-full place-items-center bg-primary-dark text-secondary-light">
                             <Play className="size-10 fill-secondary" />
                           </div>
                         )}
@@ -934,12 +934,12 @@ export default async function HomeView() {
                             {sermon.videoUrl && (
                               <a
                                 aria-label={`Watch ${sermon.title}`}
-                                className="inline-flex size-8 items-center justify-center rounded-full bg-secondary/40 text-amber-950 transition hover:bg-secondary"
+                                className="inline-flex size-8 items-center justify-center rounded-full bg-secondary/40 text-secondary-foreground transition hover:bg-secondary"
                                 href={sermon.videoUrl}
                                 rel="noreferrer"
                                 target="_blank"
                               >
-                                <Play className="size-4 fill-amber-950" />
+                                <Play className="size-4 fill-secondary-foreground" />
                               </a>
                             )}
                           </div>
@@ -990,7 +990,7 @@ export default async function HomeView() {
                         className={`group grid gap-4 rounded-2xl border border-stone-100 border-l-4 ${borderColor} bg-white p-6 shadow-xs transition-all hover:shadow-sm sm:grid-cols-[1fr_auto] sm:items-center sm:p-7`}
                       >
                         <div>
-                          <span className="inline-block rounded-full bg-amber-100 px-3 py-0.5 text-[11px] font-bold text-amber-900 uppercase tracking-wider">
+                          <span className="inline-block rounded-full bg-secondary/15 px-3 py-0.5 text-[11px] font-bold text-primary uppercase tracking-wider">
                             {text(item.details.category).replaceAll("_", " ") || "Church Update"}
                           </span>
                           <h3 className="mt-2 font-display text-xl font-bold transition-colors group-hover:text-primary sm:text-2xl">
@@ -1042,7 +1042,7 @@ export default async function HomeView() {
                   {publicTestimonials.map((item) => (
                     <figure className="flex h-full flex-col justify-between rounded-xl border border-stone-200 bg-white p-7 shadow-sm" key={item.id}>
                       <div>
-                        <Quote aria-hidden="true" className="size-8 text-secondary" />
+                        <Quote aria-hidden="true" className="size-8 text-primary" />
                         <blockquote className="mt-4 font-display text-lg leading-relaxed text-stone-800">
                           “{item.description}”
                         </blockquote>
@@ -1117,7 +1117,7 @@ export default async function HomeView() {
                   <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-white/5 blur-2xl" />
                   <div aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-10 size-80 rounded-full bg-secondary/10 blur-3xl" />
                   <div className="relative z-10 max-w-2xl">
-                    <p className="eyebrow text-secondary uppercase tracking-widest text-xs font-bold">
+                    <p className="eyebrow text-secondary-light uppercase tracking-widest text-xs font-bold">
                       {config.eyebrow || "Prayer & Support"}
                     </p>
                     <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">

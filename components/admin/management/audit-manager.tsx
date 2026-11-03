@@ -90,7 +90,7 @@ export function AuditLogManager() {
       return "bg-rose-100 text-rose-800 border-rose-200";
     }
     if (event.includes("UPDATE") || event.includes("MODIFY")) {
-      return "bg-amber-100 text-amber-800 border-amber-200";
+      return "bg-primary/10 text-primary border-primary/20";
     }
     return "bg-slate-100 text-slate-800 border-slate-200";
   }

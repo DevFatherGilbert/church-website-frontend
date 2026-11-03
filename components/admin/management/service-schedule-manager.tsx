@@ -376,7 +376,7 @@ export function ServiceScheduleManager() {
                         {service.publicationStatus}
                       </span>
                       {!service.active && (
-                        <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
+                        <span className="rounded-full bg-primary/5 px-2.5 py-0.5 text-xs font-semibold text-primary border border-primary/20">
                           Inactive
                         </span>
                       )}
@@ -425,7 +425,7 @@ export function ServiceScheduleManager() {
                   {service.publicationStatus !== "archived" && (
                     <button
                       aria-label={`Archive ${service.title}`}
-                      className="grid size-10 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:text-amber-700"
+                      className="grid size-10 place-items-center rounded-xl border border-border bg-surface text-muted transition hover:text-primary"
                       onClick={() => void changeStatus(service, "archive")}
                       type="button"
                     >

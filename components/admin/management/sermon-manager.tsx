@@ -840,7 +840,7 @@ export function SermonManager() {
                               {sermon.category}
                             </span>
                             {sermon.bibleBook && (
-                              <span className="inline-block rounded-md border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800">
+                              <span className="inline-block rounded-md border border-primary/20 bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary">
                                 {sermon.bibleBook}
                               </span>
                             )}
@@ -891,7 +891,7 @@ export function SermonManager() {
                                   ? "bg-emerald-600"
                                   : status === "archived"
                                     ? "bg-muted"
-                                    : "bg-amber-500"
+                                    : "bg-primary"
                               }`}
                             />
                             {status}
@@ -1539,7 +1539,7 @@ export function SermonManager() {
                       );
                     }
                     return (
-                      <p className="mt-1 text-xs text-amber-600">
+                      <p className="mt-1 text-xs text-primary">
                         Note: For video embeds, please enter a valid YouTube or Vimeo URL.
                       </p>
                     );
@@ -1556,13 +1556,13 @@ export function SermonManager() {
                   <label
                     className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3.5 transition ${
                       formStatus === "draft"
-                        ? "border-amber-500 bg-amber-50/50"
+                        ? "border-primary bg-primary/5"
                         : "border-slate-200 hover:bg-slate-50"
                     }`}
                   >
                     <input
                       checked={formStatus === "draft"}
-                      className="size-4 accent-amber-600"
+                      className="size-4 accent-primary"
                       name="status"
                       onChange={() => setFormStatus("draft")}
                       type="radio"

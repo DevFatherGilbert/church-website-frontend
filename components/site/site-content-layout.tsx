@@ -55,14 +55,14 @@ export function SiteContentLayout({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/90 via-primary-dark/40 to-transparent" />
                 <div className="absolute bottom-4 left-5 right-5 text-white">
-                  <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-950">
+                  <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-secondary-foreground">
                     JOIN US THIS SABBATH
                   </span>
                   <p className="font-display mt-2 text-base font-bold text-white">
                     Experience Warm Fellowship & Inspiring Worship
                   </p>
                   <Link
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors"
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-secondary-light hover:text-white transition-colors"
                     href="/plan-your-visit"
                   >
                     <span>Plan Your Visit</span>

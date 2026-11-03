@@ -56,7 +56,7 @@ export function PlanYourVisitPage({
       <section className="page-container py-12 sm:py-20 border-b border-border/80">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               FIRST-TIME VISITOR GUIDE
             </p>
             <h2 className="font-headline mt-3 text-2xl sm:text-4xl font-bold uppercase tracking-wide text-primary leading-tight">

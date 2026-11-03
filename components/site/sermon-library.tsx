@@ -281,8 +281,8 @@ export function SermonLibrary({ sermons }: { sermons: Sermon[] }) {
                       />
                     ) : (
                       <div className="flex size-full flex-col items-center justify-center bg-gradient-to-br from-[#0a1526] via-primary to-[#0a1526] p-6 text-center text-white">
-                        <Mic className="mb-2 size-10 text-secondary opacity-80" />
-                        <span className="text-xs font-bold tracking-widest text-secondary uppercase">
+                        <Mic className="mb-2 size-10 text-secondary-light opacity-80" />
+                        <span className="text-xs font-bold tracking-widest text-secondary-light uppercase">
                           {sermon.category}
                         </span>
                       </div>
@@ -292,7 +292,7 @@ export function SermonLibrary({ sermons }: { sermons: Sermon[] }) {
                     <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
                       {sermon.audioUrl && (
                         <span className="inline-flex items-center gap-1 rounded-md bg-black/70 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur-xs">
-                          <Headphones className="size-3 text-secondary" />
+                          <Headphones className="size-3 text-secondary-light" />
                           Audio
                         </span>
                       )}
@@ -333,7 +333,7 @@ export function SermonLibrary({ sermons }: { sermons: Sermon[] }) {
                       </div>
                       {sermon.scripture && (
                         <div className="flex items-center gap-1.5 text-muted">
-                          <BookOpen className="size-3.5 text-secondary shrink-0" />
+                          <BookOpen className="size-3.5 text-primary shrink-0" />
                           <span>{sermon.scripture}</span>
                         </div>
                       )}

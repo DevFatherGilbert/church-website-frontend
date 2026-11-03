@@ -2,13 +2,14 @@
 @import "./login.css";
 
 :root {
-  /* Aligned with the church brand colors (Sapphire Royal Blue & Radiant Warm Gold) */
+  /* Brand colors use sapphire blue and blue-derived accents. */
   --brand-primary: 214 100% 24%; /* #00387B Sapphire Royal Blue (Cross & Bible Pages) */
   --brand-primary-hover: 212 95% 32%; /* #0754A3 Vibrant Royal Sapphire */
   --brand-primary-dark: 218 100% 14%; /* #001C46 Deep Midnight Navy (Logo base) */
-  --brand-secondary: 42 96% 48%; /* #F4A900 Radiant Sun Gold (Halo & Rays) */
-  --brand-secondary-hover: 39 90% 43%; /* #D3900B Metallic Gold */
-  --brand-secondary-foreground: 218 100% 12%; /* #00193E Deep Navy for contrast on gold */
+  --brand-secondary: 205 100% 38%;
+  --brand-secondary-hover: 205 100% 30%;
+  --brand-secondary-light: 205 100% 78%;
+  --brand-secondary-foreground: 0 0% 100%;
   --background: 210 20% 98%;
   --surface: 0 0% 100%;
   --surface-alt: 214 25% 96%;
@@ -16,12 +17,10 @@
   --muted-foreground: 215 20% 42%;
   --border: 214 22% 88%;
   --success: 142 71% 32%;
-  --warning: 42 96% 42%;
-  --warning-foreground: 30 90% 28%;
+  --warning: 205 100% 70%;
+  --warning-foreground: 218 100% 20%;
   --error: 0 65% 42%;
   --information: 214 100% 24%;
-  --font-manrope: ui-sans-serif, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-inter: ui-sans-serif, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   color-scheme: light;
 }
 
@@ -31,6 +30,7 @@
   --color-primary-hover: hsl(var(--brand-primary-hover));
   --color-primary-dark: hsl(var(--brand-primary-dark));
   --color-secondary: hsl(var(--brand-secondary));
+  --color-secondary-light: hsl(var(--brand-secondary-light));
   --color-secondary-foreground: hsl(var(--brand-secondary-foreground));
   --color-accent: hsl(var(--brand-secondary));
   --color-background: hsl(var(--background));
@@ -48,10 +48,10 @@
   --color-forest: var(--color-primary);
   --color-leaf: var(--color-accent);
   --color-clay: hsl(var(--brand-primary));
-  --font-headline: Georgia, Cambria, "Times New Roman", serif;
-  --font-display: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-brand: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-headline: var(--font-manrope), sans-serif;
+  --font-display: var(--font-manrope), sans-serif;
+  --font-brand: var(--font-manrope), sans-serif;
+  --font-sans: var(--font-manrope), sans-serif;
   --text-display: clamp(2.75rem, 6vw, 5rem);
   --text-page-title: clamp(2.25rem, 5vw, 3.75rem);
   --text-section-title: clamp(1.75rem, 4vw, 3rem);
@@ -113,11 +113,11 @@ a { text-underline-offset: .2em; }
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
-.glass-pill-gold {
-  background: rgba(244, 169, 0, 0.14);
+.glass-pill-accent {
+  background: hsl(var(--brand-secondary) / 0.14);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(244, 169, 0, 0.35);
+  border: 1px solid hsl(var(--brand-secondary) / 0.35);
 }
 .mobile-nav-toggle { display: grid; }
 .eyebrow { font-size: .75rem; font-weight: 800; letter-spacing: .14em; line-height: 1.4; text-transform: uppercase; font-family: var(--font-display); }
@@ -136,7 +136,7 @@ a { text-underline-offset: .2em; }
   .button:active { transform: translateY(0); }
   .button-primary { background: var(--color-primary); color: var(--color-primary-foreground); box-shadow: 0 4px 14px -1px hsl(var(--brand-primary) / 0.35); }
   .button-primary:hover { background: var(--color-primary-hover); box-shadow: 0 6px 20px -2px hsl(var(--brand-primary) / 0.45); }
-  .button-secondary { background: linear-gradient(135deg, hsl(42 96% 50%), hsl(38 90% 44%)); color: hsl(var(--brand-secondary-foreground)); box-shadow: 0 4px 14px -1px hsl(var(--brand-secondary) / 0.35); }
+  .button-secondary { background: var(--color-secondary); color: hsl(var(--brand-secondary-foreground)); box-shadow: 0 4px 14px -1px hsl(var(--brand-secondary) / 0.35); }
   .button-secondary:hover { filter: brightness(1.05); box-shadow: 0 6px 20px -2px hsl(var(--brand-secondary) / 0.45); }
   .button-outline { border: 1.5px solid var(--color-border); background: transparent; color: inherit; }
   .button-outline:hover { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-primary-foreground); box-shadow: 0 4px 14px -1px hsl(var(--brand-primary) / 0.25); }

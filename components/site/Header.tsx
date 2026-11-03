@@ -203,27 +203,26 @@ export function HeaderView({
       {activeAnnouncement && bannerVisible && (
         <aside
           aria-label="Urgent church announcement"
-          className="relative z-20 w-full border-b border-amber-500/20 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-stone-950 px-3 py-2 sm:px-6 lg:px-8"
+          className="relative z-20 w-full border-b border-primary/20 bg-gradient-to-r from-primary to-primary-hover text-white px-3 py-2 sm:px-6 lg:px-8"
           role="region"
         >
           <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 pr-7 sm:pr-0">
             {/* Live Indicator, Title, & CTA Link */}
             <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-center leading-normal">
               <span className="inline-flex items-center gap-2">
-                {/* Animated Blue Circle - strictly centered straight with notice text */}
+                {/* Animated white indicator for the announcement */}
                 <span className="relative flex size-2 shrink-0 items-center justify-center sm:size-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex size-2 rounded-full bg-primary sm:size-2.5"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70"></span>
+                  <span className="relative inline-flex size-2 rounded-full bg-white sm:size-2.5"></span>
                 </span>
-                
-                <span className="font-bold tracking-tight text-stone-950 text-xs sm:text-sm">
+                <span className="font-bold tracking-tight text-white text-xs sm:text-sm">
                   {activeAnnouncement.title}
                 </span>
               </span>
               
               {activeAnnouncement.description && (
-                <span className="hidden md:inline text-stone-800 text-xs font-medium max-w-lg truncate">
-                  <span className="mx-2 text-stone-950/40">—</span>
+                <span className="hidden md:inline text-white/85 text-xs font-medium max-w-lg truncate">
+                  <span className="mx-2 text-white/50">—</span>
                   {activeAnnouncement.description}
                 </span>
               )}
@@ -231,7 +230,7 @@ export function HeaderView({
               {/* CTA Link */}
               {activeAnnouncement.href && (
                 <Link
-                  className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-stone-950/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-stone-950 transition-all hover:bg-stone-950 hover:text-white"
+                  className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-white transition-all hover:bg-white hover:text-primary"
                   href={activeAnnouncement.href}
                 >
                   <span>{activeAnnouncement.ctaLabel}</span>
@@ -243,7 +242,7 @@ export function HeaderView({
 
           <button
             aria-label="Dismiss announcement"
-            className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-stone-800 transition hover:bg-stone-950/15 hover:text-stone-950 sm:right-3 sm:size-7"
+            className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white sm:right-3 sm:size-7"
             onClick={() => setBannerVisible(false)}
             type="button"
           >
@@ -258,7 +257,7 @@ export function HeaderView({
         {/* Brand / Logo */}
         <Link
           aria-label={`${churchName} home`}
-          className="group flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-90 md:flex-none"
+          className="group flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-90 xl:flex-none"
           href="/"
         >
           <span className="flex size-10 sm:size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-stone-900/10 group-hover:shadow-md transition-shadow">
@@ -289,7 +288,7 @@ export function HeaderView({
         </Link>
 
         {/* Desktop Nav Links */}
-        <nav aria-label="Main navigation" className="hidden items-center gap-1 md:flex lg:gap-2 shrink min-w-0">
+        <nav aria-label="Main navigation" className="hidden items-center gap-1 xl:flex xl:gap-2 shrink min-w-0">
           {configuredNavigation.map((link) => {
             const isAbout = link.href === "/about";
             const active = isCurrentPage(pathname, link.href);
@@ -333,7 +332,7 @@ export function HeaderView({
                         <Link
                           className={`flex items-center justify-between text-xs font-bold uppercase tracking-wider transition-colors ${
                             isDarkHeader
-                              ? "text-secondary hover:text-secondary-hover"
+                              ? "text-secondary-light hover:text-white"
                               : "text-primary hover:text-primary-hover"
                           }`}
                           href="/about"
@@ -353,7 +352,7 @@ export function HeaderView({
                               className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors ${
                                 isDarkHeader
                                   ? subActive
-                                    ? "bg-white/15 text-secondary"
+                                    ? "bg-white/15 text-secondary-light"
                                     : "text-white/90 hover:bg-white/10 hover:text-white"
                                   : subActive
                                     ? "bg-primary/8 text-primary"
@@ -366,7 +365,7 @@ export function HeaderView({
                             >
                               <div className={`mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg ${
                                 isDarkHeader
-                                  ? "bg-white/10 text-secondary"
+                                  ? "bg-white/10 text-secondary-light"
                                   : "bg-primary/10 text-primary"
                               }`}>
                                 <SubIcon className="size-4" />
@@ -410,7 +409,7 @@ export function HeaderView({
 
         {/* Desktop Primary CTA Button - Blue Accent */}
         {headerSettings.primaryCta.visible && (
-          <div className="hidden shrink-0 items-center md:flex ml-4">
+          <div className="hidden shrink-0 items-center xl:flex ml-4">
             <Link
               className="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-primary-hover hover:shadow-md hover:-translate-y-0.5"
               href={headerSettings.primaryCta.href}
@@ -426,7 +425,7 @@ export function HeaderView({
           aria-controls="mobile-navigation"
           aria-expanded={mobileMenuOpen}
           aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          className={`ml-2 flex size-11 shrink-0 items-center justify-center rounded-xl p-0 shadow-sm transition-all md:hidden ${
+          className={`ml-2 flex size-11 shrink-0 items-center justify-center rounded-xl p-0 shadow-sm transition-all xl:hidden ${
             scrolled || !isHeroPage 
               ? "bg-white border border-stone-200 text-stone-900 hover:bg-stone-50" 
               : "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
@@ -445,7 +444,7 @@ export function HeaderView({
 
       {/* ── 3. Full-screen Mobile Navigation Drawer ── */}
       {mobileMenuOpen && mounted && createPortal(
-        <div className="fixed inset-0 z-[100] bg-stone-950/40 backdrop-blur-sm md:hidden transition-opacity">
+        <div className="fixed inset-0 z-[100] bg-stone-950/40 backdrop-blur-sm xl:hidden transition-opacity">
           <button
             aria-label="Close navigation menu"
             className="absolute inset-0 size-full cursor-default"

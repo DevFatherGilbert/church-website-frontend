@@ -2,7 +2,7 @@
    Login & Auth Split-Panel Styles
    Theme colors aligned strictly with site tokens:
    - Primary: var(--color-primary) / hsl(var(--brand-primary)) [Navy #142852]
-   - Secondary / Glow: var(--color-secondary) / hsl(var(--brand-secondary)) [Gold/Amber #f59e0b]
+   - Secondary / Glow: var(--color-secondary) / hsl(var(--brand-secondary))
    - Background: var(--color-background) [Ivory #fbfaf8]
    - Surface: var(--color-surface) [#ffffff]
    - Text: var(--color-text) [#0f172a]
@@ -306,7 +306,7 @@
   min-height: 240px;
 }
 
-/* Background atmospheric glows using amber/secondary color */
+/* Background atmospheric glows use the blue-derived secondary color. */
 .auth-wrapper .slide-panel.side-b::before {
   content: "";
   position: absolute;
@@ -465,7 +465,7 @@
 }
 
 .auth-wrapper .login-layout .input-group .icon {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
   text-shadow: 0 0 8px hsl(var(--brand-secondary) / 0.32);
 }
 
@@ -488,7 +488,7 @@
 .auth-wrapper .login-layout .input-group input:focus ~ label,
 .auth-wrapper .login-layout .input-group input:not(:placeholder-shown) ~ label,
 .auth-wrapper .login-layout .input-group input.has-value ~ label {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
   background: hsl(220 58% 11%);
 }
 
@@ -497,18 +497,18 @@
 }
 
 .auth-wrapper .login-layout .password-toggle:hover {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
   background: hsl(var(--brand-secondary) / 0.12);
 }
 
 .auth-wrapper .login-layout .glow-button {
-  color: hsl(var(--brand-primary-dark));
-  background: linear-gradient(110deg, hsl(42 96% 68%), hsl(var(--brand-secondary)));
+  color: hsl(var(--brand-secondary-foreground));
+  background: linear-gradient(110deg, hsl(var(--brand-secondary)), hsl(var(--brand-secondary-hover)));
   box-shadow: 0 6px 20px hsl(var(--brand-secondary) / 0.35), 0 0 24px hsl(var(--brand-secondary) / 0.2);
 }
 
 .auth-wrapper .login-layout .glow-button:hover:not(:disabled) {
-  background: linear-gradient(110deg, hsl(42 96% 74%), hsl(38 92% 56%));
+  background: linear-gradient(110deg, hsl(var(--brand-secondary)), hsl(var(--brand-secondary-hover)));
   box-shadow: 0 10px 26px hsl(var(--brand-secondary) / 0.42), 0 0 32px hsl(var(--brand-secondary) / 0.28);
 }
 
@@ -517,11 +517,11 @@
 }
 
 .auth-wrapper .login-layout .signup-link a {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
 }
 
 .auth-wrapper .login-layout .signup-link a:hover {
-  color: hsl(42 96% 78%);
+  color: hsl(var(--brand-secondary-light));
 }
 
 .auth-wrapper .login-layout > .login-panel {
@@ -571,7 +571,7 @@
 }
 
 .auth-wrapper .login-layout .church-tag span {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
 }
 
 .auth-wrapper .login-layout .welcome-text pre {
@@ -660,7 +660,7 @@
 }
 
 .auth-wrapper .registration-layout .church-tag span {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
 }
 
 .auth-wrapper .registration-layout .welcome-text pre {
@@ -708,7 +708,7 @@
 .auth-wrapper .registration-layout .input-group .icon {
   right: 1rem;
   left: auto;
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
   text-shadow: 0 0 8px hsl(var(--brand-secondary) / 0.32);
 }
 
@@ -734,7 +734,7 @@
 .auth-wrapper .registration-layout .input-group input:focus ~ label,
 .auth-wrapper .registration-layout .input-group input:not(:placeholder-shown) ~ label,
 .auth-wrapper .registration-layout .input-group input.has-value ~ label {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
   background: hsl(220 58% 11%);
 }
 
@@ -744,18 +744,18 @@
 }
 
 .auth-wrapper .registration-layout .password-toggle:hover {
-  color: hsl(42 96% 68%);
+  color: hsl(var(--brand-secondary-light));
   background: hsl(var(--brand-secondary) / 0.12);
 }
 
 .auth-wrapper .registration-layout .glow-button {
-  color: hsl(var(--brand-primary-dark));
-  background: linear-gradient(135deg, hsl(42 96% 70%), hsl(38 95% 60%) 72%, hsl(34 90% 52%));
+  color: hsl(var(--brand-secondary-foreground));
+  background: linear-gradient(135deg, hsl(var(--brand-secondary)), hsl(var(--brand-secondary-hover)));
   box-shadow: 0 5px 20px hsl(var(--brand-secondary) / 0.28), 0 0 24px hsl(var(--brand-secondary) / 0.18);
 }
 
 .auth-wrapper .registration-layout .glow-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, hsl(46 100% 78%), hsl(38 96% 65%));
+  background: linear-gradient(135deg, hsl(var(--brand-secondary)), hsl(var(--brand-secondary-hover)));
   box-shadow: 0 8px 26px hsl(var(--brand-secondary) / 0.36), 0 0 35px hsl(var(--brand-secondary) / 0.24);
 }
 
@@ -764,11 +764,11 @@
 }
 
 .auth-wrapper .registration-layout .signup-link a {
-  color: hsl(var(--brand-secondary));
+  color: hsl(var(--brand-secondary-light));
 }
 
 .auth-wrapper .registration-layout .signup-link a:hover {
-  color: hsl(46 100% 76%);
+  color: hsl(var(--brand-secondary-light));
 }
 
 .auth-wrapper .registration-layout ol li {
@@ -777,8 +777,8 @@
 }
 
 .auth-wrapper .registration-layout ol li.border-primary {
-  color: hsl(42 100% 72%);
-  border-color: hsl(42 100% 64%);
+  color: hsl(var(--brand-secondary-light));
+  border-color: hsl(var(--brand-secondary-light));
 }
 
 .auth-wrapper .registration-layout label.flex {

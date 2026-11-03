@@ -80,7 +80,7 @@ export function NotificationsDropdown() {
               <span
                 title={connected ? "Real-time connection active" : "Reconnecting to live server…"}
                 className={`inline-block size-2 rounded-full ${
-                  connected ? "bg-green-500" : "bg-amber-500"
+                  connected ? "bg-green-500" : "bg-primary"
                 }`}
               />
               {notifications.length > 0 && (

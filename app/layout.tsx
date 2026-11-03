@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
+import { Manrope } from "next/font/google";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
 import { ChurchBrandProvider } from "@/components/brand/church-brand-provider";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -56,7 +63,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   };
 
   return (
-    <html data-scroll-behavior="smooth" lang="en">
+    <html className={manrope.variable} data-scroll-behavior="smooth" lang="en">
       <body className="antialiased font-sans">
         <ChurchBrandProvider initialBrand={initialBrand}>
           {children}

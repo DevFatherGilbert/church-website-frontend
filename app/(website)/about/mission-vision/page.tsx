@@ -82,10 +82,10 @@ export default async function MissionVisionPage() {
       {/* ── Scripture Anchor Banner ── */}
       <section className="bg-primary-dark text-white py-10 px-5 border-b border-secondary/30">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="font-display text-xl sm:text-2xl font-medium italic text-amber-200">
+          <p className="font-display text-xl sm:text-2xl font-medium italic text-secondary-light">
             “Where there is no vision, the people perish; but he that keepeth the law, happy is he.”
           </p>
-          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-secondary">
+          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-secondary-light">
             — Proverbs 29:18
           </p>
         </div>
@@ -107,7 +107,7 @@ export default async function MissionVisionPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/90 via-primary-dark/30 to-transparent" />
               <div className="absolute bottom-5 left-6 right-6">
-                <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-stone-950">
+                <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-secondary-foreground">
                   <Target className="size-3.5" />
                   OUR MISSION
                 </span>
@@ -164,7 +164,7 @@ export default async function MissionVisionPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/90 via-primary-dark/30 to-transparent" />
               <div className="absolute bottom-5 left-6 right-6">
-                <span className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-stone-950">
+                <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-secondary-foreground">
                   <Sparkles className="size-3.5" />
                   OUR VISION
                 </span>
@@ -214,7 +214,7 @@ export default async function MissionVisionPage() {
       <section className="bg-surface-strong/60 py-16 sm:py-24 border-y border-border/80">
         <div className="page-container">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               WHAT WE CHERISH
             </p>
             <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">

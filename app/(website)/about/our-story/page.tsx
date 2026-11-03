@@ -69,7 +69,7 @@ export default async function OurStoryPage() {
       <section className="page-container py-16 sm:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               GOD’S FAITHFULNESS
             </p>
             <h2 className="font-headline mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold uppercase tracking-wide text-primary leading-tight">
@@ -105,7 +105,7 @@ export default async function OurStoryPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 text-white">
-              <p className="text-xs font-bold uppercase tracking-widest text-secondary">
+              <p className="text-xs font-bold uppercase tracking-widest text-secondary-light">
                 COMMUNITY OF GRACE
               </p>
               <p className="font-display mt-1 text-xl font-bold">
@@ -120,7 +120,7 @@ export default async function OurStoryPage() {
       <section className="bg-surface-strong/70 py-16 sm:py-24 border-y border-border/80">
         <div className="page-container">
           <div className="text-center max-w-2xl mx-auto">
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               OUR MILESTONES
             </p>
             <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -146,7 +146,7 @@ export default async function OurStoryPage() {
                     src={item.imageUrl}
                     unoptimized
                   />
-                  <div className="absolute top-4 left-4 rounded-full bg-secondary px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-stone-950 shadow-sm">
+                  <div className="absolute top-4 left-4 rounded-full bg-secondary px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-secondary-foreground shadow-sm">
                     {item.year}
                   </div>
                 </div>
@@ -168,7 +168,7 @@ export default async function OurStoryPage() {
       {/* ── Photo Gallery: Life in Our Fellowship ── */}
       <section className="page-container py-16 sm:py-24">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+          <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
             COMMUNITY IN ACTION
           </p>
           <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">

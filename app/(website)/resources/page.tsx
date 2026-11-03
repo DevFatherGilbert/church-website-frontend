@@ -110,7 +110,7 @@ export default async function ResourcesPage() {
 
       <section aria-label="Published church resources" className="page-container py-16 sm:py-24">
         <div className="max-w-2xl mb-12">
-          <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+          <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
             DIGITAL RESOURCE LIBRARY
           </p>
           <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -138,7 +138,7 @@ export default async function ResourcesPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-transparent to-transparent" />
                 <div className="absolute top-4 left-4">
-                  <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-950">
+                  <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-secondary-foreground">
                     {resource.category}
                   </span>
                 </div>

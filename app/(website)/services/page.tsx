@@ -80,7 +80,7 @@ export default async function ServicesPage() {
       {/* ── Regular Worship Services with Photography (SRS Section 12 & 26) ── */}
       <section className="page-container py-16 sm:py-24">
         <div className="max-w-2xl mb-12">
-          <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+          <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
             REGULAR SERVICES
           </p>
           <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -111,12 +111,12 @@ export default async function ServicesPage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-transparent to-transparent" />
                     <div className="absolute top-4 left-4">
-                      <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-950">
+                      <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-secondary-foreground">
                         {service.serviceType || "Weekly Service"}
                       </span>
                     </div>
                     <div className="absolute bottom-3 left-4 right-4 flex items-center gap-2 text-xs font-bold text-white">
-                      <Clock3 className="size-4 text-secondary" />
+                      <Clock3 className="size-4 text-primary" />
                       <span>{formatServiceDate(service)} · {formatServiceTime(service)}</span>
                     </div>
                   </div>
@@ -148,7 +148,7 @@ export default async function ServicesPage() {
                       </div>
 
                       {service.instructions && (
-                        <p className="mt-3 text-xs italic text-amber-800">
+                        <p className="mt-3 text-xs italic text-primary">
                           Note: {service.instructions}
                         </p>
                       )}
@@ -177,7 +177,7 @@ export default async function ServicesPage() {
         {special.length > 0 && (
           <div className="mt-20">
             <div className="max-w-2xl mb-8">
-              <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+              <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
                 SPECIAL EVENTS
               </p>
               <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -188,7 +188,7 @@ export default async function ServicesPage() {
               {special.map((service) => (
                 <article className="surface-card flex flex-col justify-between p-7 rounded-2xl" key={service.id}>
                   <div>
-                    <span className="inline-block rounded-full bg-secondary/30 px-3 py-1 text-xs font-bold text-amber-950 uppercase tracking-wider">
+                    <span className="inline-block rounded-full bg-secondary/15 px-3 py-1 text-xs font-bold text-primary uppercase tracking-wider">
                       {service.serviceType || "Special Gathering"}
                     </span>
                     <h3 className="font-display mt-3 text-2xl font-bold text-text">{service.title}</h3>
@@ -210,7 +210,7 @@ export default async function ServicesPage() {
       <section className="bg-surface-strong/70 py-16 sm:py-24 border-y border-border/80">
         <div className="page-container">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               FIRST TIME VISITING?
             </p>
             <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -236,7 +236,7 @@ export default async function ServicesPage() {
                     src={step.imageUrl}
                     unoptimized
                   />
-                  <div className="absolute top-3 left-3 flex size-8 items-center justify-center rounded-full bg-secondary font-display text-xs font-extrabold text-stone-950 shadow-md">
+                  <div className="absolute top-3 left-3 flex size-8 items-center justify-center rounded-full bg-secondary font-display text-xs font-extrabold text-secondary-foreground shadow-md">
                     {step.step}
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export default async function ServicesPage() {
       <section className="page-container py-16 sm:py-20">
         <div className="rounded-3xl bg-primary-dark p-8 text-white sm:p-12 lg:p-14 flex flex-col md:flex-row md:items-center md:justify-between gap-8 shadow-xl">
           <div className="max-w-xl">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-secondary">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">
               READY TO JOIN US?
             </span>
             <h3 className="font-display mt-2 text-2xl sm:text-3xl font-bold">

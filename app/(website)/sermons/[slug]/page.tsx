@@ -228,8 +228,8 @@ export default async function SermonDetailPage({ params }: Props) {
 
             {/* Scripture Callout Card */}
             {sermon.scripture && (
-              <div className="rounded-2xl border border-amber-200/60 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-900/50 p-6 sm:p-8">
-                <p className="text-xs font-bold uppercase tracking-widest text-amber-800 dark:text-amber-400 flex items-center gap-2">
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 sm:p-8">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                   <BookOpen className="size-4" />
                   Scripture Reading
                 </p>

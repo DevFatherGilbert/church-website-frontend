@@ -33,7 +33,7 @@ export function PrayerRequestPage() {
         {/* Left column — Visual assurances and scripture */}
         <div className="space-y-8">
           <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-secondary">
+            <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-primary">
               SAFE & CONFIDENTIAL
             </p>
             <h2 className="font-headline mt-2 text-3xl sm:text-4xl font-bold uppercase tracking-wide text-primary">
@@ -57,7 +57,7 @@ export function PrayerRequestPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/85 via-primary-dark/20 to-transparent" />
             <div className="absolute bottom-4 left-5 right-5 text-white">
-              <span className="flex items-center gap-1.5 text-xs font-bold text-secondary uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-secondary-light uppercase tracking-wider">
                 <Lock className="size-3.5" /> Strict Confidentiality Guaranteed
               </span>
               <p className="font-display mt-1 text-sm font-semibold text-white/90">
@@ -74,7 +74,7 @@ export function PrayerRequestPage() {
             {scripturePromises.map((p) => (
               <blockquote className="rounded-xl border border-primary/10 bg-white p-4 text-xs leading-relaxed shadow-xs" key={p.verse}>
                 <p className="italic text-stone-800 font-medium">{p.text}</p>
-                <cite className="mt-1 block font-bold not-italic text-secondary uppercase tracking-wider">
+                <cite className="mt-1 block font-bold not-italic text-primary uppercase tracking-wider">
                   — {p.verse}
                 </cite>
               </blockquote>

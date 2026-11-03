@@ -363,12 +363,12 @@ export function InquiryManager({
               className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                 connected
                   ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-amber-50 text-amber-700 border border-amber-200"
+                  : "bg-primary/5 text-primary border border-primary/20"
               }`}
             >
               <span
                 className={`size-1.5 rounded-full ${
-                  connected ? "bg-green-500" : "bg-amber-500"
+                  connected ? "bg-green-500" : "bg-primary"
                 }`}
               />
               {connected ? "Live Real-Time" : "Connecting…"}
@@ -580,8 +580,8 @@ export function InquiryManager({
                 </div>
 
                 {/* Visitor Message Quote */}
-                <div className="mt-4 rounded-xl border-l-3 border-amber-400 bg-amber-50/50 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
-                  <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-amber-700">
+                <div className="mt-4 rounded-xl border-l-3 border-primary/50 bg-primary/5 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+                  <p className="mb-1 text-[11px] font-bold uppercase tracking-wider text-primary">
                     Visitor Message
                   </p>
                   {item.message}

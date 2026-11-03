@@ -83,7 +83,7 @@ export function AnnouncementList({ items }: { items: PublicContent[] }) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent" />
                   <div className="absolute bottom-3 left-4">
-                    <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-950">
+                    <span className="rounded-full bg-secondary px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-secondary-foreground">
                       {announcementCategoryLabel(categoryValue)}
                     </span>
                   </div>
