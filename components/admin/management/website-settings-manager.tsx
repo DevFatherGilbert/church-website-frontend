@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { authGet, authMutation, authUpload, getPublicData, type Ministry } from "@/lib/api/church-api";
-import { defaultChurchInformation, defaultHomepageSettings, type ChurchInformation, type HomepageFooterLink, type HomepageLinkCard, type HomepageSectionKey, type HomepageSettings, type WebsiteSettingRecord } from "@/lib/content/website-settings";
+import { defaultChurchInformation, defaultHomepageSettings, sortHomepageSections, type ChurchInformation, type HomepageFooterLink, type HomepageLinkCard, type HomepageSectionKey, type HomepageSettings, type WebsiteSettingRecord } from "@/lib/content/website-settings";
 import { useConfirmation } from "@/components/admin/confirmation-dialog";
 import { ImageUploadDropzone } from "@/components/admin/management/image-upload-dropzone";
 import { MediaLibraryPicker } from "@/components/admin/management/media-library-picker";
@@ -11,6 +11,7 @@ import { ArrowDown, ArrowUp, Code, Plus, Trash2 } from "lucide-react";
 type Mode = "homepage" | "church-information";
 type EditableDetails = {
   contentKey?: HomepageSettings["contentKey"] | ChurchInformation["contentKey"];
+  layout?: HomepageSettings["layout"];
   hero?: HomepageSettings["hero"];
   siteHeader?: HomepageSettings["siteHeader"];
   siteFooter?: HomepageSettings["siteFooter"];
@@ -31,9 +32,9 @@ type Editable = { id?: string; title: string; description: string; details: Edit
 const inputClass = "mt-1 h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
 const areaClass = "mt-1 min-h-24 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
 const homepageSections: { key: HomepageSectionKey; label: string }[] = [
-  { key: "welcome", label: "Welcome" }, { key: "facts", label: "Church at a glance" }, { key: "services", label: "Service schedule" }, { key: "about", label: "About the church" },
-  { key: "ministries", label: "Featured ministries" }, { key: "events", label: "Upcoming events" }, { key: "announcements", label: "Announcements" },
-  { key: "sermons", label: "Latest sermons" }, { key: "testimonials", label: "Community stories" },
+  { key: "services", label: "Service schedule" }, { key: "events", label: "Upcoming events" }, { key: "sermons", label: "Latest sermons" },
+  { key: "about", label: "About the church" }, { key: "ministries", label: "Featured ministries" }, { key: "welcome", label: "Welcome" },
+  { key: "facts", label: "Church at a glance" }, { key: "announcements", label: "Announcements" }, { key: "testimonials", label: "Community stories" },
   { key: "gallery", label: "Church life gallery" }, { key: "contact", label: "Contact and engagement" },
 ];
 const footerLinkGroups = [
@@ -810,10 +811,10 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
 </section>
         {(() => {
           const hero = record.details.hero ?? defaultHomepageSettings.hero;
-          const visibleSections = Object.entries(record.details.sections ?? {})
-            .map(([key, section]) => ({ key: key as HomepageSectionKey, ...section }))
-            .filter((section) => section.visible)
-            .sort((left, right) => left.order - right.order);
+          const visibleSections = sortHomepageSections(
+            record.details.sections ?? defaultHomepageSettings.sections,
+            record.details.layout ?? defaultHomepageSettings.layout,
+          );
           return <section aria-labelledby="homepage-preview-title" className="admin-card p-4 sm:p-6">
             <div className="mb-4"><h2 className="font-display text-lg font-bold text-slate-900" id="homepage-preview-title">Draft preview</h2><p className="mt-1 text-sm text-slate-600">This preview uses the unsaved settings below. Visitors will see these changes only after you publish them.</p></div>
             {hero.visible ? <div className="relative isolate flex min-h-64 items-center overflow-hidden rounded-xl bg-primary-dark p-6 text-white sm:min-h-72 sm:p-10">
@@ -821,13 +822,21 @@ export function WebsiteSettingsManager({ mode }: { mode: Mode }) {
               <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950/90 via-slate-950/65 to-slate-950/25" />
               <div className="max-w-2xl"><p className="text-xs font-bold uppercase tracking-[.18em] text-secondary-light">{record.title || "Church homepage"}</p><h3 className="mt-3 whitespace-pre-line font-display text-2xl font-bold leading-tight sm:text-4xl">{hero.heading || "Welcome"}</h3><p className="mt-3 max-w-xl text-sm leading-6 text-white/85 sm:text-base">{hero.description}</p><div className="mt-5 flex flex-wrap gap-2"><span className="rounded-lg bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground">{hero.primaryCtaLabel || "Primary action"}</span>{hero.secondaryCtaLabel && <span className="rounded-lg border border-white/50 bg-white/10 px-3 py-2 text-xs font-bold text-white">{hero.secondaryCtaLabel}</span>}</div></div>
             </div> : <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">The hero is hidden. The homepage will begin with the first visible section.</p>}
-            <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{visibleSections.map((section) => <li className="rounded-xl border border-slate-200 bg-white p-3" key={section.key}><p className="text-[10px] font-bold uppercase tracking-wider text-primary">{homepageSections.find((item) => item.key === section.key)?.label ?? section.key}</p><p className="mt-1 text-sm font-semibold text-slate-900">{section.heading || "Untitled section"}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{section.description}</p></li>)}</ol>
+            <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{visibleSections.map(([key, section]) => <li className="rounded-xl border border-slate-200 bg-white p-3" key={key}><p className="text-[10px] font-bold uppercase tracking-wider text-primary">{homepageSections.find((item) => item.key === key)?.label ?? key}</p><p className="mt-1 text-sm font-semibold text-slate-900">{section.heading || "Untitled section"}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{section.description}</p></li>)}</ol>
           </section>;
         })()}
         <section className="space-y-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
-          <div><h2 className="text-lg font-semibold">Homepage sections</h2><p className="mt-1 text-sm text-slate-500">Set the content and display order of each section. Hidden sections do not affect navigation or contact information.</p></div>
+          <div><h2 className="text-lg font-semibold">Homepage sections</h2><p className="mt-1 text-sm text-slate-500">Choose a visitor-friendly order or arrange sections yourself. You can also edit each section and hide sections that are not in use.</p></div>
+          <label className="block max-w-md text-sm font-medium text-slate-700">
+            Section order
+            <select className={inputClass} onChange={(event) => setDetails("layout", event.target.value)} value={record.details.layout ?? defaultHomepageSettings.layout}>
+              <option value="visitor-first">Visitor-friendly flow (recommended)</option>
+              <option value="custom">Custom order</option>
+            </select>
+            <span className="mt-1 block text-xs font-normal text-slate-500">The recommended flow starts with service details, then guides visitors to events, sermons, ministries, and church information.</span>
+          </label>
           {homepageSections.map(({ key, label }) => <article className="space-y-4 border-t border-slate-100 pt-5" key={key}>
-            <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">{label}</h3><div className="flex items-center gap-4"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(record.details.sections?.[key]?.visible)} onChange={(e) => setDetails(`sections.${key}.visible`, e.target.checked)} />Visible</label><label className="flex items-center gap-2 text-sm">Order<input aria-label={`${label} order`} className="h-9 w-20 rounded border border-slate-300 px-2" max={100} min={0} onChange={(e) => setDetails(`sections.${key}.order`, Number(e.target.value))} type="number" value={Number(record.details.sections?.[key]?.order ?? 0)} /></label></div></div>
+            <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">{label}</h3><div className="flex items-center gap-4"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(record.details.sections?.[key]?.visible)} onChange={(e) => setDetails(`sections.${key}.visible`, e.target.checked)} />Visible</label><label className="flex items-center gap-2 text-sm">Order<input aria-label={`${label} order`} className="h-9 w-20 rounded border border-slate-300 px-2 disabled:bg-slate-100 disabled:text-slate-400" disabled={(record.details.layout ?? defaultHomepageSettings.layout) !== "custom"} max={100} min={0} onChange={(e) => setDetails(`sections.${key}.order`, Number(e.target.value))} type="number" value={Number(record.details.sections?.[key]?.order ?? 0)} /></label></div></div>
             <div className="grid gap-4 sm:grid-cols-2">{field("Section label", `sections.${key}.eyebrow`)}{field("Section heading", `sections.${key}.heading`)}{field("Supporting description", `sections.${key}.description`, true)}</div>
             {(["events", "announcements", "sermons", "testimonials", "gallery"] as HomepageSectionKey[]).includes(key) && <label className="block max-w-xs text-sm font-medium text-slate-700">Items to display<input className={inputClass} max={12} min={1} onChange={(e) => setDetails(`sections.${key}.limit`, Number(e.target.value))} type="number" value={Number(record.details.sections?.[key]?.limit ?? (key === "gallery" ? 6 : 3))} /></label>}
             {(["welcome", "services", "about", "ministries", "events", "sermons", "announcements", "gallery"] as HomepageSectionKey[]).includes(key) && <div className="grid gap-4 sm:grid-cols-2">{field("Primary button text", `sections.${key}.primaryCtaLabel`)}{field("Primary button destination", `sections.${key}.primaryCtaHref`)}</div>}

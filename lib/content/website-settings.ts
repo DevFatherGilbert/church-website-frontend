@@ -7,6 +7,7 @@ export type HomepageFooterLink = { label: string; href: string; visible: boolean
 export type HomepageLinkCard = { id: string; eyebrow: string; title: string; description: string; href: string; cta: string; visible: boolean; order: number };
 export type HomepageSettings = {
   contentKey: "homepage";
+  layout: "visitor-first" | "custom";
   hero: { heading: string; description: string; imageUrl: string; imageAlt: string; images?: { url: string; alt?: string; addedAt?: string }[]; visible: boolean; primaryCtaLabel: string; primaryCtaHref: string; secondaryCtaLabel: string; secondaryCtaHref: string };
   siteHeader: {
     brandTagline: string;
@@ -58,19 +59,50 @@ export type ChurchInformation = {
 };
 export type WebsiteSettingRecord = { id: string; type: string; title: string; slug: string; description?: string | null; details: Record<string, unknown>; published: boolean; updatedAt?: string };
 
+export const recommendedHomepageSectionOrder: HomepageSectionKey[] = [
+  "services",
+  "events",
+  "sermons",
+  "about",
+  "ministries",
+  "welcome",
+  "facts",
+  "announcements",
+  "testimonials",
+  "gallery",
+  "contact",
+];
+
+export function sortHomepageSections(
+  sections: HomepageSettings["sections"],
+  layout: HomepageSettings["layout"] = "visitor-first",
+) {
+  const visibleSections = (Object.keys(sections) as HomepageSectionKey[])
+    .map((key) => [key, sections[key]] as [HomepageSectionKey, HomepageSection])
+    .filter(([, section]) => section.visible);
+
+  if (layout === "custom") {
+    return visibleSections.sort((left, right) => left[1].order - right[1].order);
+  }
+
+  const order = new Map(recommendedHomepageSectionOrder.map((key, index) => [key, index]));
+  return visibleSections.sort((left, right) => (order.get(left[0]) ?? 0) - (order.get(right[0]) ?? 0));
+}
+
 export const defaultHomepageSettings: HomepageSettings = {
   contentKey: "homepage",
+  layout: "visitor-first",
   hero: {
-    heading: "Rooted in Scripture. Resting in the Sabbath. Sharing hope in Jesus.",
-    description: "A Bible-centered Christian community that worships on the seventh-day Sabbath and seeks to serve with the compassion of Jesus.",
+    heading: "A place to grow in faith and community",
+    description: "Join us for worship, grow through Scripture, and find a community ready to welcome you.",
     imageUrl: "",
     imageAlt: "Church worship congregation",
     images: [],
     visible: true,
-    primaryCtaLabel: "Explore our beliefs",
-    primaryCtaHref: "/about/beliefs",
-    secondaryCtaLabel: "Plan Your Visit",
-    secondaryCtaHref: "/plan-your-visit",
+    primaryCtaLabel: "Plan Your Visit",
+    primaryCtaHref: "/plan-your-visit",
+    secondaryCtaLabel: "Watch Sermons",
+    secondaryCtaHref: "/sermons",
   },
   siteHeader: {
     brandTagline: "A community of faith",
@@ -149,10 +181,10 @@ export const defaultHomepageSettings: HomepageSettings = {
     ],
   },
   audienceCards: [
-    { id: "visitor", eyebrow: "New here?", title: "First-Time Visitor", description: "Planning your first Sabbath visit? Service times, location & what to expect.", href: "/plan-your-visit", cta: "Plan Your Visit", visible: true, order: 0 },
-    { id: "member", eyebrow: "Connect & grow", title: "Church Ministries", description: "Find your church community: children, youth, choir, health & outreach teams.", href: "/ministries", cta: "Explore Ministries", visible: true, order: 1 },
-    { id: "sermons", eyebrow: "God's Word", title: "Watch & Listen", description: "Inspiring biblical teachings, Sabbath sermons, live streams & podcast audio.", href: "/sermons", cta: "Browse Sermons", visible: true, order: 2 },
-    { id: "prayer", eyebrow: "Pastoral support", title: "Prayer & Care", description: "Need prayer or pastoral counsel? Our intercessory team prays for every request.", href: "/prayer-request", cta: "Request Prayer", visible: true, order: 3 },
+    { id: "visitor", eyebrow: "Planning a visit", title: "Your first visit", description: "Find service times, directions, and what to expect when you arrive.", href: "/plan-your-visit", cta: "Plan Your Visit", visible: true, order: 0 },
+    { id: "member", eyebrow: "Get connected", title: "Find a ministry", description: "Meet people, explore your interests, and find a place to serve.", href: "/ministries", cta: "Explore Ministries", visible: true, order: 1 },
+    { id: "sermons", eyebrow: "Messages", title: "Watch or listen", description: "Explore recent sermons and biblical teaching from our church.", href: "/sermons", cta: "Browse Sermons", visible: true, order: 2 },
+    { id: "prayer", eyebrow: "We're here for you", title: "Request prayer", description: "Share a prayer request with our pastoral care team.", href: "/prayer-request", cta: "Request Prayer", visible: true, order: 3 },
   ],
   aboutCards: [
     { id: "story", eyebrow: "Our story", title: "Our Story & Heritage", description: "Learn how God planted our church and the journey of faith that shapes who we are today.", href: "/about/our-story", cta: "Read our story", visible: true, order: 0 },
@@ -162,10 +194,10 @@ export const defaultHomepageSettings: HomepageSettings = {
   sections: {
     welcome: {
       visible: true,
-      order: 0,
-      eyebrow: "Welcome to",
-      heading: "A place to worship, learn, and serve",
-      description: "Discover a Christ-centered community shaped by Scripture, Sabbath worship, prayer, and practical care for others.",
+      order: 5,
+      eyebrow: "Our Church Family",
+      heading: "A place to belong and grow",
+      description: "Get to know our church, the people who make it home, and the values that guide our life together.",
       imageUrl: "",
       imageAlt: "Church community gathering",
       quote: "Come as you are — there’s a place for you.",
@@ -174,13 +206,13 @@ export const defaultHomepageSettings: HomepageSettings = {
       secondaryCtaLabel: "Plan Your Visit",
       secondaryCtaHref: "/plan-your-visit",
     },
-    facts: { visible: true, order: 1, eyebrow: "More About Us", heading: "Fast Facts", description: "Key pillars of our community life, gathering times, and active ministries serving Kigali and beyond.", worshipFactLabel: "Worship Gatherings", ministriesFactLabel: "Ministries to Connect", eventsFactLabel: "Upcoming Events", communityFactLabel: "Our Community", communityFactFallback: "A place to belong", factLinkLabel: "Learn more" },
+    facts: { visible: true, order: 6, eyebrow: "Our Church", heading: "Our community at a glance", description: "A few highlights about our gatherings, ministries, and community.", worshipFactLabel: "Worship Gatherings", ministriesFactLabel: "Ministries to Connect", eventsFactLabel: "Upcoming Events", communityFactLabel: "Our Community", communityFactFallback: "A place to belong", factLinkLabel: "Learn more" },
     services: {
       visible: true,
-      order: 2,
+      order: 0,
       eyebrow: "Gather With Us",
       heading: "Gather on the Sabbath",
-      description: "The seventh-day Sabbath is a time for worship, rest, Bible study, and fellowship. Ask the local congregation to confirm current meeting details.",
+      description: "Join us for worship, Bible study, and fellowship. Find the gathering time and location that work for your visit.",
       primaryCtaLabel: "Plan Your Visit",
       primaryCtaHref: "/plan-your-visit",
     },
@@ -188,8 +220,8 @@ export const defaultHomepageSettings: HomepageSettings = {
       visible: true,
       order: 3,
       eyebrow: "Who We Are",
-      heading: "Faith grounded in Scripture",
-      description: "Seventh-day Adventists look to the Bible as the foundation for faith and follow Jesus with hope in His promised return.",
+      heading: "Rooted in faith, here for our community",
+      description: "Learn what we believe, why we gather, and how our church serves the community around us.",
       primaryCtaLabel: "Read our beliefs",
       primaryCtaHref: "/about/beliefs",
     },
@@ -205,7 +237,7 @@ export const defaultHomepageSettings: HomepageSettings = {
     },
     events: {
       visible: true,
-      order: 5,
+      order: 1,
       eyebrow: "Community Life",
       heading: "Upcoming Events",
       description: "Explore upcoming gatherings, conferences, and community fellowship opportunities.",
@@ -215,7 +247,7 @@ export const defaultHomepageSettings: HomepageSettings = {
     },
     sermons: {
       visible: true,
-      order: 6,
+      order: 2,
       eyebrow: "God's Word",
       heading: "Latest Sermons",
       description: "Watch or listen to life-giving messages and teachings from God's Word.",
@@ -345,6 +377,7 @@ function mergeHomepageSettings(details?: Record<string, unknown> | null): Homepa
     ...defaultHomepageSettings,
     ...safeDetails,
     contentKey: "homepage",
+    layout: safeDetails.layout === "custom" ? "custom" : "visitor-first",
     hero: {
       ...defaultHomepageSettings.hero,
       ...asObject(safeDetails.hero),

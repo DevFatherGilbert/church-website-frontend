@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, Users, BookOpen, Sparkles, ChevronRight } from "lucide-react";
+import { ArrowRight, Heart, Users, BookOpen, Sparkles } from "lucide-react";
 import type { HomepageLinkCard } from "@/lib/content/website-settings";
 
 export function ArrangedAudienceStrip({ cards }: { cards: HomepageLinkCard[] }) {
@@ -10,46 +10,46 @@ export function ArrangedAudienceStrip({ cards }: { cards: HomepageLinkCard[] }) 
   if (!visibleCards.length) return null;
 
   return (
-    <section aria-label="Quick Access Gateways" className="relative z-20 -mt-14 sm:-mt-16 lg:-mt-20">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-2xl border border-border/70 bg-white shadow-[0_24px_70px_-20px_rgba(0,0,0,0.28)]">
-          {/* Desktop: 4-column balanced grid with border dividers; Mobile: horizontal swipeable snap strip */}
-          <div className="flex overflow-x-auto py-3 gap-3 scrollbar-none snap-x snap-mandatory sm:py-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-0 sm:divide-x sm:divide-border/60">
-            {visibleCards.map((item) => {
-              const Icon = iconById[item.id] ?? Sparkles;
-              return (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className="group relative flex min-w-[280px] flex-1 flex-col justify-between rounded-xl border border-border/70 bg-surface p-5 transition-all duration-300 hover:border-secondary/50 hover:bg-surface-strong/50 hover:shadow-md sm:min-w-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-6 lg:p-7 snap-start"
-                >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-primary">
-                        {item.eyebrow}
-                      </span>
-                      <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary group-hover:text-white group-hover:scale-105">
-                        <Icon className="size-4" aria-hidden="true" />
-                      </div>
-                    </div>
+    <section aria-labelledby="homepage-pathways-title" className="bg-white py-14 sm:py-16">
+      <div className="mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10">
+        <header className="mb-8 max-w-2xl">
+          <p className="eyebrow text-primary">Take your next step</p>
+          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-primary sm:text-4xl" id="homepage-pathways-title">
+            Find your place here
+          </h2>
+          <p className="mt-3 text-base leading-7 text-muted">
+            Visiting, finding a community, hearing a message, or looking for prayer? Start here.
+          </p>
+        </header>
 
-                    <h3 className="mt-3 font-display text-lg font-bold text-text group-hover:text-primary transition-colors">
-                      {item.title}
-                    </h3>
-
-                    <p className="mt-1.5 text-xs leading-relaxed text-muted line-clamp-2">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary group-hover:text-primary-hover transition-colors">
-                    <span>{item.cta}</span>
-                    <ChevronRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {visibleCards.map((item) => {
+            const Icon = iconById[item.id] ?? Sparkles;
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className="group flex min-h-56 flex-col rounded-2xl border border-border bg-background p-5 transition duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:p-6"
+              >
+                <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                  <Icon className="size-5" aria-hidden="true" />
+                </div>
+                <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.16em] text-primary">
+                  {item.eyebrow}
+                </p>
+                <h3 className="mt-1 font-display text-xl font-bold text-text transition-colors group-hover:text-primary">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  {item.description}
+                </p>
+                <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-bold text-primary">
+                  {item.cta}
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

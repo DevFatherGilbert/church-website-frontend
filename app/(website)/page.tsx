@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -38,8 +39,7 @@ import {
   getPublicWebsiteSettings,
   defaultChurchInformation,
   defaultHomepageSettings,
-  type HomepageSection,
-  type HomepageSectionKey,
+  sortHomepageSections,
 } from "@/lib/content/website-settings";
 import {
   formatServiceDate,
@@ -63,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const heroImage = settings?.homepage?.hero?.imageUrl || settings?.church?.profile?.imageUrl;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: "/" },
     openGraph: {
@@ -199,10 +199,7 @@ export default async function HomeView() {
   const testimonials = testimonialResponse;
   const leaders = leaderResponse;
 
-  const sections = (Object.keys(homepage.sections) as HomepageSectionKey[])
-    .map((key) => [key, homepage.sections[key]] as [HomepageSectionKey, HomepageSection])
-    .filter(([, section]) => section.visible)
-    .sort((a, b) => a[1].order - b[1].order);
+  const sections = sortHomepageSections(homepage.sections, homepage.layout);
 
   /* Ministries: use DB records or fallback to SRS defaults */
   const publishedMinistries = ministries ?? [];
@@ -295,12 +292,26 @@ export default async function HomeView() {
     ...(church.contact.phone ? { telephone: church.contact.phone } : {}),
     ...(church.contact.email ? { email: church.contact.email } : {}),
   };
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: churchName,
+    url: siteUrl,
+  };
 
   return (
     <main className="overflow-hidden bg-background text-text">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(churchJsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(churchJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c"),
+        }}
       />
       {/* ── 2. HERO SECTION (SRS Section 9 #2 & Section 11) ───────────────── */}
       {hero.visible && (
@@ -309,21 +320,17 @@ export default async function HomeView() {
           <div aria-hidden="true" className="home-hero-overlay absolute inset-0" />
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-transparent to-primary-dark/40" />
 
-          {/* Account for fixed header (~90px) + announcement banner (~40px) */}
-          <div className={`${container} relative z-10 pb-20 pt-44 sm:pb-28 sm:pt-52 lg:pt-56`}>
+          <div
+            className={`${container} relative z-10 grid items-center gap-10 pb-20 sm:pb-28 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14`}
+            style={{ paddingTop: 0 }}
+          >
             <div className="max-w-3xl">
-              <div className="glass-pill-accent inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-secondary-light shadow-sm">
-                <span className="size-2 rounded-full bg-secondary animate-pulse" />
-                <span>{churchName || "A Community of Faith"}</span>
-              </div>
-
-              {/* Master Headline */}
-              <h1 className="mt-6 whitespace-pre-line font-display text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
-                {hero.heading || `Welcome to\n${churchName}`}
+              <h1 className="whitespace-pre-line font-display text-4xl font-extrabold leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl">
+                {hero.heading || `Welcome to ${churchName}`}
               </h1>
 
               {/* Supporting Subtitle */}
-              <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/90 sm:text-lg sm:leading-8 font-normal">
+              <p className="mt-6 max-w-2xl text-base font-normal leading-relaxed text-white/90 sm:text-lg sm:leading-8">
                 {hero.description || churchDescription || "A welcoming community committed to faith, worship, fellowship, service and sharing the message of Christ."}
               </p>
 
@@ -344,14 +351,16 @@ export default async function HomeView() {
                   {hero.secondaryCtaLabel || "Watch Sermons"}
                 </Link>
               </div>
-
-              {(publicServices[0] || church.contact.address || location) && (
-                <div className="glass-pill mt-12 flex flex-wrap items-center gap-6 rounded-2xl p-4 text-xs text-white/90 shadow-lg sm:p-5">
-                  {publicServices[0] && <span className="flex items-center gap-2.5 font-medium"><Clock3 aria-hidden="true" className="size-4 shrink-0 text-secondary-light" /><span>{publicServices[0].title}: <strong className="font-bold text-white">{formatServiceDate(publicServices[0])} · {formatServiceTime(publicServices[0])}</strong></span></span>}
-                  {(church.contact.address || location) && <span className="flex items-center gap-2.5 font-medium"><MapPin aria-hidden="true" className="size-4 shrink-0 text-secondary-light" /><span className="truncate">{[church.contact.address, location].filter(Boolean).join(", ")}</span></span>}
-                </div>
-              )}
             </div>
+
+            {(church.contact.address || location) && (
+              <aside className="glass-pill flex w-fit max-w-full items-center gap-3 justify-self-center rounded-2xl border border-white/15 px-5 py-4 text-white shadow-xl backdrop-blur-xl lg:justify-self-end">
+                <MapPin aria-hidden="true" className="size-5 shrink-0 text-secondary-light" />
+                <p className="text-sm font-medium leading-relaxed sm:text-base">
+                  {[church.contact.address, location].filter(Boolean).join(", ")}
+                </p>
+              </aside>
+            )}
 
             <a
               aria-label="Explore the homepage"
@@ -366,9 +375,9 @@ export default async function HomeView() {
         </section>
       )}
 
-      {/* ── BK.RW-INSPIRED: Arranged Persona Gateways Strip ─────────── */}
-      <ArrangedAudienceStrip cards={homepage.audienceCards} />
-
+      {!homepage.sections.services.visible && (
+        <ArrangedAudienceStrip cards={homepage.audienceCards} />
+      )}
 
       {/* ── SECTIONS (SRS Section 9 items 3 to 13) ────────────────────────── */}
       {sections.map(([key, config]) => {
@@ -504,7 +513,8 @@ export default async function HomeView() {
         /* ── 4. SERVICE SCHEDULE & 5. PRIMARY CTA (SRS Section 9 #4, #5 & Section 12) ── */
         if (key === "services") {
           return (
-            <section className="bg-surface-strong py-20 sm:py-24" id={key} key={key}>
+            <Fragment key={key}>
+            <section className="bg-surface-strong py-20 sm:py-24" id={key}>
               <div className={container}>
                 <div className="flex flex-wrap items-end justify-between gap-6">
                   <SectionHeading
@@ -582,6 +592,8 @@ export default async function HomeView() {
                 </div>
               </div>
             </section>
+            <ArrangedAudienceStrip cards={homepage.audienceCards} />
+            </Fragment>
           );
         }
 
