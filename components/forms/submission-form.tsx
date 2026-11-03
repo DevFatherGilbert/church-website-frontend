@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { useForm, type FieldPath, type SubmitHandler } from "react-hook-form";
+import { Bird, HandHeart, Mail, type LucideIcon } from "lucide-react";
 import { submitInquiry } from "@/lib/api/church-api";
 import { submissionSchema, type SubmissionValues } from "@/lib/validation/form-schema";
 
 type SubmissionType = "contact" | "visitor" | "prayer";
 
-const TYPES: { value: SubmissionType; label: string; icon: string; description: string }[] = [
-  { value: "contact", label: "General inquiry", icon: "✉️", description: "Questions, ministry info, or anything else." },
-  { value: "visitor", label: "Plan a visit", icon: "🕊️", description: "Tell us you're coming and we'll welcome you." },
-  { value: "prayer", label: "Prayer request", icon: "🙏", description: "Share a private request with our prayer team." },
+const TYPES: { value: SubmissionType; label: string; Icon: LucideIcon; description: string }[] = [
+  { value: "contact", label: "General inquiry", Icon: Mail, description: "Questions, ministry info, or anything else." },
+  { value: "visitor", label: "Plan a visit", Icon: Bird, description: "Tell us you're coming and we'll welcome you." },
+  { value: "prayer", label: "Prayer request", Icon: HandHeart, description: "Share a private request with our prayer team." },
 ];
 
 export function SubmissionForm({
@@ -93,7 +94,7 @@ export function SubmissionForm({
         <div>
           <p className="mb-3 text-sm font-semibold text-text">I&apos;d like to&hellip;</p>
           <div className="grid gap-2 sm:grid-cols-3">
-            {TYPES.map((t) => (
+            {TYPES.map(({ Icon, ...t }) => (
               <button
                 key={t.value}
                 type="button"
@@ -106,7 +107,7 @@ export function SubmissionForm({
                 ].join(" ")}
                 aria-pressed={type === t.value}
               >
-                <span className="text-lg leading-none">{t.icon}</span>
+                <Icon aria-hidden="true" className="size-5 text-primary" />
                 <span className="mt-1 text-xs font-bold text-text">{t.label}</span>
                 <span className="text-[11px] leading-relaxed text-muted">{t.description}</span>
               </button>

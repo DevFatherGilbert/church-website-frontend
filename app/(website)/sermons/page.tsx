@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Headphones, Video, BookOpen } from "lucide-react";
+import { BookOpen, Headphones, Mic2, Search, Video } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { SermonLibrary } from "@/components/site/sermon-library";
 import { getPublicData, type Sermon } from "@/lib/api/church-api";
@@ -46,6 +46,14 @@ const FEATURE_PHOTOS = [
   },
 ];
 
+const SERMON_FEATURES = [
+  { label: "Preached by trained pastors", Icon: Mic2 },
+  { label: "Rooted in Scripture", Icon: BookOpen },
+  { label: "Audio available for download", Icon: Headphones },
+  { label: "Video recordings online", Icon: Video },
+  { label: "Searchable by topic & speaker", Icon: Search },
+];
+
 export default async function SermonsPage() {
   const sermons = await getPublicData<Sermon[]>("/sermons");
 
@@ -86,15 +94,10 @@ export default async function SermonsPage() {
             ))}
           </div>
           <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm text-muted">
-            {[
-              "🎙️ Preached by trained pastors",
-              "📖 Rooted in Scripture",
-              "🎧 Audio available for download",
-              "📺 Video recordings online",
-              "🔍 Searchable by topic & speaker",
-            ].map((item) => (
-              <span key={item} className="flex items-center gap-1.5 font-medium">
-                {item}
+            {SERMON_FEATURES.map(({ label, Icon }) => (
+              <span key={label} className="flex items-center gap-1.5 font-medium">
+                <Icon aria-hidden="true" className="size-4 text-primary" />
+                {label}
               </span>
             ))}
           </div>

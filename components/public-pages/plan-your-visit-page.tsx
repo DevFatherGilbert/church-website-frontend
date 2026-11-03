@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { Baby, CarFront, Handshake, Mail, MapPin, Phone, Shirt } from "lucide-react";
 import { SubmissionForm } from "../forms/submission-form";
 import { PageHero } from "../site/page-hero";
 import { formatServiceDate, formatServiceTime, type ChurchService } from "@/lib/content/services";
@@ -9,22 +9,22 @@ const visitAssurances = [
   {
     title: "Dedicated Parking & Easy Arrival",
     description: "Ample on-site parking with friendly parking attendants ready to guide you straight to the entrance.",
-    icon: "🚗",
+    Icon: CarFront,
   },
   {
     title: "Come As You Are",
     description: "Whether you wear Sunday best, cultural attire, or casual clothes, there is zero dress code pressure.",
-    icon: "👔",
+    Icon: Shirt,
   },
   {
     title: "Safe, Engaging Children's Care",
     description: "Fun, Christ-centered Sabbath School classes with screened volunteers where your children will thrive.",
-    icon: "👶",
+    Icon: Baby,
   },
   {
     title: "A Friendly Host Just for You",
     description: "A host will meet you at the door, show you where to sit, introduce you to friends, and give you a welcome packet.",
-    icon: "🤝",
+    Icon: Handshake,
   },
 ];
 
@@ -67,9 +67,9 @@ export function PlanYourVisitPage({
             </p>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {visitAssurances.map((item) => (
+              {visitAssurances.map(({ Icon, ...item }) => (
                 <div className="rounded-xl border border-primary/10 bg-white p-4 shadow-xs" key={item.title}>
-                  <span className="text-2xl" role="img" aria-hidden="true">{item.icon}</span>
+                  <Icon aria-hidden="true" className="size-6 text-primary" />
                   <h3 className="font-display mt-2 font-bold text-sm text-text">{item.title}</h3>
                   <p className="mt-1 text-xs text-muted leading-relaxed">{item.description}</p>
                 </div>
@@ -192,7 +192,10 @@ export function PlanYourVisitPage({
             </h3>
             {address ? (
               <address className="mt-3 whitespace-pre-line text-sm not-italic leading-relaxed text-text font-medium">
-                📍 {address}
+                <span className="inline-flex items-center gap-1.5">
+                  <MapPin aria-hidden="true" className="size-4 shrink-0 text-primary" />
+                  {address}
+                </span>
               </address>
             ) : (
               <p className="mt-3 text-sm text-muted">
@@ -203,13 +206,15 @@ export function PlanYourVisitPage({
             {(contact.phone || contact.email) && (
               <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm border-t border-border/60 pt-4">
                 {contact.phone && (
-                  <a className="font-semibold text-primary hover:underline" href={`tel:${contact.phone}`}>
-                    📞 {contact.phone}
+                  <a className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline" href={`tel:${contact.phone}`}>
+                    <Phone aria-hidden="true" className="size-4" />
+                    {contact.phone}
                   </a>
                 )}
                 {contact.email && (
-                  <a className="font-semibold text-primary hover:underline" href={`mailto:${contact.email}`}>
-                    ✉ {contact.email}
+                  <a className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline" href={`mailto:${contact.email}`}>
+                    <Mail aria-hidden="true" className="size-4" />
+                    {contact.email}
                   </a>
                 )}
               </div>

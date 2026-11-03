@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { Mail, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { getPublicData, type PublicContent } from "@/lib/api/church-api";
 import { getPublicWebsiteSettings } from "@/lib/content/website-settings";
@@ -91,7 +92,8 @@ export default async function LeadershipPage() {
                         className="block break-all text-primary transition-colors hover:text-primary-hover"
                         href={`mailto:${leader.details.email}`}
                       >
-                        ✉ {leader.details.email}
+                        <Mail aria-hidden="true" className="mr-1 inline size-3.5" />
+                        {leader.details.email}
                       </a>
                     )}
                     {leader.details.phone && (
@@ -99,7 +101,8 @@ export default async function LeadershipPage() {
                         className="mt-1 block text-primary transition-colors hover:text-primary-hover"
                         href={`tel:${leader.details.phone}`}
                       >
-                        📞 {leader.details.phone}
+                        <Phone aria-hidden="true" className="mr-1 inline size-3.5" />
+                        {leader.details.phone}
                       </a>
                     )}
                   </div>

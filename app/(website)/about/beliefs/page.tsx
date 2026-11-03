@@ -172,8 +172,9 @@ export default async function BeliefsPage() {
                     </h3>
 
                     {scripture && (
-                      <p className="mt-1 text-xs font-semibold text-primary">
-                        📖 {scripture}
+                      <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-primary">
+                        <BookOpen aria-hidden="true" className="size-3.5 shrink-0" />
+                        {scripture}
                       </p>
                     )}
 
